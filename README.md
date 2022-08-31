@@ -27,7 +27,7 @@ Here are some ideas to get you started:
   <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Fjoyunju&count_bg=%233D89C8&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false"/>
 </a>
 <!-- GitHub followers -->
-<img src="https://img.shields.io/github/followers/joyunju?style=social"/>
+<img src="https://img.shields.io/github/followers/ljk0071?style=social"/>
   
 <!--  instagram -->
 <!--   
