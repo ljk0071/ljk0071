@@ -443,7 +443,31 @@ body.modal-open{overflow:hidden}
 <p class="ch-lead">지금 스택(Boot 4.1.x, Kotlin 2.2+, Hibernate 7.4/Envers, soft delete, restdocs-api-spec, OTel)은 운영에 쓸 수 있습니다. 다만 코드를 쓰기 전에 세 가지를 먼저 확정하세요.</p>
 </header>
 <ol class="big-steps">
-<li><strong>Kotlin 컴파일 옵션과 테스트 의존성:</strong> <code>-Xannotation-default-target=param-property</code>를 켜고, Boot 4의 기능별 test 스타터로 정리합니다.</li>
+<li><strong>Kotlin 컴파일 옵션과 테스트 의존성:</strong> 서로 다른 두 가지를 같이 정리해야 합니다.
+<ul>
+<li><strong>(a) <code>-Xannotation-default-target=param-property</code>:</strong> Kotlin 2.1까지는 생성자 프로퍼티에 붙인 어노테이션이 파라미터에만 적용돼, Bean Validation이 필드를 읽지 못하고 무시했습니다. 이 옵션을 켜면 어노테이션 하나가 파라미터와 필드 양쪽에 함께 적용됩니다. 자세한 내용은 <a href="#ch2-4">2.4 Kotlin 함정</a> 참고.
+<pre class="kt" data-label="SignupRequest.kt"><code>// 옵션 없음 — @field: 를 직접 붙여야 검증이 동작
+class SignupRequest(@field:NotBlank val name: String)
+
+// 옵션 켬 — 이 어노테이션만으로 파라미터+필드 양쪽에 적용
+class SignupRequest(@NotBlank val name: String)</code></pre>
+<pre class="kt" data-label="build.gradle.kts"><code>kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+    }
+}</code></pre>
+</li>
+<li><strong>(b) Boot 4 기능별 test 스타터:</strong> Boot 4부터는 스타터마다 test 스타터가 짝으로 나뉘었습니다. 이제 <code>spring-boot-starter-test</code> 하나로는 부족하고, 쓰는 기능의 test 스타터를 골라 추가해야 합니다.<span class="tag b4">Boot 4</span> 자세한 내용은 <a href="#ch0-2">0.2 Boot 4 공통 함정</a> 참고.
+<pre class="kt" data-label="build.gradle.kts"><code>// Boot 3 — 테스트 의존성 하나로 대부분 커버
+testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+// Boot 4 — 쓰는 기능마다 test 스타터를 따로 추가
+testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
+testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
+testImplementation("org.springframework.boot:spring-boot-starter-security-test")</code></pre>
+</li>
+</ul>
+</li>
 <li><strong>restdocs-api-spec 버전:</strong> 0.20.x를 씁니다. 메인테이너가 Boot 4에서 “minor compatibility issues”가 남아 있다고 경고했습니다.</li>
 <li><strong><code>@SoftDelete</code> + Envers 검증:</strong> 이 조합에서 REVTYPE이 어떻게 기록되는지는 공식 문서로 확인되지 않았습니다. 통합 테스트로 직접 확인해야 합니다.</li>
 </ol>
