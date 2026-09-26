@@ -1,0 +1,1160 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>풀스택 인프라 교과서</title>
+<style>
+:root{
+  --bg:#f7f6f3; --panel:#ffffff; --panel2:#f0eee9; --text:#1d1c1a; --muted:#6b6862;
+  --line:#e2dfd8; --accent:#f38020; --accent-soft:#fde9d6; --blue:#2b6cb0; --blue-soft:#e3eefa;
+  --green:#2f855a; --green-soft:#e2f3ea; --red:#c53030; --red-soft:#fbe4e4; --code:#f3f1ec;
+  --shadow:0 1px 2px rgba(0,0,0,.04),0 4px 16px rgba(0,0,0,.04);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#161615; --panel:#1f1f1d; --panel2:#262624; --text:#ecebe8; --muted:#a3a09a;
+  --line:#34332f; --accent:#f6913a; --accent-soft:#3a2a1b; --blue:#7fb2ec; --blue-soft:#1d2a3a;
+  --green:#6fcf97; --green-soft:#19302a; --red:#f08b8b; --red-soft:#3a1f1f; --code:#262624;
+  --shadow:none;
+}}
+:root[data-theme="dark"]{
+  --bg:#161615; --panel:#1f1f1d; --panel2:#262624; --text:#ecebe8; --muted:#a3a09a;
+  --line:#34332f; --accent:#f6913a; --accent-soft:#3a2a1b; --blue:#7fb2ec; --blue-soft:#1d2a3a;
+  --green:#6fcf97; --green-soft:#19302a; --red:#f08b8b; --red-soft:#3a1f1f; --code:#262624;
+  --shadow:none;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--text);
+  font:16px/1.75 -apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Pretendard","Noto Sans KR",system-ui,sans-serif;
+  word-break:keep-all;overflow-wrap:break-word}
+code,pre,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.88em}
+code{background:var(--code);padding:.1em .4em;border-radius:5px}
+pre{background:var(--code);padding:14px 16px;border-radius:10px;overflow-x:auto;line-height:1.55;margin:12px 0}
+pre code{background:none;padding:0}
+a{color:var(--blue)}
+h1,h2,h3{line-height:1.3}
+h2{font-size:1.65rem;margin:0 0 6px}
+h3{font-size:1.15rem;margin:28px 0 8px}
+.layout{display:grid;grid-template-columns:270px 1fr;min-height:100vh}
+nav.side{position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid var(--line);background:var(--panel);padding:20px 14px}
+.brand{font-weight:800;font-size:1.05rem;display:flex;align-items:center;gap:8px;margin:0 6px 4px}
+.brand .dot{width:12px;height:12px;border-radius:50%;background:var(--accent)}
+.sub{color:var(--muted);font-size:.8rem;margin:0 6px 14px}
+.progress{margin:0 6px 16px}
+.bar{height:6px;background:var(--panel2);border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent);transition:width .3s}
+.progress small{color:var(--muted);font-size:.78rem}
+nav.side ol{list-style:none;padding:0;margin:0}
+nav.side li a{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;text-decoration:none;color:var(--text);font-size:.92rem}
+nav.side li a:hover{background:var(--panel2)}
+nav.side li a.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+nav.side li a .n{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:.72rem;background:var(--panel2);color:var(--muted);flex:none}
+nav.side li a.done .n{background:var(--green);color:#fff}
+.tools{display:flex;gap:6px;margin:16px 6px 0}
+.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit;font-size:.85rem}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
+main{padding:36px clamp(16px,4vw,56px) 120px;max-width:980px}
+section.ch{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px clamp(16px,3vw,34px);margin-bottom:28px;box-shadow:var(--shadow);scroll-margin-top:20px}
+.eyebrow{color:var(--accent);font-weight:800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
+.lead{color:var(--muted);margin:0 0 18px}
+.callout{border-left:4px solid var(--blue);background:var(--blue-soft);padding:12px 16px;border-radius:0 10px 10px 0;margin:16px 0}
+.callout.warn{border-color:var(--accent);background:var(--accent-soft)}
+.callout.ok{border-color:var(--green);background:var(--green-soft)}
+.callout.bad{border-color:var(--red);background:var(--red-soft)}
+.callout b:first-child{display:block;margin-bottom:2px}
+table{width:100%;border-collapse:collapse;margin:12px 0;font-size:.92rem}
+th,td{border-bottom:1px solid var(--line);padding:9px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);font-weight:700}
+.tablewrap{overflow-x:auto}
+.widget{border:1px dashed var(--line);border-radius:14px;padding:18px;margin:18px 0;background:var(--panel2)}
+.widget h4{margin:0 0 10px;font-size:1rem;display:flex;align-items:center;gap:8px}
+.widget h4::before{content:"▶";color:var(--accent);font-size:.75rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.chip{border:1px solid var(--line);background:var(--panel);border-radius:99px;padding:5px 12px;cursor:pointer;font:inherit;font-size:.86rem;color:var(--text)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.flow{display:flex;flex-direction:column;gap:8px}
+.step{display:flex;gap:12px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:var(--panel);border:1px solid var(--line);opacity:.4;transition:all .25s}
+.step.on{opacity:1;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.step.past{opacity:1}
+.step .k{flex:none;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--accent);color:#fff;font-weight:800;font-size:.8rem}
+.step .t b{display:block}
+.step .t span{color:var(--muted);font-size:.9rem}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.diagram{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;margin:10px 0}
+.node{background:var(--panel);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px;min-width:110px;text-align:center;font-size:.88rem}
+.node b{display:block;font-size:.92rem}
+.node small{color:var(--muted)}
+.node.cf{border-color:var(--accent)}
+.node.dim{opacity:.35;text-decoration:line-through}
+.arrow{align-self:center;padding:0 8px;color:var(--muted);font-weight:700}
+.arrow.red{color:var(--red)} .arrow.green{color:var(--green)}
+input[type=text],select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);width:100%}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.osigrid{grid-template-columns:minmax(180px,260px) 1fr}
+.result{margin-top:12px;padding:12px 14px;border-radius:10px;background:var(--panel);border:1px solid var(--line)}
+.pill{display:inline-block;padding:1px 9px;border-radius:99px;font-size:.8rem;font-weight:700}
+.pill.y{background:var(--green-soft);color:var(--green)} .pill.n{background:var(--red-soft);color:var(--red)} .pill.i{background:var(--blue-soft);color:var(--blue)}
+.quiz{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
+.quiz .q{font-weight:700;margin-bottom:8px}
+.quiz .opts{display:flex;flex-direction:column;gap:6px}
+.quiz .opts button{text-align:left;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer;font:inherit;font-size:.93rem}
+.quiz .opts button:hover{border-color:var(--blue)}
+.quiz .opts button.right{background:var(--green-soft);border-color:var(--green)}
+.quiz .opts button.wrong{background:var(--red-soft);border-color:var(--red)}
+.quiz .ex{margin-top:8px;font-size:.92rem;color:var(--muted);display:none}
+.donebox{display:flex;justify-content:flex-end;margin-top:20px}
+details{border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin:8px 0;background:var(--panel)}
+details summary{cursor:pointer;font-weight:700}
+.glossary-list dt{font-weight:800;margin-top:10px}
+.glossary-list dd{margin:2px 0 0;color:var(--muted)}
+.hidden{display:none!important}
+.menu-toggle{display:none}
+.cloudtoggle{display:inline-flex;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+.cloudtoggle button{border:0;background:var(--panel);color:var(--text);padding:6px 14px;cursor:pointer;font:inherit;font-size:.88rem}
+.cloudtoggle button.on{background:var(--accent);color:#fff}
+.cloudtoggle button.on.grey{background:#888}
+@media (max-width:860px){
+  .layout{grid-template-columns:1fr}
+  nav.side{position:fixed;inset:0 auto 0 0;width:280px;z-index:20;transform:translateX(-100%);transition:transform .25s;box-shadow:0 0 30px rgba(0,0,0,.2)}
+  nav.side.open{transform:none}
+  .menu-toggle{display:block;position:fixed;top:12px;right:12px;z-index:30}
+  main{padding-top:60px}
+  .grid2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<button class="btn primary menu-toggle" id="menuBtn">☰ 목차</button>
+<div class="layout">
+<nav class="side" id="side">
+  <div class="brand"><span class="dot"></span>풀스택 인프라 교과서</div>
+  <div class="sub">ssobbs13.pp.ua 프로젝트로 배우는 도메인 · DNS · Cloudflare</div>
+  <div class="progress"><div class="bar"><i id="progBar"></i></div><small id="progTxt">0 / 0 완료</small></div>
+  <ol id="toc"></ol>
+  <div class="tools">
+    <button class="btn" id="themeBtn">🌓 테마</button>
+    <button class="btn" id="resetBtn">진도 초기화</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- 0 -->
+<section class="ch" id="c0" data-title="큰 그림: 요청의 여정">
+  <div class="eyebrow">Chapter 0</div>
+  <h2>큰 그림: 요청 하나가 겪는 일</h2>
+  <p class="lead">브라우저에 주소를 치고 화면이 뜨기까지. 이후 모든 챕터는 이 여정의 한 구간이에요.</p>
+
+  <div class="widget">
+    <h4>요청 여정 따라가기</h4>
+    <p style="margin:0 0 10px;color:var(--muted)"><code>https://api.ssobbs13.pp.ua/diaries</code>를 호출하면…</p>
+    <div class="flow" id="journey"></div>
+    <div class="row">
+      <button class="btn" id="jPrev">← 이전</button>
+      <button class="btn primary" id="jNext">다음 →</button>
+      <button class="btn" id="jPlay">▶ 자동 재생</button>
+      <span id="jInfo" style="color:var(--muted);font-size:.88rem"></span>
+    </div>
+  </div>
+
+  <div class="callout"><b>이 교과서 사용법</b>각 챕터 끝에 퀴즈가 있어요. 다 읽었으면 "이 챕터 완료"를 눌러 진도를 기록하세요. 진도는 이 브라우저에만 저장돼요.</div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 1 -->
+<section class="ch" id="c1" data-title="도메인">
+  <div class="eyebrow">Chapter 1</div>
+  <h2>도메인: 인터넷 주소의 "이름"</h2>
+  <p class="lead">IP 주소는 외우기 어려우니 사람이 읽는 이름을 붙인 것. 그 이름을 누가, 어떻게 관리할까요?</p>
+
+  <div class="widget">
+    <h4>도메인 해부하기 (조각을 눌러보세요)</h4>
+    <div class="chips" id="domParts"></div>
+    <div class="result" id="domExplain">조각을 선택하세요.</div>
+  </div>
+
+  <h3>도메인을 둘러싼 세 주체</h3>
+  <div class="tablewrap"><table>
+    <tr><th>주체</th><th>역할</th><th>이번 경우</th></tr>
+    <tr><td><b>레지스트리</b> (Registry)</td><td>TLD 전체를 관리하는 기관. 장부의 원본을 가짐</td><td><code>.ua</code> 레지스트리</td></tr>
+    <tr><td><b>레지스트라</b> (Registrar)</td><td>레지스트리에 대신 등록해주는 판매 대리점</td><td><b>nic.ua</b></td></tr>
+    <tr><td><b>등록자</b> (Registrant)</td><td>도메인 주인</td><td>나</td></tr>
+  </table></div>
+  <p>nic.ua에서 한 일은 레지스트리 장부에 <b>"이 도메인의 네임서버는 Cloudflare야"</b>라고 적은 것뿐이에요. 도메인 소유권은 여전히 nic.ua를 통해 관리돼요.</p>
+
+  <h3>서브도메인은 공짜</h3>
+  <p>내가 산 건 <code>ssobbs13.pp.ua</code> 하나예요. 그 아래 <code>api.</code>, <code>www.</code>, <code>admin.</code>은 DNS 레코드 한 줄로 <b>무한히, 무료로</b> 만들 수 있어요. 서브도메인에는 "서버"가 필요 없어요. 그냥 이름표예요.</p>
+
+  <h3>Public Suffix List (PSL)</h3>
+  <p><code>pp.ua</code>, <code>co.kr</code>, <code>github.io</code>, <code>pages.dev</code>처럼 "이 아래 이름은 각자 다른 주인"이라고 정한 공개 목록이에요. 브라우저는 이 목록으로 <b>쿠키를 격리</b>하고, Cloudflare는 <code>ssobbs13.pp.ua</code>를 독립 도메인으로 인정해요.</p>
+
+  <div class="callout warn"><b>꼭 기억할 것</b>만료일 <b>2027-09-25</b>, 자동 갱신 <b>꺼짐</b>. 만료되면 사이트가 통째로 죽고 남이 가져갈 수 있어요. <b>Auth code</b>(EPP)는 도메인 이전용 비밀번호라 절대 공유하면 안 돼요.</div>
+
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. <code>admin.ssobbs13.pp.ua</code>를 쓰고 싶다. 무엇을 해야 할까?</div>
+    <div class="opts">
+      <button>nic.ua에서 서브도메인을 추가 구매한다</button>
+      <button>새 서버를 만들어야 한다</button>
+      <button>DNS에 <code>admin</code> 레코드를 하나 추가한다</button>
+    </div>
+    <div class="ex">서브도메인은 DNS 레코드 한 줄이에요. 구매도, 서버도 필요 없어요. 터널을 쓰면 route 추가 시 레코드가 자동 생성돼요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 2 -->
+<section class="ch" id="c2" data-title="DNS">
+  <div class="eyebrow">Chapter 2</div>
+  <h2>DNS: 이름을 주소로 바꾸는 전화번호부</h2>
+  <p class="lead">브라우저가 가장 먼저 하는 일은 "이 이름의 IP가 뭐지?"를 묻는 것.</p>
+
+  <div class="widget">
+    <h4>DNS 조회 시뮬레이터</h4>
+    <div class="flow" id="dnsFlow"></div>
+    <div class="row">
+      <button class="btn primary" id="dnsNext">조회 다음 단계 →</button>
+      <button class="btn" id="dnsReset">처음부터</button>
+      <label style="font-size:.88rem;color:var(--muted)"><input type="checkbox" id="dnsCache"> 리졸버에 캐시가 있다면?</label>
+    </div>
+  </div>
+
+  <h3>두 종류의 DNS 서버</h3>
+  <ul>
+    <li><b>권한 있는 네임서버 (Authoritative)</b>: 정답 원본을 가진 서버. 지금은 <code>cash / virginia.ns.cloudflare.com</code></li>
+    <li><b>리졸버 (Recursive Resolver)</b>: 대신 물어보고 캐시하는 서버. 통신사 DNS, <code>8.8.8.8</code>, <code>1.1.1.1</code></li>
+  </ul>
+
+  <div class="widget">
+    <h4>레코드 타입 탐색기</h4>
+    <div class="chips" id="recChips"></div>
+    <div class="result" id="recExplain"></div>
+  </div>
+
+  <h3>TTL과 "전파"의 정체</h3>
+  <p><b>TTL</b>(Time To Live)은 리졸버가 답을 캐시하는 시간(초)이에요. "DNS 전파에 24시간 걸린다"는 말의 정체는 <b>전 세계 리졸버의 캐시가 만료되기를 기다리는 시간</b>이에요. 뭔가 퍼져나가는 게 아니에요.</p>
+
+  <div class="widget">
+    <h4>TTL 계산기: 레코드를 바꾸면 언제 모두에게 반영될까?</h4>
+    <div class="grid2">
+      <label>TTL (초)<input type="text" id="ttlIn" value="3600"></label>
+      <label>변경 시각<input type="text" id="ttlAt" value="14:00"></label>
+    </div>
+    <div class="result" id="ttlOut"></div>
+  </div>
+
+  <div class="callout"><b>apex와 CNAME</b><code>@</code>(= <code>ssobbs13.pp.ua</code> 자체)는 원래 규칙상 CNAME을 못 가져요. Cloudflare는 <b>CNAME Flattening</b>으로 몰래 A 레코드처럼 바꿔줘서 가능하게 해줘요.</div>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. <code>api</code> 레코드를 <code>xxx.cfargotunnel.com</code>으로 연결하려면 어떤 타입을 써야 할까?</div>
+    <div class="opts">
+      <button>A</button>
+      <button>CNAME</button>
+      <button>MX</button>
+      <button>TXT</button>
+    </div>
+    <div class="ex">이름 → 다른 이름(별칭)은 CNAME. A는 이름 → IP 주소예요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 3 -->
+<section class="ch" id="c3" data-title="Zone">
+  <div class="eyebrow">Chapter 3</div>
+  <h2>Zone: Cloudflare에서 도메인을 다루는 단위</h2>
+  <p class="lead">"Zone을 추가한다" = "Cloudflare야, 이 도메인의 DNS를 네가 맡아줘"</p>
+
+  <div class="callout ok"><b>한 줄 정의</b>Zone = 한 도메인에 대한 <b>DNS 레코드 묶음 + 그걸 관리할 권한</b>. Cloudflare에서는 여기에 더해 그 도메인에 적용되는 <b>모든 설정의 단위</b>예요(SSL, 캐시, WAF, 규칙…).</div>
+
+  <div class="widget">
+    <h4>Zone 상태 변화</h4>
+    <div class="chips" id="zoneChips"></div>
+    <div class="result" id="zoneExplain"></div>
+  </div>
+
+  <h3>Zone 안에 들어있는 것 (대시보드 왼쪽 메뉴)</h3>
+  <div class="tablewrap"><table>
+    <tr><th>메뉴</th><th>하는 일</th></tr>
+    <tr><td>DNS</td><td>레코드 관리 (A, CNAME…), 주황/회색 구름</td></tr>
+    <tr><td>SSL/TLS</td><td>암호화 모드(Flexible/Full/Strict), 인증서</td></tr>
+    <tr><td>Security</td><td>WAF, 봇 차단, Rate limit</td></tr>
+    <tr><td>Caching</td><td>엣지 캐시 규칙</td></tr>
+    <tr><td>Rules</td><td>리다이렉트, 헤더 변경</td></tr>
+    <tr><td>Workers Routes</td><td>이 도메인 경로에 Worker 연결</td></tr>
+  </table></div>
+
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. 터널 route 화면의 도메인 목록에 <code>ssobbs13.pp.ua</code>가 안 보인다. 가장 유력한 이유는?</div>
+    <div class="opts">
+      <button>Zone이 아직 Pending이라서</button>
+      <button>도메인이 .ua라서</button>
+      <button>cloudflared가 꺼져 있어서</button>
+    </div>
+    <div class="ex">Active가 되기 전엔 Cloudflare가 이 도메인의 주인이라고 인정하지 않아서 목록에 안 나와요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 4 -->
+<section class="ch" id="c4" data-title="IP · 포트 · 방화벽">
+  <div class="eyebrow">Chapter 4</div>
+  <h2>IP, 포트, 방화벽: "어디로, 몇 번 문으로"</h2>
+  <p class="lead">IP는 건물 주소, 포트는 호실 번호, 방화벽은 경비원.</p>
+
+  <h3>IP 주소의 종류</h3>
+  <div class="widget">
+    <h4>이 IP는 어떤 종류? (입력해보세요)</h4>
+    <input type="text" id="ipIn" placeholder="예: 168.107.55.205, 10.0.0.5, 127.0.0.1, 192.168.0.1">
+    <div class="result" id="ipOut">IP를 입력하세요.</div>
+  </div>
+  <div class="callout warn"><b>Docker에서 가장 헷갈리는 것</b>컨테이너 안의 <code>localhost</code>는 <b>그 컨테이너 자신</b>이에요. 호스트 서버가 아니에요. cloudflared 컨테이너가 <code>localhost:8080</code>으로 Spring에 닿으려면 같은 네트워크 네임스페이스를 공유하거나(<code>network_mode</code>), 서비스 이름(<code>http://be:8080</code>)을 써야 해요.</div>
+
+  <h3>자주 쓰는 포트</h3>
+  <div class="tablewrap"><table>
+    <tr><th>포트</th><th>용도</th></tr>
+    <tr><td>22</td><td>SSH (서버 접속)</td></tr>
+    <tr><td>80 / 443</td><td>HTTP / HTTPS</td></tr>
+    <tr><td>5432 / 3306</td><td>PostgreSQL / MySQL</td></tr>
+    <tr><td>8080</td><td>Spring Boot 기본값</td></tr>
+  </table></div>
+
+  <h3>인바운드 vs 아웃바운드</h3>
+  <div class="widget">
+    <h4>연결 방향 비교</h4>
+    <div class="cloudtoggle" id="dirToggle"><button class="on" data-v="direct">직접 오픈 (nginx)</button><button data-v="tunnel">터널</button></div>
+    <div class="diagram" id="dirDiagram"></div>
+    <div class="result" id="dirExplain"></div>
+  </div>
+
+  <h3>OCI의 방화벽은 두 겹</h3>
+  <pre>인터넷 → [OCI Security List / NSG] → [서버 OS: iptables/ufw] → [Docker] → 앱
+         클라우드 콘솔에서 설정          서버 안에서 설정</pre>
+  <p>"포트 열었는데 안 돼요"의 90%는 <b>OS 방화벽</b>을 안 열어서예요. 터널을 쓰는 지금은 <b>둘 다 닫아두는 게 정답</b>. SSH(22)만 열어두세요.</p>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. 터널을 쓰면 OCI에서 443 포트를 열어야 할까?</div>
+    <div class="opts">
+      <button>열어야 한다. HTTPS니까</button>
+      <button>안 열어도 된다. cloudflared가 아웃바운드로 연결하니까</button>
+    </div>
+    <div class="ex">터널은 서버가 먼저 바깥으로 연결을 열고, 요청은 그 연결을 타고 들어와요. 인바운드 포트는 필요 없어요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 5 -->
+<section class="ch" id="c5" data-title="HTTPS · TLS · 인증서">
+  <div class="eyebrow">Chapter 5</div>
+  <h2>HTTPS, TLS, 인증서: nginx SSL이 어려웠던 이유</h2>
+  <p class="lead">HTTPS = HTTP + TLS. TLS는 암호화와 신원 확인을 해줘요.</p>
+
+  <ul>
+    <li><b>인증서</b>: 믿을 수 있는 기관(<b>CA</b>)이 "이 서버는 이 도메인 주인 맞음"이라고 서명한 파일</li>
+    <li><b>Let's Encrypt</b>: 무료 자동 CA. 90일마다 갱신 필요</li>
+  </ul>
+
+  <h3>nginx로 직접 하면 해야 하는 일</h3>
+  <div class="widget">
+    <h4>체크리스트 (몇 개나 할 줄 아나요?)</h4>
+    <div id="nginxList"></div>
+    <div class="result" id="nginxOut"></div>
+  </div>
+
+  <h3>Cloudflare를 쓰면: TLS가 두 구간으로 나뉨</h3>
+  <div class="widget">
+    <h4>SSL/TLS 모드 선택기</h4>
+    <div class="chips" id="sslChips"></div>
+    <div class="diagram" id="sslDiagram"></div>
+    <div class="result" id="sslExplain"></div>
+  </div>
+
+  <div class="callout ok"><b>터널을 쓰면</b>②구간이 터널 자체로 암호화돼요. <code>http://localhost:8080</code>처럼 평문으로 적어도 안전해요. 평문 구간은 서버 내부뿐이에요. <b>nginx도, certbot도, 인증서 파일도 필요 없어요.</b></div>
+
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. 브라우저엔 자물쇠가 뜨는데 Cloudflare→서버 구간이 평문인 위험한 모드는?</div>
+    <div class="opts">
+      <button>Full (strict)</button>
+      <button>Full</button>
+      <button>Flexible</button>
+    </div>
+    <div class="ex">Flexible은 뒤쪽이 HTTP예요. 리다이렉트 무한루프의 단골 원인이기도 해요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 6 -->
+<section class="ch" id="c6" data-title="프록시 · CDN · 엣지">
+  <div class="eyebrow">Chapter 6</div>
+  <h2>프록시, 리버스 프록시, CDN, 엣지</h2>
+  <p class="lead">Cloudflare의 정체는 "전 세계에 깔린 거대한 리버스 프록시"예요.</p>
+
+  <div class="tablewrap"><table>
+    <tr><th>용어</th><th>뜻</th></tr>
+    <tr><td><b>포워드 프록시</b></td><td>클라이언트 쪽 대리인 (회사 프록시, VPN)</td></tr>
+    <tr><td><b>리버스 프록시</b></td><td>서버 쪽 대리인. 요청을 대신 받아 뒤로 넘김 (nginx, Caddy, Cloudflare)</td></tr>
+    <tr><td><b>CDN</b></td><td>전 세계에 서버를 두고 가까운 곳에서 응답하는 네트워크</td></tr>
+    <tr><td><b>엣지</b></td><td>CDN의 각 서버. 커넥터가 붙어있던 <code>icn</code>(인천)이 그 예</td></tr>
+    <tr><td><b>오리진</b></td><td>진짜 원본 서버. OCI의 Spring 앱</td></tr>
+    <tr><td><b>Anycast</b></td><td>여러 서버가 같은 IP를 쓰고, 가장 가까운 곳으로 자동 연결</td></tr>
+  </table></div>
+
+  <h3>주황 구름 vs 회색 구름</h3>
+  <div class="widget">
+    <h4>구름을 눌러 바꿔보세요</h4>
+    <div class="cloudtoggle" id="cloudToggle"><button class="on" data-v="orange">🟠 Proxied</button><button data-v="grey">⚪ DNS only</button></div>
+    <div class="diagram" id="cloudDiagram"></div>
+    <div class="result" id="cloudExplain"></div>
+  </div>
+
+  <h3>캐시</h3>
+  <p>정적 파일(JS, CSS, 이미지)은 엣지 캐시로 빨라져요(Pages가 자동으로 해줘요). <b>API 응답은 기본적으로 캐시 안 돼요.</b> 캐시 규칙을 잘못 만들면 남의 일기가 보이는 사고가 날 수 있어요. Spring에서 <code>Cache-Control</code> 헤더로 제어하세요.</p>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. 터널용 <code>api</code> CNAME 레코드의 구름 색은?</div>
+    <div class="opts">
+      <button>회색 (DNS only)</button>
+      <button>주황 (Proxied)</button>
+      <button>상관없다</button>
+    </div>
+    <div class="ex">터널은 Cloudflare 엣지를 거쳐야만 동작해요. 반드시 주황이에요(자동으로 그렇게 생성돼요).</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 7 -->
+<section class="ch" id="c7" data-title="CORS · 쿠키">
+  <div class="eyebrow">Chapter 7</div>
+  <h2>브라우저 보안 모델: CORS와 쿠키</h2>
+  <p class="lead">FE와 API 도메인이 달라지는 순간 반드시 만나는 것.</p>
+
+  <h3>Origin과 Site</h3>
+  <ul>
+    <li><b>Origin</b> = 스킴 + 호스트 + 포트. 하나라도 다르면 다른 origin</li>
+    <li><b>Site</b> = 등록 가능한 도메인(PSL 기준). <code>api.ssobbs13.pp.ua</code>와 <code>ssobbs13.pp.ua</code>는 같은 site</li>
+  </ul>
+
+  <div class="widget">
+    <h4>Origin / Site 판별기</h4>
+    <div class="grid2">
+      <label>FE 주소 (페이지)<input type="text" id="oA" value="https://ssobbs13.pp.ua"></label>
+      <label>API 주소 (요청 대상)<input type="text" id="oB" value="https://api.ssobbs13.pp.ua"></label>
+    </div>
+    <div class="chips" id="oPresets"></div>
+    <div class="result" id="oOut"></div>
+  </div>
+
+  <h3>CORS</h3>
+  <p>브라우저는 기본적으로 <b>다른 origin의 응답을 JS가 못 읽게</b> 막아요. CORS는 서버가 "이 origin은 읽어도 돼"라고 허락하는 헤더예요.</p>
+  <pre><code>Access-Control-Allow-Origin: https://ssobbs13.pp.ua
+Access-Control-Allow-Credentials: true</code></pre>
+  <p><code>PUT</code>/<code>DELETE</code>, JSON 본문, <code>Authorization</code> 헤더를 쓰면 브라우저가 먼저 <b>OPTIONS 요청(preflight)</b>을 보내요. Spring Security가 OPTIONS를 막으면 CORS 에러가 나요.</p>
+  <div class="callout bad"><b>CORS는 서버 보안이 아니다</b>브라우저만 지키는 규칙이에요. curl이나 Postman은 무시해요. 인증과 권한은 Spring Security가 따로 해야 해요.</div>
+
+  <h3>쿠키 속성</h3>
+  <div class="tablewrap"><table>
+    <tr><th>속성</th><th>뜻</th></tr>
+    <tr><td><code>Domain=ssobbs13.pp.ua</code></td><td>서브도메인끼리 공유</td></tr>
+    <tr><td><code>SameSite=Lax</code></td><td>같은 site 요청 + 링크 이동 시 전송 (기본값)</td></tr>
+    <tr><td><code>SameSite=None; Secure</code></td><td>다른 site에도 전송 (서드파티)</td></tr>
+    <tr><td><code>HttpOnly</code></td><td>JS에서 못 읽음 (XSS 방어)</td></tr>
+    <tr><td><code>Secure</code></td><td>HTTPS에서만 전송</td></tr>
+  </table></div>
+  <div class="callout ok"><b>그래서</b>FE를 <code>pages.dev</code>가 아니라 <code>ssobbs13.pp.ua</code> 커스텀 도메인에 두면, API와 같은 site가 되어 쿠키 인증이 훨씬 쉬워져요.</div>
+
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. <code>https://ssobbs13.pp.ua</code> 페이지에서 <code>https://api.ssobbs13.pp.ua</code>를 fetch하면?</div>
+    <div class="opts">
+      <button>다른 origin이라 CORS 필요, 하지만 같은 site라 SameSite=Lax 쿠키는 전송됨</button>
+      <button>같은 origin이라 CORS 필요 없음</button>
+      <button>다른 site라 쿠키가 절대 안 감</button>
+    </div>
+    <div class="ex">호스트가 달라서 cross-origin이지만, 등록 도메인이 같아서 same-site예요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 8 -->
+<section class="ch" id="c8" data-title="부하 분산 · 가용성">
+  <div class="eyebrow">Chapter 8</div>
+  <h2>부하 분산과 가용성</h2>
+  <p class="lead">커넥터 2개가 이미 레플리카 구조예요.</p>
+
+  <div class="widget">
+    <h4>레플리카 시뮬레이터: 요청을 보내고 레플리카를 죽여보세요</h4>
+    <div class="row" id="lbNodes"></div>
+    <div class="row">
+      <button class="btn primary" id="lbSend">요청 10개 보내기</button>
+      <label style="font-size:.88rem"><input type="checkbox" id="lbSession"> 세션을 메모리에 저장 (stateful)</label>
+    </div>
+    <div class="result" id="lbOut">레플리카를 눌러 죽이거나 살릴 수 있어요.</div>
+  </div>
+
+  <ul>
+    <li><b>헬스체크</b>: <code>/actuator/health</code>를 주기적으로 찔러 죽은 레플리카를 빼요</li>
+    <li><b>SPOF</b>: 그게 죽으면 전체가 죽는 지점. 커넥터 2개가 같은 서버라면 서버가 SPOF, DB가 1개면 DB가 SPOF</li>
+    <li><b>무상태(stateless)</b>: 레플리카가 여럿이면 세션을 메모리에 두면 안 돼요 → JWT 또는 Redis 세션</li>
+  </ul>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. 레플리카 2개에서 로그인이 자꾸 풀린다. 원인으로 가장 유력한 건?</div>
+    <div class="opts">
+      <button>DNS TTL이 짧아서</button>
+      <button>세션을 각 서버 메모리에 저장해서</button>
+      <button>SSL 모드가 Full이라서</button>
+    </div>
+    <div class="ex">요청이 다른 레플리카로 가면 그 서버엔 세션이 없어요. JWT나 공유 세션 저장소(Redis)를 쓰세요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 9 -->
+<section class="ch" id="c9" data-title="보안 계층">
+  <div class="eyebrow">Chapter 9</div>
+  <h2>보안 계층: 누가 무엇을 막나</h2>
+  <p class="lead">여러 겹의 방어. 한 겹이 뚫려도 다음 겹이 막아요.</p>
+
+  <div class="widget">
+    <h4>공격을 골라 어디서 막히는지 보세요</h4>
+    <div class="chips" id="atkChips"></div>
+    <div class="flow" id="atkLayers"></div>
+  </div>
+
+  <h3>인증 vs 인가</h3>
+  <ul>
+    <li><b>인증 (Authentication)</b>: 너 누구야? → 로그인, JWT</li>
+    <li><b>인가 (Authorization)</b>: 너 이거 해도 돼? → RBAC (<code>ROLE_USER</code>, <code>ROLE_ADMIN</code>)</li>
+    <li><b>객체 단위 권한</b>: 이 일기가 네 거야? ← 가장 많이 놓치는 곳</li>
+  </ul>
+  <div class="callout bad"><b>IDOR 주의</b><code>GET /diaries/123</code>에서 123만 바꾸면 남의 일기가 보이는 취약점. 역할(RBAC)만으로는 못 막아요. 매 요청마다 "이 리소스 주인 == 현재 사용자"를 확인하세요.</div>
+
+  <h3>Cloudflare Access는?</h3>
+  <p>엣지에서 동작하는 <b>문지기</b>예요(터널과 별개 제품). BE에 Spring Security로 인증과 권한이 제대로 있으면 <b>필수가 아니라 추가 방어층</b>이에요. 이번 프로젝트는 제거 예정이에요.</p>
+
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. 로그인한 사용자 A가 <code>/diaries/999</code>(B의 일기)를 조회할 수 있었다. 무엇이 빠졌나?</div>
+    <div class="opts">
+      <button>인증</button>
+      <button>CORS</button>
+      <button>객체 단위 권한 체크</button>
+    </div>
+    <div class="ex">A는 인증됐고 ROLE_USER도 있어요. 빠진 건 "이 일기의 주인이 A인가" 체크예요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 10 -->
+<section class="ch" id="c10" data-title="Cloudflare 제품 지도">
+  <div class="eyebrow">Chapter 10</div>
+  <h2>Cloudflare 제품 지도 (풀스택 관점)</h2>
+  <p class="lead">제품을 눌러 상세를 보세요.</p>
+  <div class="widget">
+    <h4>제품 카드</h4>
+    <div class="chips" id="prodChips"></div>
+    <div class="result" id="prodOut"></div>
+  </div>
+
+  <h3>터널 vs ngrok vs 직접 오픈</h3>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>Cloudflare Tunnel</th><th>ngrok</th><th>직접 오픈 (Caddy)</th></tr>
+    <tr><td>서버 인바운드</td><td>안 엶</td><td>안 엶</td><td>80/443 엶</td></tr>
+    <tr><td>DNS</td><td>Cloudflare 필수</td><td>아무 데나 (CNAME)</td><td>아무 데나 (A)</td></tr>
+    <tr><td>커스텀 도메인</td><td>무료</td><td>유료</td><td>무료</td></tr>
+    <tr><td>서버 IP</td><td>숨김</td><td>숨김</td><td>노출</td></tr>
+    <tr><td>DDoS 방어</td><td>강함</td><td>기본</td><td>없음</td></tr>
+    <tr><td>BE 코드 변경</td><td colspan="3" style="text-align:center"><b>셋 다 없음</b>. BE는 localhost:8080만 알면 됨</td></tr>
+  </table></div>
+  <div class="callout"><b>핵심 원리</b>인터넷에서 접속하려면 어딘가에는 반드시 인바운드가 열린 공인 서버가 있어야 해요. 터널은 인바운드를 없애는 게 아니라 <b>남의 엣지가 대신 열어주는 것</b>이에요.</div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 11 -->
+<section class="ch" id="c11" data-title="내 프로젝트 구조">
+  <div class="eyebrow">Chapter 11</div>
+  <h2>내 프로젝트: 전환 전과 후</h2>
+  <p class="lead">diary 프로젝트의 실제 구성 (대시보드와 저장소에서 확인한 내용).</p>
+
+  <div class="widget">
+    <h4>단계별 구조 비교</h4>
+    <div class="cloudtoggle" id="archToggle">
+      <button class="on" data-v="before">전환 전</button>
+      <button data-v="step1">1단계</button>
+      <button data-v="after">최종</button>
+    </div>
+    <div class="diagram" id="archDiagram" style="margin-top:14px"></div>
+    <div class="result" id="archExplain"></div>
+  </div>
+
+  <h3>전환 작업 체크리스트</h3>
+  <div id="todoList"></div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 12 -->
+<section class="ch" id="c12" data-title="문제 해결 도구">
+  <div class="eyebrow">Chapter 12</div>
+  <h2>문제 생겼을 때: 도구와 에러 코드</h2>
+
+  <h3>명령어 (터미널에서 실행)</h3>
+  <details open><summary><code>dig +short api.ssobbs13.pp.ua</code></summary>DNS가 어떤 IP를 주는지 봐요. Cloudflare IP(104.x, 172.67.x)면 정상이에요.</details>
+  <details><summary><code>dig +short NS ssobbs13.pp.ua</code></summary>네임서버가 누구인지 봐요. <code>cash / virginia.ns.cloudflare.com</code>이 나와야 해요.</details>
+  <details><summary><code>curl -v https://api.ssobbs13.pp.ua/actuator/health</code></summary>연결, TLS, 헤더, 상태 코드를 한 번에 볼 수 있어요. 가장 많이 쓰는 도구예요.</details>
+  <details><summary><code>curl -I -X OPTIONS https://api.ssobbs13.pp.ua/diaries -H "Origin: https://ssobbs13.pp.ua" -H "Access-Control-Request-Method: POST"</code></summary>CORS preflight 응답에 <code>Access-Control-Allow-Origin</code>이 있는지 확인해요.</details>
+
+  <div class="widget">
+    <h4>Cloudflare 에러 코드 검색</h4>
+    <input type="text" id="errIn" placeholder="코드나 증상 입력 (예: 502, 524, 느림, 방화벽)">
+    <div id="errOut" style="margin-top:10px"></div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- OSI -->
+<section class="ch" id="cOsi" data-title="OSI 계층 모델">
+  <div class="eyebrow">Chapter</div>
+  <h2>OSI 계층 모델: 네트워크의 지도</h2>
+  <p class="lead">지금까지 배운 것 대부분이 L7(HTTP)이었어요. 이 챕터는 그 전체를 한 장의 지도로 정리해요.</p>
+
+  <div class="callout"><b>왜 계층으로 나누나</b>각 계층은 바로 아래 계층만 믿고 자기 일만 해요. HTTP는 TCP가 데이터를 순서대로 전달해준다고 믿고, TCP는 IP가 목적지까지 패킷을 옮겨준다고 믿어요. 그래서 Spring 개발자는 광케이블을 몰라도 API를 만들 수 있어요.</div>
+
+  <div class="widget">
+    <h4>계층을 눌러 살펴보세요</h4>
+    <div class="grid2 osigrid">
+      <div class="flow" id="osiStack"></div>
+      <div class="result" id="osiDetail" style="margin-top:0"></div>
+    </div>
+  </div>
+  <p>실무에서는 L5/L6를 따로 나누지 않고 <b>TCP/IP 4계층</b>(응용 · 전송 · 인터넷 · 네트워크 접근)으로 보는 경우가 많아요. 대화에서 가장 자주 나오는 건 <b>L3(IP) · L4(포트/TCP) · L7(HTTP)</b> 세 개예요.</p>
+
+  <h3>캡슐화: 요청이 계층을 내려갔다 올라오는 과정</h3>
+  <div class="widget">
+    <h4>캡슐화 애니메이션</h4>
+    <div id="encapBox" style="display:flex;flex-direction:column;gap:6px;align-items:flex-start;font-size:.85rem"></div>
+    <div class="result" id="encapText"></div>
+    <div class="row">
+      <button class="btn" id="encPrev">← 이전</button>
+      <button class="btn primary" id="encNext">다음 →</button>
+      <span id="encInfo" style="color:var(--muted);font-size:.88rem"></span>
+    </div>
+  </div>
+
+  <h3>L4와 L7: 무엇을 볼 수 있나</h3>
+  <pre>L4 장비가 보는 것:  203.0.113.7:51234 → 104.21.5.9:443  (내용은 암호화된 바이트 덩어리)
+L7 장비가 보는 것:  GET /diaries/123  Host: api.ssobbs13.pp.ua  Authorization: Bearer …</pre>
+  <div class="tablewrap"><table>
+    <tr><th>구성 요소</th><th>계층</th><th>이유</th></tr>
+    <tr><td>OCI Security List / iptables</td><td><span class="pill i">L3/L4</span></td><td>IP와 포트로만 허용/차단</td></tr>
+    <tr><td>Cloudflare DDoS 방어</td><td><span class="pill i">L3/L4</span> <span class="pill y">L7</span></td><td>패킷 폭탄(L3/4)과 HTTP 요청 폭탄(L7) 둘 다</td></tr>
+    <tr><td>Cloudflare 엣지 (주황 구름)</td><td><span class="pill y">L7</span></td><td>TLS를 풀고 HTTP를 읽어서 캐시·규칙 적용</td></tr>
+    <tr><td>WAF · Rate Limiting · Access</td><td><span class="pill y">L7</span></td><td>URL, 헤더, 본문을 봐야 판단 가능</td></tr>
+    <tr><td>Tunnel 호스트명 라우팅</td><td><span class="pill y">L7</span></td><td><code>Host</code> 헤더로 ingress 규칙 매칭</td></tr>
+    <tr><td>Tunnel 연결 자체</td><td><span class="pill i">L4</span></td><td>cloudflared ↔ 엣지 QUIC(UDP 7844) 연결</td></tr>
+    <tr><td>Spring Security · CORS</td><td><span class="pill y">L7</span></td><td>전부 HTTP 헤더 기반</td></tr>
+  </table></div>
+
+  <div class="callout warn"><b>실제 사용자 IP는 L7 헤더에</b>L7 프록시(Cloudflare → cloudflared)를 거치면 Spring이 보는 접속 IP(L3)는 <code>127.0.0.1</code>이에요. 진짜 사용자 IP는 <code>CF-Connecting-IP</code> 또는 <code>X-Forwarded-For</code> 헤더에서 꺼내야 해요. IP 기준 Rate Limit이나 로그에 꼭 필요해요. Spring Boot에서는 <code>server.forward-headers-strategy=native</code> 설정을 알아두세요.</div>
+
+  <div class="widget">
+    <h4>증상 진단기: 몇 계층 문제일까?</h4>
+    <div class="chips" id="diagChips"></div>
+    <div class="result" id="diagOut"></div>
+  </div>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. 로그인 API를 초당 수천 번 정상 HTTP 요청으로 두드리는 공격. OCI 방화벽(L4)으로 막을 수 있을까?</div>
+    <div class="opts">
+      <button>막을 수 있다. 443 포트를 닫으면 된다</button>
+      <button>못 막는다. 정상 연결이라 L7(WAF/Rate Limit)이 필요하다</button>
+    </div>
+    <div class="ex">L4는 포트와 IP만 봐요. 요청 내용과 빈도를 봐야 하는 L7 공격은 WAF나 Rate Limiting이 막아요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- TCP -->
+<section class="ch" id="cTcp" data-title="TCP · UDP · 지연시간">
+  <div class="eyebrow">Chapter</div>
+  <h2>TCP, UDP, HTTP 버전, 그리고 지연시간</h2>
+  <p class="lead">"왜 엣지가 가까우면 빠를까?"를 숫자로 이해하는 챕터.</p>
+
+  <h3>TCP vs UDP</h3>
+  <div class="tablewrap"><table>
+    <tr><th></th><th>TCP</th><th>UDP</th></tr>
+    <tr><td>연결</td><td>3-way handshake로 연결 후 전송</td><td>연결 없이 바로 전송</td></tr>
+    <tr><td>보장</td><td>순서 보장, 유실 시 재전송</td><td>보장 없음 (앱이 알아서)</td></tr>
+    <tr><td>속도</td><td>느림 (확인 절차)</td><td>빠름</td></tr>
+    <tr><td>용도</td><td>HTTP/1.1, HTTP/2, DB, SSH</td><td>DNS, 영상통화, 게임, <b>QUIC(HTTP/3)</b></td></tr>
+  </table></div>
+
+  <div class="widget">
+    <h4>TCP 3-way handshake</h4>
+    <div class="flow" id="hsFlow"></div>
+    <div class="row"><button class="btn primary" id="hsNext">다음 →</button><button class="btn" id="hsReset">처음부터</button></div>
+  </div>
+
+  <h3>RTT: 지연시간의 기본 단위</h3>
+  <p><b>RTT</b>(Round Trip Time)는 패킷이 갔다 오는 시간이에요. 서울↔서울 엣지는 수 ms, 서울↔미국은 150ms 이상이에요. 빛의 속도는 못 이기니까, <b>왕복 횟수를 줄이거나 거리를 줄이는 것</b>이 성능 최적화의 핵심이에요.</p>
+
+  <div class="widget">
+    <h4>첫 요청 지연시간 계산기</h4>
+    <div class="grid2">
+      <label>사용자 ↔ 서버 RTT (ms)<input type="text" id="rttIn" value="150"></label>
+      <label>서버 처리 시간 (ms)<input type="text" id="srvIn" value="30"></label>
+    </div>
+    <div id="rttOut" style="margin-top:10px"></div>
+    <div class="callout ok" style="margin-top:12px"><b>CDN이 빠른 이유</b>TCP/TLS 핸드셰이크 왕복은 가까운 엣지(RTT 수 ms)와 해요. 엣지 ↔ 오리진 구간은 이미 열린 연결을 재사용해서, 먼 거리를 왕복하는 횟수가 1번으로 줄어요.</div>
+  </div>
+
+  <h3>HTTP 버전</h3>
+  <div class="tablewrap"><table>
+    <tr><th>버전</th><th>전송</th><th>특징</th></tr>
+    <tr><td>HTTP/1.1</td><td>TCP</td><td>연결당 요청 하나씩 (keep-alive로 재사용). 앞 요청이 막히면 뒤도 대기 (HOL blocking)</td></tr>
+    <tr><td>HTTP/2</td><td>TCP</td><td>한 연결에 여러 요청 동시 전송(멀티플렉싱), 헤더 압축. 하지만 TCP 패킷 하나가 유실되면 전부 대기</td></tr>
+    <tr><td>HTTP/3</td><td><b>QUIC (UDP)</b></td><td>TCP의 HOL 문제 해결, 핸드셰이크와 TLS를 합쳐 더 빠름. 모바일 네트워크 전환에도 강함</td></tr>
+  </table></div>
+  <div class="callout"><b>우리 구조에서</b>브라우저 ↔ Cloudflare는 HTTP/2나 HTTP/3(자동), cloudflared ↔ Cloudflare는 QUIC(UDP 7844)이에요. 서버 방화벽이 아웃바운드 UDP를 막으면 cloudflared는 HTTP/2(TCP 7844)로 자동 전환해요. cloudflared → Spring은 평범한 HTTP/1.1이에요.</div>
+
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. HTTP/3가 사용하는 전송 계층 프로토콜은?</div>
+    <div class="opts"><button>TCP</button><button>ICMP</button><button>UDP (QUIC)</button></div>
+    <div class="ex">HTTP/3는 UDP 위의 QUIC을 써요. 재전송과 순서 보장은 QUIC이 스트림 단위로 직접 해요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- HTTP semantics -->
+<section class="ch" id="cHttp" data-title="HTTP 의미론">
+  <div class="eyebrow">Chapter</div>
+  <h2>HTTP 의미론: 메서드, 상태 코드, 헤더</h2>
+  <p class="lead">L7의 언어. API 설계와 캐시, 재시도, 에러 처리가 전부 여기서 나와요.</p>
+
+  <div class="widget">
+    <h4>메서드 속성 탐색기</h4>
+    <div class="chips" id="methChips"></div>
+    <div class="result" id="methOut"></div>
+  </div>
+  <ul>
+    <li><b>안전(Safe)</b>: 서버 상태를 안 바꿈 → 크롤러, 프리페치가 마음대로 호출해도 됨</li>
+    <li><b>멱등(Idempotent)</b>: 여러 번 해도 결과가 같음 → 네트워크 오류 시 <b>자동 재시도해도 안전</b></li>
+    <li><b>캐시 가능</b>: 엣지나 브라우저가 응답을 저장해도 됨</li>
+  </ul>
+  <div class="callout warn"><b>POST 중복 문제</b>POST는 멱등이 아니라서, 타임아웃 후 재시도하면 일기가 두 번 저장될 수 있어요. 결제처럼 중요한 곳에서는 <code>Idempotency-Key</code> 헤더로 중복을 막아요.</div>
+
+  <div class="widget">
+    <h4>상태 코드 사전</h4>
+    <input type="text" id="scIn" placeholder="코드나 키워드 (예: 401, 권한, 서버)">
+    <div id="scOut" style="margin-top:10px"></div>
+  </div>
+  <div class="callout"><b>401 vs 403 (Spring Security에서 자주 헷갈림)</b><b>401</b> = "너 누군지 모르겠어" (로그인 필요). <b>403</b> = "누군지 아는데 넌 안 돼" (권한 부족). 남의 일기 조회(IDOR)는 403이나, 존재 자체를 숨기려면 404를 주기도 해요.</div>
+
+  <h3>꼭 알아야 할 헤더</h3>
+  <div class="tablewrap"><table>
+    <tr><th>헤더</th><th>방향</th><th>역할</th></tr>
+    <tr><td><code>Host</code></td><td>요청</td><td>어느 도메인에 대한 요청인지. 터널 ingress 매칭의 기준</td></tr>
+    <tr><td><code>Authorization</code></td><td>요청</td><td><code>Bearer &lt;JWT&gt;</code> 형태의 인증 정보</td></tr>
+    <tr><td><code>Cookie</code> / <code>Set-Cookie</code></td><td>요청 / 응답</td><td>세션 쿠키 주고받기</td></tr>
+    <tr><td><code>Content-Type</code></td><td>양쪽</td><td>본문 형식 (<code>application/json</code>)</td></tr>
+    <tr><td><code>Cache-Control</code></td><td>응답</td><td>캐시 가능 여부와 기간. API는 <code>no-store</code>나 <code>private</code></td></tr>
+    <tr><td><code>Origin</code></td><td>요청</td><td>CORS 판단 기준. 브라우저가 자동으로 붙임</td></tr>
+    <tr><td><code>CF-Connecting-IP</code> / <code>X-Forwarded-For</code></td><td>요청</td><td>프록시 뒤에서 진짜 사용자 IP</td></tr>
+    <tr><td><code>CF-Ray</code></td><td>응답</td><td>Cloudflare 요청 추적 ID. 문제 신고와 로그 검색에 사용</td></tr>
+  </table></div>
+
+  <h3>HTTP는 무상태(stateless)</h3>
+  <p>HTTP 요청은 서로를 기억하지 못해요. 로그인 상태를 유지하려면 매 요청마다 <b>쿠키(세션 ID)</b>나 <b>토큰(JWT)</b>을 들고 와야 해요. 이게 8장의 레플리카와 세션 문제, 7장의 쿠키 이야기로 이어져요.</p>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. 네트워크가 끊겨 응답을 못 받았다. 자동 재시도해도 안전한 요청은?</div>
+    <div class="opts"><button>POST /diaries (일기 작성)</button><button>PUT /diaries/7 (7번 일기 전체 교체)</button></div>
+    <div class="ex">PUT은 멱등이라 여러 번 해도 결과가 같아요. POST는 일기가 중복 생성될 수 있어요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- Crypto -->
+<section class="ch" id="cCrypto" data-title="암호학 기초 (TLS · JWT)">
+  <div class="eyebrow">Chapter</div>
+  <h2>암호학 기초: TLS와 JWT를 이해하기 위한 최소한</h2>
+  <p class="lead">수학은 몰라도 돼요. 도구 네 가지가 각각 무엇을 보장하는지만 알면 돼요.</p>
+
+  <div class="tablewrap"><table>
+    <tr><th>도구</th><th>보장하는 것</th><th>비유</th><th>우리 프로젝트에서</th></tr>
+    <tr><td><b>해시</b></td><td>무결성 (바뀌었는지 확인), 되돌릴 수 없음</td><td>지문</td><td>비밀번호 저장 (BCrypt)</td></tr>
+    <tr><td><b>대칭키 암호</b></td><td>기밀성. 같은 키로 잠그고 품</td><td>집 열쇠</td><td>TLS의 실제 데이터 암호화 (AES)</td></tr>
+    <tr><td><b>비대칭키 암호</b></td><td>공개키로 잠그면 개인키로만 풀림</td><td>우체통 (누구나 넣고, 주인만 꺼냄)</td><td>TLS 키 교환</td></tr>
+    <tr><td><b>전자서명</b></td><td>진위 (누가 썼는지), 위변조 방지</td><td>도장</td><td>인증서, JWT 서명</td></tr>
+  </table></div>
+
+  <div class="widget">
+    <h4>해시 체험 (SHA-256)</h4>
+    <input type="text" id="hashIn" value="my-diary-password">
+    <div class="result mono" id="hashOut" style="word-break:break-all"></div>
+    <p style="font-size:.88rem;color:var(--muted);margin:8px 0 0">한 글자만 바꿔도 결과가 완전히 달라져요(눈사태 효과). 결과로 원문을 되돌릴 수 없어요.</p>
+  </div>
+  <div class="callout bad"><b>비밀번호는 SHA-256으로 저장하면 안 돼요</b>SHA-256은 너무 빨라서 무차별 대입에 약해요. Spring Security의 <code>BCryptPasswordEncoder</code>처럼 <b>일부러 느리고 솔트(salt)를 섞는</b> 전용 해시를 쓰세요. 같은 비밀번호라도 사용자마다 다른 결과가 나와요.</div>
+
+  <h3>TLS 핸드셰이크 (단순화)</h3>
+  <div class="widget">
+    <h4>TLS 1.3 핸드셰이크 따라가기</h4>
+    <div class="flow" id="tlsFlow"></div>
+    <div class="row"><button class="btn primary" id="tlsNext">다음 →</button><button class="btn" id="tlsReset">처음부터</button></div>
+  </div>
+  <p>비대칭키는 느려서 <b>키 교환에만</b> 쓰고, 실제 데이터는 빠른 <b>대칭키</b>로 암호화해요. 인증서의 <b>서명</b>이 "이 공개키는 진짜 api.ssobbs13.pp.ua의 것"임을 보증해요.</p>
+
+  <h3>JWT: 서명된 출입증</h3>
+  <p>JWT는 <code>헤더.페이로드.서명</code> 세 부분을 점으로 이은 문자열이에요. 앞의 두 부분은 <b>암호화가 아니라 Base64 인코딩</b>이라 누구나 읽을 수 있어요. 서명은 "서버가 발급했고 내용이 안 바뀌었다"를 보장할 뿐이에요.</p>
+  <div class="widget">
+    <h4>JWT 해부기 (브라우저 안에서만 디코딩, 외부 전송 없음)</h4>
+    <input type="text" id="jwtIn">
+    <div id="jwtOut" style="margin-top:10px"></div>
+  </div>
+  <div class="callout warn"><b>JWT 규칙</b>① 페이로드에 비밀번호·개인정보를 넣지 마세요(누구나 읽음). ② 서명 키는 서버에만. ③ <code>exp</code>(만료)를 짧게. ④ 실제 JWT를 온라인 디코더 사이트에 붙여넣지 마세요.</div>
+
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. JWT 페이로드에 <code>"role":"USER"</code>가 있다. 사용자가 이걸 <code>"ADMIN"</code>으로 바꿔서 보내면?</div>
+    <div class="opts"><button>서명 검증이 실패해서 서버가 거부한다</button><button>Base64라 수정이 불가능하다</button><button>관리자가 된다</button></div>
+    <div class="ex">내용은 누구나 바꿀 수 있지만, 서명 키가 없으니 올바른 서명을 만들 수 없어요. 서버가 서명을 검증하면 거부돼요. 그래서 서명 검증은 절대 생략하면 안 돼요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- 13 -->
+<section class="ch" id="c13" data-title="공부 순서 · 용어집">
+  <div class="eyebrow">Chapter 13</div>
+  <h2>공부 순서와 용어집</h2>
+  <h3>추천 학습 순서</h3>
+  <div id="roadmap"></div>
+  <div class="callout ok"><b>기억할 것</b>nginx와 SSL을 직접 못 해도 지금 구조에선 문제없어요. 대신 <b>DNS, CORS, 쿠키, 인증</b>은 어떤 호스팅을 쓰든 개발자가 직접 다뤄야 하니 여기에 먼저 투자하세요.</div>
+
+  <h3>용어집</h3>
+  <input type="text" id="glIn" placeholder="용어 검색…">
+  <dl class="glossary-list" id="glList"></dl>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+</main>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+/* ---------- theme ---------- */
+const savedTheme=store.get('nit-theme',null); if(savedTheme) document.documentElement.dataset.theme=savedTheme;
+$('#themeBtn').onclick=()=>{const cur=document.documentElement.dataset.theme||(matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light');const nx=cur==='dark'?'light':'dark';document.documentElement.dataset.theme=nx;store.set('nit-theme',nx)};
+$('#menuBtn').onclick=()=>$('#side').classList.toggle('open');
+
+/* ---------- TOC + progress ---------- */
+const chapters=$$('section.ch'); let done=new Set(store.get('nit-done',[]));
+$('#toc').innerHTML=chapters.map((c,i)=>`<li><a href="#${c.id}" data-id="${c.id}"><span class="n">${i}</span>${c.dataset.title}</a></li>`).join('');
+$$('#toc a').forEach(a=>a.onclick=()=>$('#side').classList.remove('open'));
+chapters.forEach((c,i)=>{const e=c.querySelector('.eyebrow');if(e)e.textContent='Chapter '+i});
+function renderProgress(){
+  $$('#toc a').forEach(a=>a.classList.toggle('done',done.has(a.dataset.id)));
+  chapters.forEach(c=>{const b=c.querySelector('.done-btn');if(b){const d=done.has(c.id);b.classList.toggle('on',d);b.textContent=d?'✓ 완료함 (취소하려면 클릭)':'✓ 이 챕터 완료'}});
+  $('#progBar').style.width=(done.size/chapters.length*100)+'%';
+  $('#progTxt').textContent=`${done.size} / ${chapters.length} 완료`;
+}
+chapters.forEach(c=>{const b=c.querySelector('.done-btn');if(b)b.onclick=()=>{done.has(c.id)?done.delete(c.id):done.add(c.id);store.set('nit-done',[...done]);renderProgress()}});
+$('#resetBtn').onclick=()=>{done=new Set();store.set('nit-done',[]);renderProgress()};
+renderProgress();
+const io=new IntersectionObserver(es=>{es.forEach(e=>{if(e.isIntersecting){$$('#toc a').forEach(a=>a.classList.toggle('active',a.dataset.id===e.target.id))}})},{rootMargin:'-30% 0px -60% 0px'});
+chapters.forEach(c=>io.observe(c));
+
+/* ---------- quizzes ---------- */
+$$('.quiz').forEach(q=>{const ans=+q.dataset.answer;const bs=[...q.querySelectorAll('.opts button')];
+  bs.forEach((b,i)=>b.onclick=()=>{bs.forEach(x=>x.classList.remove('right','wrong'));b.classList.add(i===ans?'right':'wrong');if(i!==ans)bs[ans].classList.add('right');const ex=q.querySelector('.ex');ex.style.display='block';ex.innerHTML=(i===ans?'<b style="color:var(--green)">정답!</b> ':'<b style="color:var(--red)">아쉬워요.</b> ')+ex.dataset.orig})});
+$$('.quiz .ex').forEach(e=>e.dataset.orig=e.innerHTML);
+
+/* ---------- helpers ---------- */
+function stepper(el,steps,idx){el.innerHTML=steps.map((s,i)=>`<div class="step ${i===idx?'on':i<idx?'past':''}"><div class="k">${i+1}</div><div class="t"><b>${s[0]}</b><span>${s[1]}</span></div></div>`).join('')}
+function chipGroup(el,items,onPick,start=0){el.innerHTML=items.map((it,i)=>`<button class="chip" data-i="${i}">${it.label}</button>`).join('');const bs=[...el.children];const pick=i=>{bs.forEach(b=>b.classList.toggle('on',+b.dataset.i===i));onPick(items[i],i)};bs.forEach(b=>b.onclick=()=>pick(+b.dataset.i));if(start!==null)pick(start)}
+function toggleGroup(el,onPick){const bs=[...el.querySelectorAll('button')];const pick=v=>{bs.forEach(b=>b.classList.toggle('on',b.dataset.v===v));onPick(v)};bs.forEach(b=>b.onclick=()=>pick(b.dataset.v));pick(bs[0].dataset.v)}
+function diagram(parts){return parts.map(p=>typeof p==='string'?`<div class="arrow ${p.startsWith('✕')?'red':''}">${p}</div>`:`<div class="node ${p.c||''}"><b>${p.t}</b><small>${p.s||''}</small></div>`).join('')}
+
+/* ---------- ch0 journey ---------- */
+const J=[
+ ['DNS 조회','"api.ssobbs13.pp.ua의 IP가 뭐야?" → Cloudflare 네임서버가 엣지 IP를 알려줌 (Ch.2)'],
+ ['TCP 연결','그 IP의 443번 포트로 연결 (Ch.4)'],
+ ['TLS 핸드셰이크','"진짜 그 사이트 맞아? 인증서 보여줘" → 암호화 채널 수립 (Ch.5)'],
+ ['HTTP 요청','GET /diaries + 헤더(Origin, Cookie/Authorization) 전송 (Ch.7)'],
+ ['엣지 처리','Cloudflare 엣지(icn)가 DDoS/WAF 검사 → 터널로 전달 (Ch.6, 9)'],
+ ['터널 통과','cloudflared가 받아서 localhost:8080으로 넘김 (Ch.10)'],
+ ['오리진 응답','Spring Security 인증/인가 → 컨트롤러 → DB → JSON 응답 (Ch.9)'],
+ ['돌아가기','응답이 같은 길을 거꾸로. 브라우저가 CORS 헤더 확인 후 JS에 전달 (Ch.7)']];
+let ji=0,jt=null;
+function jr(){stepper($('#journey'),J,ji);$('#jInfo').textContent=`${ji+1} / ${J.length}`}
+$('#jNext').onclick=()=>{ji=Math.min(J.length-1,ji+1);jr()};$('#jPrev').onclick=()=>{ji=Math.max(0,ji-1);jr()};
+$('#jPlay').onclick=()=>{if(jt){clearInterval(jt);jt=null;$('#jPlay').textContent='▶ 자동 재생';return}ji=0;jr();$('#jPlay').textContent='⏸ 정지';jt=setInterval(()=>{if(ji>=J.length-1){clearInterval(jt);jt=null;$('#jPlay').textContent='▶ 자동 재생';return}ji++;jr()},1400)};
+jr();
+
+/* ---------- ch1 domain parts ---------- */
+chipGroup($('#domParts'),[
+ {label:'api',d:'<b>서브도메인</b>. 내가 DNS에서 마음대로 만드는 이름. 무료, 무제한. 서버가 아니라 이름표예요.'},
+ {label:'ssobbs13',d:'<b>내가 등록한 이름</b>. nic.ua에서 산 부분. <code>ssobbs13.pp.ua</code> 전체가 내 도메인(=apex, <code>@</code>)이에요.'},
+ {label:'pp',d:'<b>2단계 공용 영역</b>. <code>pp.ua</code>는 개인용 공개 접미사로 PSL에 등록돼 있어서, 그 아래 이름은 각각 다른 주인이에요.'},
+ {label:'ua',d:'<b>TLD (최상위 도메인)</b>. 우크라이나 국가 도메인. <code>.ua</code> 레지스트리가 장부를 관리해요.'}
+],it=>$('#domExplain').innerHTML=it.d);
+
+/* ---------- ch2 DNS sim ---------- */
+const D=[
+ ['브라우저 → 리졸버','"api.ssobbs13.pp.ua IP 알려줘" (통신사 DNS 또는 1.1.1.1)'],
+ ['리졸버 → 루트 서버','"<code>.ua</code>는 저기 가서 물어봐"'],
+ ['리졸버 → .ua 서버','"<code>pp.ua</code>는 저기"'],
+ ['리졸버 → pp.ua 서버','"<code>ssobbs13.pp.ua</code>는 cash / virginia.ns.cloudflare.com한테" ← nic.ua에서 바꾼 부분!'],
+ ['리졸버 → Cloudflare NS','"api는 104.21.x.x (엣지 IP)" ← 권한 있는 답'],
+ ['리졸버 → 브라우저','답을 TTL 동안 캐시하고 전달']];
+const Dc=[['브라우저 → 리졸버','"api.ssobbs13.pp.ua IP 알려줘"'],['리졸버: 캐시 hit!','TTL이 안 지났으니 저장해둔 답을 바로 반환. 루트/TLD/NS에 안 물어봄. 그래서 레코드를 바꿔도 이 리졸버는 한동안 옛 답을 줘요.']];
+let di=0;const dsteps=()=>$('#dnsCache').checked?Dc:D;
+function dr(){stepper($('#dnsFlow'),dsteps(),di)}
+$('#dnsNext').onclick=()=>{di=Math.min(dsteps().length-1,di+1);dr()};$('#dnsReset').onclick=()=>{di=0;dr()};$('#dnsCache').onchange=()=>{di=0;dr()};dr();
+
+chipGroup($('#recChips'),[
+ {label:'A',d:'<b>이름 → IPv4 주소</b><pre>api.ssobbs13.pp.ua.  A  168.107.55.205</pre>서버 IP로 직접 연결할 때. 직접 오픈 방식에서 사용.'},
+ {label:'AAAA',d:'<b>이름 → IPv6 주소</b><pre>api.ssobbs13.pp.ua.  AAAA  2606:4700::6810:1</pre>'},
+ {label:'CNAME',d:'<b>이름 → 다른 이름 (별칭)</b><pre>api.ssobbs13.pp.ua.  CNAME  913c2edc-….cfargotunnel.com.</pre>"주소는 저 이름한테 물어봐". 남의 서비스(터널, Pages, Vercel)에 연결할 때. 상대 IP가 바뀌어도 내 레코드는 그대로.'},
+ {label:'MX',d:'<b>이 도메인의 메일 서버</b><pre>ssobbs13.pp.ua.  MX 10  route1.mx.cloudflare.net.</pre>me@ssobbs13.pp.ua로 메일을 받으려면 필요. Cloudflare Email Routing이 자동으로 만들어줘요.'},
+ {label:'TXT',d:'<b>아무 텍스트</b><pre>ssobbs13.pp.ua.  TXT  "v=spf1 include:_spf.mx.cloudflare.net ~all"</pre>소유권 증명(Google Search Console 등), 메일 보안(SPF/DKIM/DMARC).'},
+ {label:'NS',d:'<b>이 영역을 누가 관리하나</b><pre>ssobbs13.pp.ua.  NS  cash.ns.cloudflare.com.\nssobbs13.pp.ua.  NS  virginia.ns.cloudflare.com.</pre>2개인 이유: DNS 표준이 최소 2개를 요구(SPOF 대책). Cloudflare는 각각이 Anycast로 수백 곳에서 응답.'},
+ {label:'CAA',d:'<b>인증서 발급 허용 기관</b><pre>ssobbs13.pp.ua.  CAA  0 issue "letsencrypt.org"</pre>지정한 CA만 이 도메인 인증서를 발급할 수 있게. 선택 사항.'}
+],it=>$('#recExplain').innerHTML=it.d,2);
+
+function ttl(){const t=parseInt($('#ttlIn').value)||0;const m=($('#ttlAt').value||'').match(/(\d{1,2}):(\d{2})/);if(!m){$('#ttlOut').textContent='시각을 HH:MM 형식으로';return}
+ const start=(+m[1])*60+(+m[2]);const end=start+Math.ceil(t/60);const f=x=>`${String(Math.floor(x/60)%24).padStart(2,'0')}:${String(x%60).padStart(2,'0')}`;
+ const human=t>=3600?`${(t/3600).toFixed(t%3600?1:0)}시간`:t>=60?`${Math.round(t/60)}분`:`${t}초`;
+ $('#ttlOut').innerHTML=`TTL ${human}이면, <b>${f(start)}</b>에 바꾼 레코드가 최악의 경우 <b>${f(end)}</b>까지 옛 값으로 보일 수 있어요.<br><span style="color:var(--muted)">팁: 이사 전날 TTL을 60~300초로 줄여두면 전환이 빨라져요. Cloudflare 주황 구름 레코드는 TTL이 Auto(300초).</span>`}
+$('#ttlIn').oninput=ttl;$('#ttlAt').oninput=ttl;ttl();
+
+/* ---------- ch3 zone ---------- */
+chipGroup($('#zoneChips'),[
+ {label:'1. 추가 (Pending)',d:'Cloudflare에 zone을 만들고 네임서버 2개를 배정받은 상태. 아직 레지스트리 장부는 옛 네임서버(nic.ua Parked)를 가리켜요. 레코드는 만들 수 있지만 아무도 안 봐요.'},
+ {label:'2. NS 변경',d:'nic.ua에서 네임서버를 <code>cash / virginia.ns.cloudflare.com</code>으로 변경. 레지스트리 장부가 갱신되고, 리졸버 캐시가 만료되면서 점점 Cloudflare로 질문이 와요.'},
+ {label:'3. Active',d:'Cloudflare가 "장부에 내 NS가 적혀 있네"를 확인. 이제 이 도메인의 DNS, SSL, 보안, 터널 route를 전부 Cloudflare에서 설정할 수 있어요.'},
+ {label:'(주의) Moved',d:'나중에 네임서버를 다른 곳으로 바꾸면 Cloudflare가 감지하고 zone이 비활성화돼요. 일정 기간 후 삭제될 수 있어요.'}
+],it=>$('#zoneExplain').innerHTML=it.d);
+
+/* ---------- ch4 ip ---------- */
+function ipClass(s){const m=s.trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);if(!m)return null;const [a,b]=[+m[1],+m[2]];if([a,b,+m[3],+m[4]].some(x=>x>255))return['n','올바르지 않은 IP','각 자리는 0~255'];
+ if(a===127)return['i','루프백 (localhost)','"나 자신". 컨테이너 안이면 그 컨테이너 자신이에요.'];
+ if(a===10||(a===172&&b>=16&&b<=31)||(a===192&&b===168))return['i','사설 IP (Private)','내부망 전용. 공유기 안, OCI VCN, Docker 네트워크. 인터넷에서 직접 못 닿아요.'];
+ if(a===100&&b>=64&&b<=127)return['i','CGNAT / Tailscale 대역','통신사 공유 NAT나 Tailscale VPN이 쓰는 대역.'];
+ if(a===169&&b===254)return['i','링크 로컬','DHCP 실패 시 자동 할당되거나, 클라우드 메타데이터 서버(169.254.169.254).'];
+ if(a===0)return['n','특수 주소','0.0.0.0은 "모든 인터페이스에서 받기"(서버 바인딩)의 의미로 쓰여요.'];
+ if((a===104&&b>=16&&b<=31)||(a===172&&b>=64&&b<=71)||(a===162&&b>=158&&b<=159))return['y','공인 IP (Cloudflare 엣지로 보임)','주황 구름 레코드를 dig하면 나오는 대역이에요.'];
+ return['y','공인 IP (Public)','인터넷 어디서든 닿는 주소. OCI 서버의 168.107.55.205 같은 것.']}
+$('#ipIn').oninput=e=>{const r=ipClass(e.target.value);$('#ipOut').innerHTML=r?`<span class="pill ${r[0]}">${r[1]}</span> ${r[2]}`:'IPv4 형식으로 입력하세요.'};
+
+toggleGroup($('#dirToggle'),v=>{
+ if(v==='direct'){$('#dirDiagram').innerHTML=diagram([{t:'인터넷',s:'누구나'},'──인바운드 443──►',{t:'OCI 방화벽',s:'80/443 열어야 함'},'→',{t:'nginx',s:'인증서 직접 관리'},'→',{t:'Spring',s:':8080'}]);
+  $('#dirExplain').innerHTML='<span class="pill n">포트 열림</span> 서버 IP가 공개되고, 누구나 443에 직접 접속을 시도할 수 있어요. 방화벽 두 겹 + 인증서 + 갱신을 직접 해야 해요.'}
+ else{$('#dirDiagram').innerHTML=diagram([{t:'인터넷',s:'누구나'},'──443──►',{t:'Cloudflare 엣지',s:'인바운드는 여기',c:'cf'},'◄──아웃바운드──',{t:'cloudflared',s:'OCI 안'},'→',{t:'Spring',s:'localhost:8080'}]);
+  $('#dirExplain').innerHTML='<span class="pill y">포트 닫힘</span> cloudflared가 먼저 바깥으로 연결을 열어두고, 요청은 그 연결을 타고 거꾸로 들어와요. 서버 IP는 숨겨져요.'}});
+
+/* ---------- ch5 ---------- */
+const NG=['도메인 A 레코드를 서버 IP로 설정','OCI Security List에서 80/443 열기','서버 iptables에서 80/443 열기','nginx 설치 및 server 블록 작성','certbot으로 Let\'s Encrypt 인증서 발급 (HTTP-01 챌린지)','nginx에 인증서 경로 설정','90일 자동 갱신 설정 (cron/systemd)','HTTP→HTTPS 리다이렉트','TLS 버전·암호 스위트 설정'];
+const ngs=new Set(store.get('nit-ng',[]));
+$('#nginxList').innerHTML=NG.map((t,i)=>`<label style="display:block"><input type="checkbox" data-i="${i}" ${ngs.has(i)?'checked':''}> ${t}</label>`).join('');
+function ngr(){$('#nginxOut').innerHTML=`<b>${ngs.size} / ${NG.length}</b> 가능. ${ngs.size===NG.length?'직접 호스팅도 가능한 수준이에요!':'<b>터널을 쓰면 이 목록 전부가 필요 없어요.</b> (Caddy를 쓰면 5~9번이 자동)'}`}
+$$('#nginxList input').forEach(c=>c.onchange=()=>{c.checked?ngs.add(+c.dataset.i):ngs.delete(+c.dataset.i);store.set('nit-ng',[...ngs]);ngr()});ngr();
+
+chipGroup($('#sslChips'),[
+ {label:'Off',p:['✕ HTTP','✕ HTTP'],d:'<span class="pill n">쓰지 마세요</span> 암호화 없음.'},
+ {label:'Flexible',p:['🔒 HTTPS','✕ HTTP 평문'],d:'<span class="pill n">위험</span> 브라우저엔 자물쇠가 뜨지만 엣지→서버는 평문. 서버가 HTTPS로 리다이렉트하면 무한 루프.'},
+ {label:'Full',p:['🔒 HTTPS','🔒 HTTPS (검증 X)'],d:'<span class="pill i">보통</span> 서버도 HTTPS지만 인증서가 가짜여도(자체서명) 통과.'},
+ {label:'Full (strict)',p:['🔒 HTTPS','🔒 HTTPS (검증 O)'],d:'<span class="pill y">권장</span> 서버 인증서까지 검증. 가장 안전.'},
+ {label:'터널 사용 시',p:['🔒 HTTPS','🔒 터널 암호화'],d:'<span class="pill y">자동 안전</span> ②구간은 터널이 암호화. 서버 안에서만 <code>http://localhost:8080</code> 평문. SSL 모드 설정과 무관하게 안전해요.'}
+],it=>{$('#sslDiagram').innerHTML=diagram([{t:'브라우저'},`① ${it.p[0]} ►`,{t:'Cloudflare 엣지',c:'cf'},`② ${it.p[1]} ►`,{t:'오리진 서버'}]);$('#sslExplain').innerHTML=it.d},4);
+
+/* ---------- ch6 cloud ---------- */
+toggleGroup($('#cloudToggle'),v=>{
+ $$('#cloudToggle button').forEach(b=>b.classList.toggle('grey',b.dataset.v==='grey'));
+ if(v==='orange'){$('#cloudDiagram').innerHTML=diagram([{t:'브라우저'},'→',{t:'DNS 응답',s:'104.21.x.x (엣지)'},'→',{t:'Cloudflare 엣지',s:'TLS · 캐시 · WAF · DDoS',c:'cf'},'→',{t:'오리진',s:'IP 숨김'}]);
+  $('#cloudExplain').innerHTML='<span class="pill y">Proxied</span> 모든 트래픽이 Cloudflare를 경유. 웹사이트·API·터널용. 오리진 IP는 외부에 안 보여요.'}
+ else{$('#cloudDiagram').innerHTML=diagram([{t:'브라우저'},'→',{t:'DNS 응답',s:'168.107.55.205 (진짜)'},'→',{t:'Cloudflare 엣지',s:'거치지 않음',c:'cf dim'},'→',{t:'오리진',s:'IP 노출'}]);
+  $('#cloudExplain').innerHTML='<span class="pill n">DNS only</span> Cloudflare는 전화번호부 역할만. TLS/WAF/DDoS 없음. 메일(MX), SSH, 게임 서버처럼 HTTP가 아닌 것에 사용. <b>터널은 이 모드로 동작 안 해요.</b>'}});
+
+/* ---------- ch7 origin checker ---------- */
+const PSL=['pp.ua','co.kr','or.kr','ac.kr','github.io','pages.dev','workers.dev','vercel.app','netlify.app','co.uk','com.ua'];
+function site(h){const p=h.split('.');for(const s of PSL){if(h===s||h.endsWith('.'+s)){const n=s.split('.').length;return p.slice(-(n+1)).join('.')}}return p.slice(-2).join('.')}
+function oc(){let a,b;try{a=new URL($('#oA').value);b=new URL($('#oB').value)}catch(e){$('#oOut').textContent='URL 형식으로 입력하세요 (https://…)';return}
+ const pa=a.port||(a.protocol==='https:'?'443':'80'),pb=b.port||(b.protocol==='https:'?'443':'80');
+ const so=a.protocol===b.protocol&&a.hostname===b.hostname&&pa===pb;const ss=site(a.hostname)===site(b.hostname)&&a.protocol===b.protocol;
+ $('#oOut').innerHTML=`<div>Origin: <span class="pill ${so?'y':'n'}">${so?'같음 (same-origin)':'다름 (cross-origin)'}</span> ${so?'':`<small style="color:var(--muted)">${[a.protocol!==b.protocol?'스킴':'',a.hostname!==b.hostname?'호스트':'',pa!==pb?'포트':''].filter(Boolean).join(', ')}가 다름</small>`}</div>
+ <div>Site: <span class="pill ${ss?'y':'n'}">${ss?'같음 (same-site)':'다름 (cross-site)'}</span> <small style="color:var(--muted)">${site(a.hostname)} vs ${site(b.hostname)}</small></div>
+ <div style="margin-top:8px">${so?'✅ CORS 설정 필요 없음. 쿠키도 그대로 전송.':`⚠️ 서버에 <b>CORS 설정 필요</b>: <code>Access-Control-Allow-Origin: ${a.origin}</code><br>${ss?'🍪 <code>SameSite=Lax</code> 쿠키가 전송돼요 (fetch에 <code>credentials: "include"</code> 필요).':'🍪 <code>SameSite=None; Secure</code> 쿠키만 전송돼요. 브라우저의 서드파티 쿠키 차단에 걸릴 수 있어 <b>JWT(Authorization 헤더)</b>가 편해요.'}`}</div>`}
+$('#oA').oninput=oc;$('#oB').oninput=oc;
+chipGroup($('#oPresets'),[
+ {label:'최종 구조',a:'https://ssobbs13.pp.ua',b:'https://api.ssobbs13.pp.ua'},
+ {label:'pages.dev에서 직접',a:'https://diary-6c6.pages.dev',b:'https://api.ssobbs13.pp.ua'},
+ {label:'지금 (Pages Function)',a:'https://diary-6c6.pages.dev',b:'https://diary-6c6.pages.dev/api/diaries'},
+ {label:'로컬 개발',a:'http://localhost:5173',b:'http://localhost:8080'}
+],it=>{$('#oA').value=it.a;$('#oB').value=it.b;oc()});
+
+/* ---------- ch8 LB ---------- */
+const lb=[{n:'커넥터 1',s:'my-finance',up:true},{n:'커넥터 2',s:'my-finance-db',up:true}];
+function lbr(){$('#lbNodes').innerHTML=lb.map((x,i)=>`<button class="node ${x.up?'cf':'dim'}" data-i="${i}" style="cursor:pointer"><b>${x.up?'🟢':'🔴'} ${x.n}</b><small>${x.s}</small></button>`).join('');$$('#lbNodes button').forEach(b=>b.onclick=()=>{lb[+b.dataset.i].up=!lb[+b.dataset.i].up;lbr()})}
+$('#lbSend').onclick=()=>{const alive=lb.map((x,i)=>x.up?i:-1).filter(i=>i>=0);if(!alive.length){$('#lbOut').innerHTML='<span class="pill n">전부 다운</span> 10건 모두 502/1033 에러. 모든 레플리카가 죽으면 서비스 중단이에요.';return}
+ const cnt=lb.map(()=>0);let logout=0,last=null;for(let k=0;k<10;k++){const i=alive[Math.floor(Math.random()*alive.length)];cnt[i]++;if($('#lbSession').checked&&k>0&&last!==null&&i!==last)logout++;last=i}
+ $('#lbOut').innerHTML=lb.map((x,i)=>`${x.n}: <b>${cnt[i]}</b>건`).join(' · ')+(alive.length<lb.length?'<br><span class="pill y">자동 우회</span> 죽은 레플리카는 빼고 나머지로 보냈어요. 이게 레플리카의 가치예요.':'')+($('#lbSession').checked?`<br><span class="pill n">stateful</span> 다른 레플리카로 넘어간 <b>${logout}번</b> 동안 로그인이 풀렸어요. → JWT나 Redis 세션을 쓰세요.`:'<br><span class="pill y">stateless</span> 어느 레플리카로 가든 문제없어요.')};
+lbr();
+
+/* ---------- ch9 attacks ---------- */
+const L=['DDoS 방어 (엣지)','WAF (엣지)','Rate Limiting (엣지)','Tunnel (IP 숨김·포트 닫힘)','Spring: 인증','Spring: 인가 (RBAC)','Spring: 객체 권한 체크'];
+chipGroup($('#atkChips'),[
+ {label:'대량 트래픽 폭탄',stop:0,why:'엣지가 흡수. 서버까지 안 와요.'},
+ {label:'SQL 인젝션 패턴',stop:1,why:'알려진 패턴은 WAF가 차단. (그래도 JPA 파라미터 바인딩은 기본!)'},
+ {label:'로그인 무차별 대입',stop:2,why:'IP당 요청 수 제한으로 차단. 무료 플랜도 규칙 1개 가능.'},
+ {label:'서버 IP로 직접 공격',stop:3,why:'IP를 모르고 포트도 닫혀 있어서 공격할 곳이 없어요.'},
+ {label:'로그인 없이 API 호출',stop:4,why:'토큰/세션이 없으니 401.'},
+ {label:'일반 유저가 관리자 API 호출',stop:5,why:'ROLE_ADMIN이 없으니 403.'},
+ {label:'남의 일기 ID로 조회 (IDOR)',stop:6,why:'앞의 모든 층을 정상 통과해요! 마지막 "이 일기 주인이 너냐" 체크만 막을 수 있어요.'}
+],it=>{stepper($('#atkLayers'),L.map((l,i)=>[l,i<it.stop?'통과':i===it.stop?'🛑 여기서 차단: '+it.why:'도달하지 않음']),it.stop)});
+
+/* ---------- ch10 products ---------- */
+chipGroup($('#prodChips'),[
+ {label:'DNS',d:'도메인 레코드 관리. <b>AWS: Route 53</b>. 상태: 이제 사용.'},
+ {label:'Pages',d:'정적 FE 호스팅 + Functions(= Workers). Git push로 자동 배포. <b>AWS: Amplify, S3+CloudFront</b>. 상태: <b>사용 중</b> (diary).'},
+ {label:'Pages Functions',d:'Pages 안의 서버리스 코드. <code>functions/api/[[path]].ts</code>가 /api/* 를 BE로 프록시 + Access 헤더 부착. Workers 무료 한도(10만/일)를 공유. 상태: 최종 구조에서 제거.'},
+ {label:'Workers',d:'엣지 서버리스 코드. <b>AWS: Lambda@Edge</b>. 상태: <code>diary-backend-proxy</code> 제거 예정.'},
+ {label:'Tunnel',d:'사설 서버를 공개 도메인에 연결. 인바운드 포트 불필요. 원격 관리형이라 대시보드 설정이 커넥터에 자동 반영. 상태: <b>사용</b> (diary-api).'},
+ {label:'Access',d:'엣지의 인증 게이트(문지기). 서비스 토큰 또는 사용자 로그인. 무료 50명. 상태: 제거 예정 (Spring Security로 대체).'},
+ {label:'Workers VPC',d:'Worker에서 터널 뒤 사설 서비스로 접근(바인딩). 상태: <code>diary-backend</code> 제거 예정.'},
+ {label:'R2',d:'S3 호환 파일 저장소. 다운로드(egress) 비용 무료. 이미지 업로드 기능에 유용.'},
+ {label:'Email Routing',d:'<code>me@ssobbs13.pp.ua</code> → Gmail 전달. 무료. 도메인 메일 주소가 생겨요.'},
+ {label:'Turnstile',d:'무료 CAPTCHA 대체. 회원가입/로그인 폼 봇 방지. Spring에서 토큰 검증.'}
+],it=>$('#prodOut').innerHTML=it.d);
+
+/* ---------- ch11 arch ---------- */
+const ARCH={
+ before:{p:[{t:'브라우저'},'→',{t:'Pages',s:'diary-6c6.pages.dev'},'→',{t:'Pages Function',s:'+Access 헤더',c:'cf'},'→',{t:'Worker',s:'diary-backend-proxy',c:'cf'},'→',{t:'VPC Service',s:'127.0.0.1:8080',c:'cf'},'→',{t:'Tunnel',s:'diary-api',c:'cf'},'→',{t:'Spring',s:'OCI ×2'}],
+  d:'Workers 실행 <b>2회</b>/요청. 도메인이 없어서 Worker + VPC 바인딩으로 터널에 우회 접근. Access 서비스 토큰이 유일한 잠금장치.'},
+ step1:{p:[{t:'브라우저'},'→',{t:'Pages',s:'ssobbs13.pp.ua'},'→',{t:'Pages Function',s:'BACKEND_URL 변경',c:'cf'},'→',{t:'api.ssobbs13.pp.ua',s:'DNS CNAME',c:'cf'},'→',{t:'Tunnel',s:'route → localhost:8080',c:'cf'},'→',{t:'Spring',s:'OCI ×2'}],
+  d:'Worker와 VPC 제거. Workers 실행 <b>1회</b>/요청. <code>wrangler.jsonc</code>의 BACKEND_URL만 바꾸면 돼요.'},
+ after:{p:[{t:'브라우저',s:'ssobbs13.pp.ua'},'── fetch ──►',{t:'api.ssobbs13.pp.ua',s:'DNS CNAME',c:'cf'},'→',{t:'Tunnel',s:'localhost:8080',c:'cf'},'→',{t:'Spring Security',s:'인증·RBAC·CORS'}],
+  d:'Workers 실행 <b>0회</b>. Pages는 정적 파일만. 브라우저가 API를 직접 호출하고, 인증/권한/CORS는 Spring Security가 담당. 벤더 락인 최소.'}};
+toggleGroup($('#archToggle'),v=>{$('#archDiagram').innerHTML=diagram(ARCH[v].p);$('#archExplain').innerHTML=ARCH[v].d});
+
+const TODO=['Zone ssobbs13.pp.ua Active 확인','터널 diary-api에 route 추가: api.ssobbs13.pp.ua → http://localhost:8080','curl로 api.ssobbs13.pp.ua 응답 확인','Pages 커스텀 도메인 ssobbs13.pp.ua 연결','Spring Security + CORS 구현 (allowed origin: https://ssobbs13.pp.ua)','FE client.ts baseUrl → VITE_API_BASE_URL','functions/ 폴더 · BACKEND_URL · CF_ACCESS_* 시크릿 삭제','Worker diary-backend-proxy · VPC Service diary-backend · workers.dev Access 앱 삭제','cloudflared 컨테이너 hostname 정리 (재생성)','(선택) maple-party.com zone 정리','(중요) 도메인 만료일 2027-09-25 캘린더 등록'];
+const td=new Set(store.get('nit-todo',[]));
+$('#todoList').innerHTML=TODO.map((t,i)=>`<label style="display:block;padding:4px 0"><input type="checkbox" data-i="${i}" ${td.has(i)?'checked':''}> ${t}</label>`).join('');
+$$('#todoList input').forEach(c=>c.onchange=()=>{c.checked?td.add(+c.dataset.i):td.delete(+c.dataset.i);store.set('nit-todo',[...td])});
+
+/* ---------- ch12 errors ---------- */
+const ERR=[
+ ['502 / 1033','터널이 연결 안 됨','cloudflared 컨테이너가 떠 있나? 대시보드에서 터널이 Healthy인가?','터널 다운 연결'],
+ ['502 Bad Gateway','터널은 됐는데 localhost:8080이 응답 없음','Spring이 떠 있나? 포트가 맞나? 컨테이너 네트워크(localhost 공유) 확인','스프링 포트'],
+ ['521','오리진이 연결 거부','서버 다운, 방화벽 (직접 오픈 방식)','방화벽 거부'],
+ ['522','오리진 연결 시간 초과','방화벽이 조용히 막음, 서버 과부하','방화벽 타임아웃'],
+ ['524','오리진이 100초 넘게 응답 없음','느린 쿼리, 긴 작업 → 비동기 처리로','느림 타임아웃'],
+ ['525 / 526','오리진 TLS 문제','SSL 모드와 오리진 인증서 불일치','ssl 인증서'],
+ ['1014','CNAME Cross-User Banned','다른 계정/다른 DNS에서 cfargotunnel.com으로 CNAME을 건 경우','cname dns'],
+ ['404 (터널)','catch-all 규칙에 걸림','터널 route에 그 호스트명이 없음 → Published application route 확인','route 호스트'],
+ ['403 (Access)','Access 문지기가 차단','서비스 토큰 헤더 누락 또는 정책 불일치','access 권한'],
+ ['CORS error (브라우저 콘솔)','브라우저가 응답을 JS에 안 줌','Spring CORS 설정, OPTIONS preflight 허용, allowed origin 철자','cors 브라우저 콘솔'],
+ ['DNS_PROBE_FINISHED_NXDOMAIN','도메인이 존재하지 않는다고 응답','레코드 없음, zone Pending, 오타 → dig로 확인','dns 도메인 없음']];
+function er(){const q=$('#errIn').value.trim().toLowerCase();const r=ERR.filter(e=>!q||e.join(' ').toLowerCase().includes(q));
+ $('#errOut').innerHTML=r.length?`<div class="tablewrap"><table><tr><th>코드</th><th>의미</th><th>확인할 곳</th></tr>${r.map(e=>`<tr><td><b>${e[0]}</b></td><td>${e[1]}</td><td>${e[2]}</td></tr>`).join('')}</table></div>`:'<div class="result">검색 결과 없음</div>'}
+$('#errIn').oninput=er;er();
+
+/* ---------- ch13 ---------- */
+const RM=[['OSI 계층 감각 (L3 · L4 · L7)','문제가 어느 계층인지 구분하는 지도'],['DNS 레코드(A/CNAME)와 dig','이번 작업에서 바로 씀'],['HTTP 의미론','메서드·멱등성, 상태 코드(401 vs 403), 헤더, curl -v 읽기'],['CORS와 쿠키','Spring Security 붙이면 반드시 만남'],['Docker 네트워크','컨테이너 localhost, 포트 매핑, compose 네트워크'],['암호학 기초 + 인증/인가','해시·BCrypt, JWT 구조, Spring Security 필터 체인, IDOR'],['리버스 프록시 개념','Cloudflare가 뭘 대신 해주는지 이해'],['(여유 있을 때) TCP 혼잡제어·TLS 상세·LB 알고리즘','깊이 파기']];
+stepper($('#roadmap'),RM,-1);$$('#roadmap .step').forEach(s=>s.style.opacity=1);
+const GL=[['Anycast','여러 서버가 같은 IP를 쓰고 가장 가까운 곳으로 자동 연결'],['Apex','도메인 자체(@). ssobbs13.pp.ua'],['Authoritative NS','DNS 정답 원본을 가진 네임서버'],['CA','인증서를 발급·서명하는 기관'],['CDN','전 세계에 분산된 캐시 서버 네트워크'],['CNAME','이름 → 다른 이름 별칭 레코드'],['CORS','다른 origin 응답 읽기를 서버가 허락하는 규칙'],['DDoS','대량 트래픽으로 서비스를 마비시키는 공격'],['Edge','CDN의 사용자 가까운 서버'],['Egress','서버에서 나가는 트래픽(주로 과금 대상)'],['Ingress rule','cloudflared가 호스트명별로 어느 서비스로 보낼지 정한 규칙'],['IDOR','ID만 바꿔 남의 리소스에 접근하는 취약점'],['Inbound','밖에서 서버로 들어오는 연결'],['NAT','사설 IP들이 공인 IP 하나를 공유하는 기술'],['Origin (서버)','진짜 원본 서버'],['Origin (브라우저)','스킴+호스트+포트'],['Outbound','서버에서 밖으로 나가는 연결'],['Preflight','CORS 확인용 사전 OPTIONS 요청'],['Proxied (주황 구름)','Cloudflare를 경유하는 DNS 레코드'],['PSL','공개 접미사 목록 (pp.ua, co.kr…)'],['RBAC','역할 기반 접근 제어'],['Registrar','도메인 판매 대리점 (nic.ua)'],['Registry','TLD 장부 원본 관리 기관'],['Replica','같은 앱의 복제 인스턴스'],['Resolver','DNS를 대신 조회·캐시하는 서버'],['Reverse proxy','서버 쪽 대리인 (nginx, Caddy, Cloudflare)'],['SameSite','쿠키를 cross-site 요청에 보낼지 정하는 속성'],['SPOF','단일 장애점'],['TLS','HTTPS의 암호화 프로토콜 (옛 SSL)'],['TTL','DNS 캐시 유지 시간'],['WAF','웹 공격 패턴 차단 방화벽'],['Zone','한 도메인의 DNS 레코드와 설정 묶음'],
+ ['OSI 7계층','네트워크 기능을 7단계로 나눈 참조 모델'],['L4','전송 계층. TCP/UDP, 포트'],['L7','애플리케이션 계층. HTTP, DNS'],['캡슐화','상위 데이터에 하위 계층 헤더를 차례로 씌우는 과정'],['PDU','계층별 데이터 단위: 세그먼트(L4), 패킷(L3), 프레임(L2)'],['MAC 주소','같은 망 안에서 장비를 식별하는 L2 주소'],['TCP','연결형·순서 보장 전송 프로토콜'],['UDP','비연결형·빠른 전송 프로토콜'],['QUIC','UDP 위의 빠른 보안 전송. HTTP/3의 기반'],['3-way handshake','TCP 연결 수립: SYN → SYN-ACK → ACK'],['RTT','패킷 왕복 시간'],['HOL blocking','앞 요청이 막혀 뒤가 대기하는 현상'],['Multiplexing','한 연결로 여러 요청 동시 전송 (HTTP/2)'],['Idempotent (멱등)','여러 번 해도 결과가 같은 성질 (GET, PUT, DELETE)'],['Safe method','서버 상태를 바꾸지 않는 메서드 (GET, HEAD)'],['401 / 403','인증 필요 / 권한 부족'],['Stateless','요청끼리 서로를 기억하지 않는 성질'],['Hash','되돌릴 수 없는 고정 길이 지문 (SHA-256)'],['Salt','해시 전에 섞는 사용자별 랜덤값'],['BCrypt','느리고 솔트를 쓰는 비밀번호 전용 해시'],['대칭키','같은 키로 암호화·복호화 (AES)'],['비대칭키','공개키/개인키 쌍 (RSA, ECDHE)'],['전자서명','개인키로 서명, 공개키로 검증'],['JWT','헤더.페이로드.서명 형태의 서명된 토큰'],['Base64url','바이너리를 URL 안전 문자로 바꾸는 인코딩 (암호화 아님)'],['X-Forwarded-For','프록시가 원래 클라이언트 IP를 전달하는 헤더']];
+function gl(){const q=$('#glIn').value.trim().toLowerCase();$('#glList').innerHTML=GL.filter(g=>!q||g.join(' ').toLowerCase().includes(q)).map(g=>`<dt>${g[0]}</dt><dd>${g[1]}</dd>`).join('')}
+$('#glIn').oninput=gl;gl();
+
+/* ---------- OSI stack ---------- */
+const OSI=[
+ {l:7,n:'애플리케이션',pdu:'메시지 / 데이터',d:'사람과 앱이 쓰는 프로토콜. "무엇을" 주고받는지.',ex:'HTTP, HTTPS, DNS, SSH, SMTP, WebSocket',dev:'L7 프록시·로드밸런서(ALB), WAF, API Gateway',me:'Spring 컨트롤러, CORS, 쿠키, Access, WAF, 터널의 Host 라우팅, Pages Functions'},
+ {l:6,n:'표현',pdu:'-',d:'데이터 형식 변환, 암호화, 압축.',ex:'TLS(흔히 여기로 분류), JSON/UTF-8 인코딩, gzip',dev:'-',me:'Cloudflare의 TLS 종료, 인증서'},
+ {l:5,n:'세션',pdu:'-',d:'대화(세션) 수립과 유지. 실무에서는 거의 따로 구분하지 않아요.',ex:'(TLS 세션 재개 등으로 설명하기도 함)',dev:'-',me:'-'},
+ {l:4,n:'전송',pdu:'세그먼트(TCP) / 데이터그램(UDP)',d:'프로세스 간 전달. <b>포트</b>로 어느 프로그램에 줄지 구분하고, TCP는 순서와 재전송을 보장.',ex:'TCP, UDP, QUIC(UDP 위)',dev:'L4 로드밸런서(NLB), 방화벽 포트 규칙',me:'443, 8080, 7844(cloudflared QUIC), Security List 포트 규칙'},
+ {l:3,n:'네트워크',pdu:'패킷',d:'<b>IP 주소</b>로 목적지까지 경로를 찾아 전달(라우팅).',ex:'IPv4, IPv6, ICMP(ping)',dev:'라우터, L3 스위치',me:'공인 IP 168.107.55.205, Anycast 엣지 IP, NAT, VCN 사설 IP'},
+ {l:2,n:'데이터링크',pdu:'프레임',d:'같은 네트워크 안에서 옆 장비로 전달. <b>MAC 주소</b> 사용.',ex:'Ethernet, Wi-Fi(802.11), ARP',dev:'스위치, 공유기 LAN 포트',me:'(클라우드가 대신 처리. 신경 쓸 일 거의 없음)'},
+ {l:1,n:'물리',pdu:'비트',d:'전기, 빛, 전파 신호 그 자체.',ex:'광섬유, UTP 케이블, 전파',dev:'케이블, 허브, 리피터',me:'(데이터센터의 영역)'}];
+function osiPick(i){$$('#osiStack .step').forEach((s,k)=>s.classList.toggle('on',k===i));const o=OSI[i];
+ $('#osiDetail').innerHTML=`<b style="font-size:1.1rem">L${o.l} ${o.n}</b> <span class="pill i">PDU: ${o.pdu}</span><p style="margin:8px 0">${o.d}</p><div><b>프로토콜</b>: ${o.ex}</div><div><b>장비</b>: ${o.dev}</div><div style="margin-top:6px"><b>내 프로젝트에서</b>: ${o.me}</div>`}
+$('#osiStack').innerHTML=OSI.map((o,i)=>`<div class="step past" data-i="${i}" style="cursor:pointer;padding:7px 10px"><div class="k" style="${o.l>=5?'':'background:var(--blue)'}">L${o.l}</div><div class="t"><b>${o.n}</b></div></div>`).join('');
+$$('#osiStack .step').forEach(s=>s.onclick=()=>osiPick(+s.dataset.i));osiPick(0);
+
+/* ---------- encapsulation ---------- */
+const SEG={eth:['Ethernet','MAC aa:bb → 라우터','#8b5cf6'],ip:['IP','203.0.113.7 → 104.21.5.9','#2b6cb0'],tcp:['TCP',':51234 → :443','#2f855a'],tls:['TLS 🔒','암호화된 레코드','#b7791f'],http:['HTTP','GET /diaries Host: api…','#f38020'],httpx:['HTTP','🔒 (밖에선 안 보임)','#f38020']};
+const ENC=[
+ [['http'],'<b>L7</b>: 브라우저가 HTTP 요청을 만들어요. 여기까지가 개발자가 직접 다루는 부분.'],
+ [['tls','httpx'],'<b>TLS</b>: HTTP 전체를 암호화해 TLS 레코드로 감싸요. 이제 중간 장비는 URL도 헤더도 못 봐요.'],
+ [['tcp','tls','httpx'],'<b>L4</b>: TCP 헤더(출발/도착 <b>포트</b>, 순서 번호)를 붙여 세그먼트로. 443번 포트의 프로그램에게 주라는 뜻.'],
+ [['ip','tcp','tls','httpx'],'<b>L3</b>: IP 헤더(출발/도착 <b>IP</b>)를 붙여 패킷으로. 인터넷 라우터들은 이것만 보고 길을 찾아요.'],
+ [['eth','ip','tcp','tls','httpx'],'<b>L2</b>: 이더넷 헤더(<b>MAC</b>)를 붙여 프레임으로. 바로 옆 장비(공유기)까지만 유효해서, 라우터를 지날 때마다 새로 바뀌어요.'],
+ [['bits'],'<b>L1</b>: 0과 1의 전기/빛 신호로 선을 타고 나가요.'],
+ [['ip','tcp','tls','httpx'],'<b>중간 라우터들</b>: 프레임을 벗기고 IP만 보고 다음 라우터로. 내용(🔒)은 전혀 모른 채 전달해요.'],
+ [['http'],'<b>Cloudflare 엣지</b>: 전부 벗겨내고 TLS까지 풀어서 HTTP를 읽어요(L7 프록시). Host를 보고 터널로 보내기로 결정. 이게 WAF와 Access가 동작할 수 있는 이유예요.']];
+let ei=0;
+function encR(){const [segs,txt]=ENC[ei];
+ $('#encapBox').innerHTML=segs[0]==='bits'?`<div class="mono" style="padding:10px;border-radius:8px;background:var(--panel);border:1px solid var(--line);letter-spacing:2px">0100 0101 0000 0000 0000 0000 0011 1100 1011 0010 …</div>`:
+  `<div style="display:flex;flex-wrap:wrap;border-radius:8px;overflow:hidden;border:1px solid var(--line)">${segs.map(s=>{const g=SEG[s];return `<div style="background:${g[2]};color:#fff;padding:8px 10px;min-width:${s.startsWith('http')?160:90}px"><b>${g[0]}</b><br><small style="opacity:.9">${g[1]}</small></div>`}).join('')}</div>`;
+ $('#encapText').innerHTML=txt;$('#encInfo').textContent=`${ei+1} / ${ENC.length}`}
+$('#encNext').onclick=()=>{ei=Math.min(ENC.length-1,ei+1);encR()};$('#encPrev').onclick=()=>{ei=Math.max(0,ei-1);encR()};encR();
+
+/* ---------- diagnosis ---------- */
+chipGroup($('#diagChips'),[
+ {label:'dig 결과가 비어 있음',l:'L7 (DNS)',d:'이름 해석 단계 실패. 레코드가 없거나 zone이 Pending이거나 오타.',c:'dig +short api.ssobbs13.pp.ua'},
+ {label:'연결 시간 초과 (timeout)',l:'L3 / L4',d:'패킷이 도착 못 하거나 방화벽이 조용히 버림. 경로·방화벽 확인.',c:'curl -v --connect-timeout 5 https://…'},
+ {label:'Connection refused',l:'L4',d:'서버엔 닿았지만 그 포트에서 듣는 프로그램이 없음. Spring이 죽었거나 포트 오타.',c:'ss -ltnp | grep 8080   (서버에서)'},
+ {label:'SSL / 인증서 오류',l:'L6 (TLS)',d:'인증서 만료, 도메인 불일치, SSL 모드 불일치(525/526).',c:'curl -vI https://…   (인증서 정보 확인)'},
+ {label:'401 / 403 응답',l:'L7',d:'연결과 TLS는 정상. 인증(401)이나 권한(403) 문제. Spring Security나 Access 확인.',c:'curl -i -H "Authorization: Bearer …" https://…'},
+ {label:'브라우저 CORS 에러',l:'L7 (브라우저)',d:'서버는 응답했지만 브라우저가 JS에 안 줌. curl로는 정상일 수 있어요.',c:'curl -I -X OPTIONS … -H "Origin: …"'},
+ {label:'Cloudflare 502 / 1033',l:'L4~L7 (오리진 쪽)',d:'엣지까지는 정상. 터널 연결(1033)이나 cloudflared → localhost:8080 구간 문제.',c:'docker logs cloudflared   (서버에서)'},
+ {label:'가끔 느리고 끊김',l:'L1~L3',d:'패킷 손실, 경로 불안정. 앱 문제가 아닐 수 있어요.',c:'mtr 1.1.1.1   (또는 traceroute)'}
+],it=>$('#diagOut').innerHTML=`<span class="pill y">${it.l}</span> ${it.d}<pre style="margin:8px 0 0">${it.c}</pre>`);
+
+/* ---------- TCP handshake ---------- */
+const HS=[['클라이언트 → 서버: SYN','"연결하고 싶어. 내 시작 번호는 x야"'],['서버 → 클라이언트: SYN-ACK','"좋아. x 받았고, 내 시작 번호는 y야"'],['클라이언트 → 서버: ACK','"y 받았어." → 연결 수립. 여기까지 1 RTT'],['이제 TLS 핸드셰이크 → HTTP 요청','TCP 연결 위에서 다음 계층의 대화가 시작돼요. 연결을 재사용(keep-alive)하면 이 비용을 다시 안 내요.']];
+let hi=0;const hsR=()=>stepper($('#hsFlow'),HS,hi);$('#hsNext').onclick=()=>{hi=Math.min(HS.length-1,hi+1);hsR()};$('#hsReset').onclick=()=>{hi=0;hsR()};hsR();
+
+/* ---------- latency calc ---------- */
+function rtt(){const r=Math.max(0,parseFloat($('#rttIn').value)||0),s=Math.max(0,parseFloat($('#srvIn').value)||0),edge=5;
+ const rows=[['HTTP/1.1 + TLS 1.2 (TCP)','TCP 1 + TLS 2 + 요청 1 = 4 RTT',4*r+s],['HTTP/2 + TLS 1.3 (TCP)','TCP 1 + TLS 1 + 요청 1 = 3 RTT',3*r+s],['HTTP/3 (QUIC)','QUIC+TLS 1 + 요청 1 = 2 RTT',2*r+s],['HTTP/3 재접속 (0-RTT)','요청을 첫 패킷에 실어 보냄 = 1 RTT',r+s],['CDN 엣지 경유 (HTTP/3)',`엣지(RTT ${edge}ms)와 2 RTT + 엣지↔오리진 1 RTT (연결 재사용)`,2*edge+r+s]];
+ const mx=Math.max(...rows.map(x=>x[2]))||1;
+ $('#rttOut').innerHTML=rows.map(x=>`<div style="margin:6px 0"><div style="display:flex;justify-content:space-between;font-size:.88rem"><span><b>${x[0]}</b> <span style="color:var(--muted)">${x[1]}</span></span><b>${Math.round(x[2])}ms</b></div><div class="bar" style="height:10px"><i style="width:${x[2]/mx*100}%"></i></div></div>`).join('')+'<small style="color:var(--muted)">DNS 조회 시간은 제외. 단순화한 모델이에요.</small>'}
+$('#rttIn').oninput=rtt;$('#srvIn').oninput=rtt;rtt();
+
+/* ---------- HTTP methods ---------- */
+const Y='<span class="pill y">예</span>',N='<span class="pill n">아니오</span>';
+chipGroup($('#methChips'),[
+ {label:'GET',s:1,i:1,c:1,b:'없음',ex:'GET /diaries/7 → 7번 일기 조회'},
+ {label:'POST',s:0,i:0,c:0,b:'있음',ex:'POST /diaries → 새 일기 작성 (두 번 보내면 두 개 생김)'},
+ {label:'PUT',s:0,i:1,c:0,b:'있음',ex:'PUT /diaries/7 → 7번 일기를 통째로 교체 (여러 번 해도 결과 같음)'},
+ {label:'PATCH',s:0,i:0,c:0,b:'있음',ex:'PATCH /diaries/7 → 일부 수정. "좋아요 +1" 같은 건 멱등이 아님'},
+ {label:'DELETE',s:0,i:1,c:0,b:'보통 없음',ex:'DELETE /diaries/7 → 삭제 (두 번째는 404지만 서버 상태는 같음)'},
+ {label:'HEAD',s:1,i:1,c:1,b:'없음',ex:'GET과 같지만 헤더만 받음. 존재 확인용'},
+ {label:'OPTIONS',s:1,i:1,c:0,b:'없음',ex:'CORS preflight. Spring Security에서 막으면 CORS 에러'}
+],m=>$('#methOut').innerHTML=`<div class="tablewrap"><table><tr><th>안전</th><th>멱등</th><th>캐시 가능</th><th>본문</th></tr><tr><td>${m.s?Y:N}</td><td>${m.i?Y:N}</td><td>${m.c?Y:N}</td><td>${m.b}</td></tr></table></div>예시: ${m.ex}`);
+
+/* ---------- status codes ---------- */
+const SC=[['200 OK','성공'],['201 Created','생성 성공 (POST 후). Location 헤더로 새 리소스 주소'],['204 No Content','성공, 본문 없음 (DELETE 후)'],['301 / 308','영구 이동 (308은 메서드 유지)'],['302 / 307','임시 이동 (307은 메서드 유지)'],['304 Not Modified','캐시된 것 그대로 써도 됨'],['400 Bad Request','요청 형식 오류, 검증 실패'],['401 Unauthorized','인증 필요 (로그인 안 함, 토큰 만료)'],['403 Forbidden','인증은 됐지만 권한 없음 (RBAC, 객체 권한)'],['404 Not Found','없음 (또는 존재를 숨길 때)'],['405 Method Not Allowed','이 경로에서 그 메서드 미지원'],['409 Conflict','상태 충돌 (중복 가입 등)'],['415 Unsupported Media Type','Content-Type 오류 (JSON 안 보냄)'],['422 Unprocessable Entity','형식은 맞지만 의미상 처리 불가'],['429 Too Many Requests','요청 과다 (Rate Limit)'],['500 Internal Server Error','서버 코드 예외'],['502 Bad Gateway','프록시가 뒤쪽 서버에서 잘못된 응답을 받음 (서버 다운)'],['503 Service Unavailable','일시적 과부하·점검'],['504 Gateway Timeout','프록시가 뒤쪽 서버를 기다리다 시간 초과']];
+function scR(){const q=$('#scIn').value.trim().toLowerCase();const fam={'2':'y','3':'i','4':'n','5':'n'};const r=SC.filter(x=>!q||x.join(' ').toLowerCase().includes(q));
+ $('#scOut').innerHTML=r.length?`<div class="tablewrap"><table>${r.map(x=>`<tr><td style="white-space:nowrap"><span class="pill ${fam[x[0][0]]}">${x[0]}</span></td><td>${x[1]}</td></tr>`).join('')}</table></div>`:'<div class="result">결과 없음</div>'}
+$('#scIn').oninput=scR;scR();
+
+/* ---------- hash ---------- */
+async function hashR(){const v=$('#hashIn').value;try{const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(v));$('#hashOut').textContent=[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}catch(e){$('#hashOut').textContent='이 브라우저 환경에서는 해시 API를 쓸 수 없어요 (https나 최신 Chrome에서 열어보세요).'}}
+$('#hashIn').oninput=hashR;hashR();
+
+/* ---------- TLS handshake ---------- */
+const TL=[['ClientHello','브라우저: "TLS 1.3 쓸게. 지원하는 암호 목록이랑 내 키 교환 값(공개) 여기 있어"'],['ServerHello + 인증서 + 서명','서버: "이 암호로 하자. 내 키 교환 값이랑 인증서, 그리고 개인키로 한 서명이야"'],['인증서 검증','브라우저: CA 서명 체인 확인 → 도메인 일치(api.ssobbs13.pp.ua) → 만료일 확인. 하나라도 틀리면 경고 화면'],['같은 대칭키 계산 (ECDHE)','양쪽이 서로의 공개 값으로 같은 비밀 키를 각자 계산. 키 자체는 네트워크로 전송되지 않아요'],['암호화 통신 시작','이제 HTTP 요청을 대칭키(AES 등)로 암호화해 전송. 여기까지 1 RTT']];
+let ti=0;const tlR=()=>stepper($('#tlsFlow'),TL,ti);$('#tlsNext').onclick=()=>{ti=Math.min(TL.length-1,ti+1);tlR()};$('#tlsReset').onclick=()=>{ti=0;tlR()};tlR();
+
+/* ---------- JWT ---------- */
+const b64u=o=>btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const now=Math.floor(Date.now()/1000);
+$('#jwtIn').value=`${b64u({alg:'HS256',typ:'JWT'})}.${b64u({sub:'42',name:'ssobbs13',role:'USER',iat:now,exp:now+3600})}.demo-signature-not-real`;
+function jwtR(){const p=$('#jwtIn').value.trim().split('.');if(p.length!==3){$('#jwtOut').innerHTML='<div class="result">JWT는 점(.)으로 나뉜 세 부분이어야 해요.</div>';return}
+ const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));const dec=s=>{try{s=s.replace(/-/g,'+').replace(/_/g,'/');s+='='.repeat((4-s.length%4)%4);return JSON.stringify(JSON.parse(decodeURIComponent(escape(atob(s)))),null,2)}catch(e){return '(디코딩 실패)'}};
+ let expInfo='';try{const pl=JSON.parse(dec(p[1]));if(pl.exp){const d=new Date(pl.exp*1000);expInfo=`<div style="margin-top:6px">만료(exp): <b>${d.toLocaleString()}</b> ${pl.exp<Date.now()/1000?'<span class="pill n">만료됨</span>':'<span class="pill y">유효 기간 내</span>'}</div>`}}catch(e){}
+ $('#jwtOut').innerHTML=`<div class="grid2"><div><b style="color:#f38020">헤더</b><pre>${esc(dec(p[0]))}</pre></div><div><b style="color:#2b6cb0">페이로드 (누구나 읽을 수 있음!)</b><pre>${esc(dec(p[1]))}</pre></div></div><div><b style="color:#2f855a">서명</b> <code>${esc(p[2].slice(0,40))}${p[2].length>40?'…':''}</code> <small style="color:var(--muted)">서버의 비밀 키로만 만들고 검증할 수 있어요. 여기선 검증하지 않아요.</small></div>${expInfo}`}
+$('#jwtIn').oninput=jwtR;jwtR();
+</script>
+</body>
+</html>

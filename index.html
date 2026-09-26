@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interactive 교과서</title>
+<style>
+  :root { --bg:#fafafa; --fg:#1a1a1a; --muted:#666; --card:#fff; --line:#e3e3e3; --accent:#2f6fed; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#131417; --fg:#ececec; --muted:#9a9a9a; --card:#1c1d21; --line:#2c2d33; --accent:#7aa2ff; }
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--fg); font:16px/1.6 system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif; }
+  main { max-width:720px; margin:0 auto; padding:48px 16px; }
+  h1 { font-size:1.6rem; margin:0 0 8px; }
+  p.sub { color:var(--muted); margin:0 0 32px; }
+  a.card { display:block; padding:20px; margin-bottom:12px; background:var(--card); border:1px solid var(--line); border-radius:12px; color:inherit; text-decoration:none; transition:border-color .15s; }
+  a.card:hover { border-color:var(--accent); }
+  a.card strong { display:block; font-size:1.1rem; margin-bottom:4px; }
+  a.card span { color:var(--muted); font-size:.9rem; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Interactive 교과서</h1>
+  <p class="sub">공부하면서 만든 인터랙티브 HTML 교과서 모음</p>
+  <a class="card" href="textbooks/fe-network-resilience.html"><strong>네트워크 복원력 FE 가이드</strong><span>Frontend · Network Resilience</span></a>
+  <a class="card" href="textbooks/network-infra.html"><strong>풀스택 인프라 교과서</strong><span>Network · Infra</span></a>
+  <a class="card" href="textbooks/spring-boot4-kotlin.html"><strong>Spring Boot 4 + Kotlin 실무 교과서</strong><span>Backend · Spring Boot · Kotlin</span></a>
+</main>
+</body>
+</html>

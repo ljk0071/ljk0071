@@ -1,0 +1,2902 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spring Boot 4 + Kotlin 실무 교과서</title>
+<meta name="description" content="Spring Boot 4, Kotlin, JPA, Envers, soft delete, restdocs-api-spec, OpenTelemetry, 코루틴 실무 교과서 (2026년 9월 기준)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>try{var t=JSON.parse(localStorage.getItem("sb4tb.theme"));if(t)document.documentElement.setAttribute("data-theme",t);}catch(e){}</script>
+<style>
+:root{
+  --ground:#f3f5f8;--surface:#ffffff;--sunk:#e8ecf1;
+  --ink:#14203a;--ink-2:#48536a;--ink-3:#727c93;
+  --rule:#d8dee6;--rule-2:#c3cbd6;
+  --cobalt:#2446c7;--cobalt-soft:#e3e8fb;
+  --violet:#6538d0;--violet-soft:#eee7fc;
+  --amber:#8f5200;--amber-soft:#fbefd6;
+  --green:#146e45;--green-soft:#e0f2e8;
+  --red:#b42d3a;--red-soft:#fbe4e6;
+  --mark:#ffe38a;
+  --code-bg:#1e1f22;--code-bar:#2b2d30;--code-rule:#393b40;--code-ink:#bcbec4;
+  --overlay:rgba(12,18,32,.42);
+  --pop-shadow:0 18px 44px -18px rgba(12,18,32,.45);
+  --sans:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --mono:"JetBrains Mono","D2Coding",ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  --top:60px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --ground:#0e1522;--surface:#141d2d;--sunk:#0a101b;
+  --ink:#e3e8f0;--ink-2:#a9b3c4;--ink-3:#7f899c;
+  --rule:#243049;--rule-2:#34425f;
+  --cobalt:#8ea7ff;--cobalt-soft:#1c2a52;
+  --violet:#b89dff;--violet-soft:#2a2150;
+  --amber:#f0b24a;--amber-soft:#3a2b10;
+  --green:#56c792;--green-soft:#12301f;
+  --red:#f2848e;--red-soft:#3a181c;
+  --mark:#6b5200;
+  --code-bg:#1b1c1f;--code-bar:#26282c;--code-rule:#35373c;
+  --overlay:rgba(0,0,0,.55);
+  --pop-shadow:0 18px 44px -14px rgba(0,0,0,.7);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#0e1522;--surface:#141d2d;--sunk:#0a101b;
+    --ink:#e3e8f0;--ink-2:#a9b3c4;--ink-3:#7f899c;
+    --rule:#243049;--rule-2:#34425f;
+    --cobalt:#8ea7ff;--cobalt-soft:#1c2a52;
+    --violet:#b89dff;--violet-soft:#2a2150;
+    --amber:#f0b24a;--amber-soft:#3a2b10;
+    --green:#56c792;--green-soft:#12301f;
+    --red:#f2848e;--red-soft:#3a181c;
+    --mark:#6b5200;
+    --code-bg:#1b1c1f;--code-bar:#26282c;--code-rule:#35373c;
+    --overlay:rgba(0,0,0,.55);
+    --pop-shadow:0 18px 44px -14px rgba(0,0,0,.7);
+    color-scheme:dark;
+  }
+}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--top) + 24px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font:400 16.5px/1.78 var(--sans);-webkit-font-smoothing:antialiased;word-break:keep-all;overflow-wrap:break-word}
+a{color:var(--cobalt);text-decoration-thickness:1px;text-underline-offset:3px}
+a:hover{text-decoration-thickness:2px}
+:focus-visible{outline:2px solid var(--cobalt);outline-offset:2px;border-radius:4px}
+button{font:inherit;color:inherit}
+code{font-family:var(--mono);font-size:.84em;background:var(--sunk);border-radius:4px;padding:.12em .36em;overflow-wrap:anywhere}
+kbd{font-family:var(--mono);font-size:.8em;padding:.1em .45em;border:1px solid var(--rule-2);border-bottom-width:2px;border-radius:4px;background:var(--surface)}
+mark{background:var(--mark);color:inherit;border-radius:2px;padding:0 1px}
+
+/* 상단바 */
+.read-bar{position:fixed;top:0;left:0;right:0;height:3px;background:var(--cobalt);transform-origin:0 50%;transform:scaleX(0);z-index:70}
+.topbar{position:sticky;top:0;z-index:60;height:var(--top);display:flex;align-items:center;gap:14px;padding:0 20px;background:var(--ground);border-bottom:1px solid var(--rule)}
+@supports (backdrop-filter:blur(8px)){.topbar{background:color-mix(in srgb,var(--ground) 86%,transparent);backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3)}}
+.brand{font-weight:700;font-size:15.5px;letter-spacing:-.01em;color:var(--ink);text-decoration:none;white-space:nowrap}
+.search{position:relative;flex:1;max-width:500px;margin-left:auto}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--ink-3);pointer-events:none}
+.search input{width:100%;height:38px;padding:0 40px 0 36px;border:1px solid var(--rule-2);border-radius:8px;background:var(--surface);color:var(--ink);font:400 14.5px/1 var(--sans)}
+.search input::placeholder{color:var(--ink-3)}
+.search input:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px var(--cobalt-soft)}
+.search kbd{position:absolute;right:10px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--ink-3)}
+.search input:focus ~ kbd,.search input:not(:placeholder-shown) ~ kbd{display:none}
+.q-results{position:absolute;top:calc(100% + 8px);left:0;right:0;max-height:min(70vh,560px);overflow:auto;background:var(--surface);border:1px solid var(--rule-2);border-radius:10px;box-shadow:var(--pop-shadow);padding:6px}
+.q-count,.q-empty{margin:6px 10px 8px;font-size:13px;color:var(--ink-3)}
+.q-empty{color:var(--ink-2);line-height:1.6}
+.q-item{display:block;width:100%;text-align:left;border:0;background:none;padding:9px 10px;border-radius:7px;cursor:pointer}
+.q-item:hover,.q-item.sel{background:var(--sunk)}
+.q-ch{display:block;font-size:12px;font-weight:600;color:var(--cobalt);margin-bottom:2px}
+.q-snip{display:block;font-size:14px;line-height:1.55;color:var(--ink-2)}
+.top-actions{display:flex;gap:8px;align-items:center}
+.pill{display:inline-flex;align-items:center;gap:7px;height:36px;padding:0 12px;border-radius:8px;border:1px solid var(--rule-2);background:var(--surface);font-size:13.5px;font-weight:500;cursor:pointer;white-space:nowrap}
+.pill:hover{border-color:var(--ink-3)}
+.pill .dot{width:8px;height:8px;border-radius:50%}
+.dot.b4{background:var(--violet)}.dot.verify{background:var(--amber)}
+.pill .count{font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.icon-btn{width:38px;height:38px;display:inline-grid;place-items:center;border-radius:8px;border:1px solid var(--rule-2);background:var(--surface);cursor:pointer}
+.icon-btn:hover{border-color:var(--ink-3)}
+.menu-btn{display:none}
+
+/* 레이아웃 */
+.layout{display:grid;grid-template-columns:300px minmax(0,1fr);align-items:start}
+.sidebar{position:sticky;top:var(--top);height:calc(100vh - var(--top));overflow-y:auto;padding:22px 16px 48px 18px;border-right:1px solid var(--rule);scrollbar-width:thin}
+.scrim{display:none}
+.prog{padding:4px 10px 16px;margin-bottom:12px;border-bottom:1px solid var(--rule)}
+.prog-row{font-size:13px;font-weight:600;color:var(--ink-2);margin:0 0 8px;font-variant-numeric:tabular-nums}
+.prog-track{height:6px;border-radius:3px;background:var(--sunk);overflow:hidden}
+.prog-fill{height:100%;width:0;background:var(--green);border-radius:3px;transition:width .4s ease}
+.prog-quiz{font-size:12.5px;color:var(--ink-3);margin:8px 0 0;font-variant-numeric:tabular-nums}
+.toc{list-style:none;margin:0;padding:0}
+.toc-ch{margin:0 0 2px}
+.toc-link{display:block;padding:8px 10px 9px;border-radius:8px;text-decoration:none;color:var(--ink-2)}
+.toc-link:hover{background:var(--sunk);color:var(--ink)}
+.toc-top{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:14px;line-height:1.4}
+.toc-name{min-width:0}
+.toc-ch.done .toc-name::before{content:"✓";color:var(--green);font-weight:700;margin-right:6px}
+.toc-min{flex:none;font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.toc-track{display:block;position:relative;height:4px;margin-top:7px;border-radius:2px;background:var(--sunk)}
+.toc-bar{position:absolute;top:0;bottom:0;left:var(--l);width:var(--w);min-width:3px;border-radius:2px;background:var(--rule-2)}
+.toc-ch.done .toc-bar{background:var(--ink-2)}
+.toc-link.active{background:var(--cobalt-soft);color:var(--ink)}
+.toc-link.active .toc-bar{background:var(--cobalt)}
+.toc-sub{list-style:none;margin:4px 0 10px 14px;padding:0 0 0 10px;border-left:1.5px solid var(--rule);display:none}
+.toc-ch.open .toc-sub{display:block}
+.toc-sublink{display:block;padding:4px 8px;font-size:13px;line-height:1.45;color:var(--ink-3);text-decoration:none;border-radius:5px}
+.toc-sublink:hover{color:var(--ink)}
+.toc-sublink.active{color:var(--cobalt);font-weight:600}
+.side-foot{font-size:12px;color:var(--ink-3);margin:18px 10px 0;line-height:1.6}
+
+main{min-width:0;padding:0 clamp(18px,4.5vw,64px) 140px}
+.cover,.chapter{max-width:780px}
+
+/* 표지와 읽기 트레이스 */
+.cover{padding:64px 0 24px;max-width:980px}
+.cover-title{font-size:clamp(34px,5.2vw,52px);line-height:1.15;letter-spacing:-.03em;font-weight:700;margin:0 0 18px;max-width:14em}
+.cover-sub{font-size:18px;line-height:1.7;color:var(--ink-2);margin:0 0 18px;max-width:40em}
+.cover-versions{font-size:14px;color:var(--ink-3);margin:0 0 26px;line-height:2.1}
+.cover-versions code{display:inline-block;white-space:nowrap;line-height:1.6;font-size:12.5px;margin-left:4px;background:var(--surface);border:1px solid var(--rule)}
+.cover-actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{height:44px;padding:0 18px;border-radius:8px;border:1.5px solid var(--ink);background:var(--surface);color:var(--ink);font-weight:600;font-size:15px;cursor:pointer}
+.btn:hover{background:var(--sunk)}
+.btn.primary{background:var(--ink);color:var(--ground)}
+.btn.primary:hover{background:var(--ink-2);border-color:var(--ink-2)}
+.cover-help{font-size:13.5px;color:var(--ink-3);margin:14px 0 0}
+.trace{margin:34px 0 0;padding:18px 20px 14px;border:1px solid var(--rule);border-radius:12px;background:var(--surface)}
+.trace-head{display:flex;align-items:baseline;justify-content:space-between;gap:6px 16px;flex-wrap:wrap;margin-bottom:10px}
+.trace-title{font-size:16px;font-weight:700;margin:0}
+.trace-meta{font-size:13.5px;color:var(--ink-2);margin:0;font-variant-numeric:tabular-nums}
+.trace-body{--name:250px;--gap:16px;position:relative}
+.trace-axis{display:grid;grid-template-columns:var(--name) minmax(0,1fr);column-gap:var(--gap);font-size:12px;color:var(--ink-3);padding-bottom:6px;border-bottom:1px solid var(--rule);font-variant-numeric:tabular-nums}
+.trace-ticks{position:relative;height:18px}
+.tick{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.tick:first-child{transform:none}
+.tick.tick-end{transform:translateX(-100%)}
+.trace-rows{list-style:none;margin:0;padding:6px 0 2px}
+.tr-link{display:grid;grid-template-columns:var(--name) minmax(0,1fr);column-gap:var(--gap);align-items:center;padding:4px 0;text-decoration:none;color:var(--ink)}
+.tr-link:hover .tr-title{text-decoration:underline;text-underline-offset:3px}
+.tr-name{display:flex;gap:8px;min-width:0;font-size:14px;line-height:1.35}
+.tr-no{flex:none;min-width:3.3em;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.tr-title{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tr-track{position:relative;height:24px;background:linear-gradient(90deg,var(--rule) 1px,transparent 1px) 0 0/25% 100%}
+.tr-bar{position:absolute;top:5px;bottom:5px;left:var(--l);width:var(--w);min-width:4px;border-radius:3px;background:var(--cobalt-soft);border:1.5px solid var(--cobalt);transform-origin:left center;transform:scaleX(0);transition:transform .7s cubic-bezier(.2,.7,.2,1) calc(var(--i) * 55ms),background-color .2s}
+.trace.ready .tr-bar{transform:scaleX(1)}
+.tr-row.done .tr-bar{background:var(--ink-2);border-color:var(--ink-2)}
+.tr-row.active .tr-bar{background:var(--cobalt);border-color:var(--cobalt)}
+.tr-dur{position:absolute;top:50%;transform:translateY(-50%);left:calc(var(--l) + var(--w) + 6px);font-size:12px;color:var(--ink-3);white-space:nowrap;font-variant-numeric:tabular-nums}
+.tr-dur.left{left:auto;right:calc(100% - var(--l) + 6px)}
+.tr-cursor{--p:0;position:absolute;top:0;bottom:0;left:calc(var(--name) + var(--gap) + (100% - var(--name) - var(--gap)) * var(--p));border-left:2px solid var(--ink);pointer-events:none;transition:left .15s linear}
+.tr-cursor.idle{opacity:0}
+.tr-cursor::before{content:"";position:absolute;top:-3px;left:-6px;width:10px;height:10px;border-radius:50%;background:var(--ink)}
+.trace-note{font-size:13px;color:var(--ink-3);margin:10px 0 0;line-height:1.6}
+
+/* 장 */
+.ch-head{margin:104px 0 0;padding-top:26px;border-top:2px solid var(--ink)}
+.ch-head h1{font-size:clamp(27px,3.4vw,34px);line-height:1.28;letter-spacing:-.025em;font-weight:700;margin:0 0 12px}
+.ch-lead{font-size:17.5px;line-height:1.72;color:var(--ink-2);margin:0;max-width:38em}
+.ch-meter{display:flex;align-items:center;gap:14px;margin-top:18px;font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.ch-track{position:relative;flex:0 1 300px;height:6px;border-radius:3px;background:var(--sunk)}
+.ch-seg{position:absolute;top:0;bottom:0;left:var(--l);width:var(--w);min-width:4px;border-radius:3px;background:var(--cobalt)}
+.keypoints{margin:28px 0 8px;padding:16px 20px 12px;border-radius:10px;background:var(--surface);border:1px solid var(--rule)}
+.kp-title{font-size:14.5px;font-weight:700;margin:0 0 4px}
+.keypoints ul{margin:0;padding-left:1.15em}
+.keypoints li{margin:4px 0}
+:where(.chapter) h2{font-size:23px;line-height:1.38;letter-spacing:-.015em;font-weight:700;margin:60px 0 12px;font-variant-numeric:tabular-nums}
+:where(.chapter) h3{font-size:18px;line-height:1.45;font-weight:700;margin:34px 0 8px}
+:where(.chapter) p{margin:12px 0}
+:where(.chapter) :is(ul,ol){padding-left:1.3em;margin:10px 0}
+:where(.chapter) li{margin:7px 0}
+:where(.chapter) li::marker{color:var(--ink-3)}
+:where(.chapter) ol > li::marker{font-weight:600;color:var(--ink-2)}
+:where(.chapter) li > :is(ul,ol){margin:6px 0 8px}
+:where(.chapter) strong{font-weight:700}
+.big-steps > li{padding-left:4px;margin:12px 0}
+
+/* 표 */
+.tw{overflow-x:auto;margin:14px 0 22px;border:1px solid var(--rule);border-radius:10px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:14.5px;line-height:1.62}
+th,td{padding:10px 14px;text-align:left;vertical-align:top;border-top:1px solid var(--rule)}
+thead th{border-top:0;background:var(--sunk);font-size:13px;font-weight:600;color:var(--ink-2);white-space:nowrap}
+td code{font-size:.82em}
+.tbl-filter{display:flex;align-items:center;gap:12px;margin:16px 0 -4px}
+.tbl-filter input{flex:0 1 300px;height:34px;padding:0 12px;border:1px solid var(--rule-2);border-radius:7px;background:var(--surface);color:var(--ink);font:400 14px/1 var(--sans)}
+.tbl-filter input:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px var(--cobalt-soft)}
+.tbl-count{font-size:12.5px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 -4px}
+.chips button{height:32px;padding:0 12px;border-radius:6px;border:1px solid var(--rule-2);background:var(--surface);color:var(--ink-2);font-size:13.5px;cursor:pointer}
+.chips button:hover{border-color:var(--ink-3)}
+.chips button.on{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+
+/* 코드 */
+.code{margin:16px 0 24px;border-radius:10px;overflow:hidden;background:var(--code-bg);border:1px solid var(--code-rule)}
+.code-bar{display:flex;justify-content:space-between;align-items:center;padding:6px 8px 6px 14px;background:var(--code-bar);border-bottom:1px solid var(--code-rule)}
+.code-lang{font-size:12px;font-weight:600;color:#9da0a8}
+.copy-btn{display:inline-flex;align-items:center;gap:6px;height:28px;padding:0 10px;border-radius:6px;border:1px solid #45474d;background:transparent;color:#c9ccd3;font-size:12.5px;cursor:pointer}
+.copy-btn:hover{background:#34363b}
+.copy-btn.ok{color:#6aab73;border-color:#6aab73}
+pre{margin:0;padding:15px 18px;overflow-x:auto;font:400 13.4px/1.7 var(--mono);color:var(--code-ink);tab-size:4;white-space:pre;word-break:normal;overflow-wrap:normal}
+pre code{background:none;border:0;padding:0;font-size:inherit;color:inherit;overflow-wrap:normal}
+.tk-k{color:#cf8e6d}.tk-s{color:#6aab73}.tk-a{color:#b3ae60}.tk-n{color:#2aacb8}.tk-c{color:#7a7e85;font-style:italic}.tk-f{color:#56a8f5}.tk-t{color:#dfe1e5}
+.jp-k{color:#cf8e6d}.jp-p{color:#c77dbb}.jp-c{color:#7a7e85;font-style:italic}
+
+/* 강조 상자와 태그 */
+.callout{margin:18px 0;padding:13px 18px;border-radius:8px;border-left:3px solid;background:var(--surface)}
+.callout p{margin:5px 0}
+.callout ul{margin:6px 0 4px}
+.callout-title{font-weight:700}
+.callout.warn{border-color:var(--red);background:var(--red-soft)}
+.callout.tip{border-color:var(--green);background:var(--green-soft)}
+.callout.verify{border-color:var(--amber);background:var(--amber-soft)}
+.callout.note{border-color:var(--cobalt);background:var(--cobalt-soft)}
+.tag{display:inline-block;font-size:11.5px;font-weight:600;line-height:1;padding:4px 6px 3px;border-radius:4px;vertical-align:2px;margin:0 2px 0 6px;white-space:nowrap}
+.tag.b4{background:var(--violet-soft);color:var(--violet)}
+.tag.verify{background:var(--amber-soft);color:var(--amber)}
+.sources{margin:44px 0 0;padding:14px 18px 10px;border:1px dashed var(--rule-2);border-radius:10px}
+.sources-title{font-size:14px;font-weight:700;margin:0 0 4px}
+.sources ul{margin:0;padding-left:1.1em;font-size:14px}
+.sources li{margin:4px 0}
+
+/* 인터랙티브 도구 */
+.widget{margin:30px 0 34px;border:1px solid var(--rule-2);border-radius:12px;background:var(--surface);overflow:hidden}
+.widget-bar{padding:14px 20px 12px;border-bottom:1px solid var(--rule);background:var(--sunk)}
+.widget-bar h3{margin:0;font-size:17px;line-height:1.4}
+.widget-bar p{margin:3px 0 0;font-size:14px;color:var(--ink-2);line-height:1.6}
+.widget-body{padding:18px 20px 20px}
+.widget-foot{font-size:12.5px;color:var(--ink-3);margin:14px 0 0}
+.field{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--ink-2)}
+.field input{height:40px;padding:0 12px;border-radius:7px;border:1px solid var(--rule-2);background:var(--ground);color:var(--ink);font:400 14px/1 var(--mono);min-width:0}
+.field input:focus{outline:none;border-color:var(--cobalt);box-shadow:0 0 0 3px var(--cobalt-soft)}
+.dq-form{display:grid;grid-template-columns:150px minmax(0,1fr);gap:12px}
+.dq-exlabel{font-size:13px;color:var(--ink-3);margin:14px 0 6px}
+.dq-examples{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 16px}
+.dq-ex{height:28px;padding:0 9px;border-radius:5px;border:1px solid var(--rule-2);background:var(--ground);color:var(--ink-2);font:400 12px/1 var(--mono);cursor:pointer}
+.dq-ex:hover{border-color:var(--cobalt);color:var(--cobalt)}
+.dq-tokens{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+.dq-tok{display:inline-flex;gap:6px;align-items:baseline;padding:4px 8px;border-radius:5px;font:400 12.5px/1.3 var(--mono);border:1px solid var(--rule-2)}
+.dq-verb{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.dq-mod{background:var(--violet-soft);border-color:transparent;color:var(--violet)}
+.dq-by,.dq-op{color:var(--ink-3);border-style:dashed}
+.dq-cond b{font-weight:600}
+.dq-cond i{font-style:normal;color:var(--cobalt)}
+.dq-order{background:var(--green-soft);border-color:transparent;color:var(--green)}
+.dq-jpql{margin:0 0 12px;border-radius:8px;background:var(--code-bg);border:1px solid var(--code-rule)}
+.dq-params{width:100%;margin:0 0 6px;font-size:13.5px;border:1px solid var(--rule);border-radius:8px;border-collapse:separate;border-spacing:0;overflow:hidden}
+.dq-params thead th{background:var(--sunk)}
+.msgs{list-style:none;padding:0;margin:10px 0 0;display:grid;gap:6px}
+.msg{margin:0;padding:8px 12px;border-radius:6px;font-size:14px;line-height:1.6;border-left:3px solid}
+.msg.warn{background:var(--red-soft);border-color:var(--red)}
+.msg.info{background:var(--sunk);border-color:var(--rule-2);color:var(--ink-2)}
+.msg.bad{background:var(--red-soft);border-color:var(--red)}
+.seg{border:0;margin:0 0 16px;padding:0;min-width:0}
+.seg legend{font-size:13px;font-weight:600;color:var(--ink-2);margin:0 0 8px;padding:0}
+.seg-opts{display:flex;flex-wrap:wrap;gap:8px}
+.seg-opts label{position:relative;display:block}
+.seg-opts input{position:absolute;opacity:0;width:1px;height:1px}
+.seg-opts span{display:block;padding:8px 12px;border-radius:7px;border:1px solid var(--rule-2);background:var(--ground);font-size:13.5px;line-height:1.4;cursor:pointer}
+.seg-opts span:hover{border-color:var(--ink-3)}
+.seg-opts input:checked + span{background:var(--ink);border-color:var(--ink);color:var(--ground)}
+.seg-opts input:focus-visible + span{outline:2px solid var(--cobalt);outline-offset:2px}
+.sim-out{border-top:1px solid var(--rule);padding-top:16px}
+.sim-lbl{font-size:13px;font-weight:600;color:var(--ink-2);margin:0 0 6px}
+.sim-code{border-radius:8px;background:var(--code-bg);border:1px solid var(--code-rule);white-space:pre-wrap}
+.sim-sql > p:last-child{font-size:14px;color:var(--ink-2);margin:8px 0 14px}
+.sim-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0}
+.sim-grid div{border:1px solid var(--rule);border-radius:8px;padding:10px 12px}
+.sim-grid dt{font-size:12.5px;font-weight:600;color:var(--ink-3);margin:0 0 6px}
+.sim-grid dd{margin:0}
+.st{display:inline-block;padding:4px 8px;border-radius:5px;font-size:13.5px;font-weight:600;line-height:1.4}
+.st-ok{background:var(--green-soft);color:var(--green)}
+.st-bad{background:var(--red-soft);color:var(--red)}
+.st-warn{background:var(--amber-soft);color:var(--amber)}
+.st-na{background:var(--sunk);color:var(--ink-3)}
+.sim-notes{margin:14px 0 0;padding-left:1.1em;font-size:14px;color:var(--ink-2)}
+
+/* 확인 문제 */
+.quiz{margin:48px 0 0;border:1px solid var(--rule-2);border-radius:12px;background:var(--surface);padding:18px 20px 8px}
+.quiz-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.quiz-title{font-size:18px;margin:0}
+.quiz-tools{display:flex;align-items:center;gap:10px}
+.quiz-score{font-size:13.5px;font-weight:600;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.quiz-reset{height:30px;padding:0 10px;border-radius:6px;border:1px solid var(--rule-2);background:transparent;font-size:13px;color:var(--ink-2);cursor:pointer}
+.quiz-reset:hover{border-color:var(--ink-3)}
+.q{padding:14px 0 12px;border-top:1px solid var(--rule)}
+.q-prompt{display:flex;gap:10px;font-weight:600;margin:0 0 10px;line-height:1.6}
+.q-no{flex:none;width:24px;height:24px;margin-top:2px;border-radius:50%;background:var(--ink);color:var(--ground);display:grid;place-items:center;font-size:12.5px;font-weight:700}
+.q-opts{display:grid;gap:7px}
+.q-opt{display:grid;grid-template-columns:24px minmax(0,1fr);gap:10px;align-items:start;text-align:left;width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--rule-2);background:var(--ground);font-size:14.5px;line-height:1.58;cursor:pointer}
+.q-opt:hover:not(:disabled){border-color:var(--ink)}
+.q-opt:disabled{cursor:default}
+.q-key{width:22px;height:22px;margin-top:1px;border-radius:5px;display:grid;place-items:center;font-size:12px;font-weight:700;border:1px solid var(--rule-2);color:var(--ink-2)}
+.q-opt.correct{border-color:var(--green);background:var(--green-soft)}
+.q-opt.correct .q-key{background:var(--green);border-color:var(--green);color:#fff}
+.q-opt.wrong{border-color:var(--red);background:var(--red-soft)}
+.q-opt.wrong .q-key{background:var(--red);border-color:var(--red);color:#fff}
+.q-opt.dim{opacity:.55}
+.q-exp{margin:10px 0 2px;padding:10px 14px;border-radius:8px;background:var(--sunk);font-size:14.5px;line-height:1.65}
+.q-exp.is-right strong{color:var(--green)}
+.q-exp.is-wrong strong{color:var(--red)}
+
+/* 장 끝 */
+.ch-foot{margin:36px 0 0;display:grid;gap:14px}
+.done-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border-radius:10px;border:1.5px dashed var(--rule-2);background:transparent;font-size:15px;font-weight:600;color:var(--ink-2);cursor:pointer;text-align:left}
+.done-btn:hover{border-color:var(--green);color:var(--ink)}
+.done-box{flex:none;width:22px;height:22px;border-radius:6px;border:2px solid var(--rule-2);display:grid;place-items:center}
+.done-btn.on{border-style:solid;border-color:var(--green);background:var(--green-soft);color:var(--green)}
+.done-btn.on .done-box{background:var(--green);border-color:var(--green)}
+.done-btn.on .done-box::after{content:"";width:10px;height:6px;margin-top:-2px;border-left:2.5px solid #fff;border-bottom:2.5px solid #fff;transform:rotate(-45deg)}
+.ch-nav{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.ch-nav a{display:block;padding:12px 16px;border-radius:10px;border:1px solid var(--rule);background:var(--surface);text-decoration:none;color:var(--ink);font-weight:600;font-size:15px;line-height:1.45}
+.ch-nav a:hover{border-color:var(--ink-3)}
+.ch-nav small{display:block;font-size:12.5px;font-weight:500;color:var(--ink-3);margin-bottom:2px}
+.ch-next{grid-column:2;text-align:right}
+
+/* 모아보기 창, 토스트, 맨 위로 */
+.modal{position:fixed;inset:0;z-index:90;background:var(--overlay);display:grid;place-items:center;padding:20px}
+.modal-card{width:min(720px,100%);max-height:min(84vh,780px);display:flex;flex-direction:column;background:var(--surface);border:1px solid var(--rule-2);border-radius:14px;box-shadow:var(--pop-shadow)}
+.modal-head{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 18px 14px 22px;border-bottom:1px solid var(--rule)}
+.modal-head h3{margin:0;font-size:18px}
+.modal-body{overflow:auto;padding:4px 22px 22px}
+.modal-intro{font-size:14px;color:var(--ink-2);line-height:1.65}
+.coll-list{list-style:none;padding:0;margin:0;display:grid;gap:8px}
+.coll-item{display:block;width:100%;text-align:left;padding:11px 14px;border-radius:8px;border:1px solid var(--rule);background:var(--ground);font-size:14px;line-height:1.6;cursor:pointer}
+.coll-item:hover{border-color:var(--ink-3)}
+.coll-text{display:block;color:var(--ink)}
+body.modal-open{overflow:hidden}
+.toast{position:fixed;left:50%;bottom:28px;z-index:95;transform:translate(-50%,16px);opacity:0;pointer-events:none;background:var(--ink);color:var(--ground);padding:10px 16px;border-radius:8px;font-size:14px;font-weight:500;box-shadow:var(--pop-shadow);transition:opacity .2s ease,transform .2s ease}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+.to-top{position:fixed;right:22px;bottom:22px;z-index:40;width:44px;height:44px;border-radius:10px;border:1px solid var(--rule-2);background:var(--surface);color:var(--ink);display:grid;place-items:center;cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s ease}
+.to-top.show{opacity:1;pointer-events:auto}
+@keyframes flash{0%,40%{background-color:var(--mark)}100%{background-color:transparent}}
+.flash{animation:flash 2s ease;border-radius:4px}
+
+/* 반응형 */
+@media (max-width:1080px){
+  .layout{grid-template-columns:minmax(0,1fr)}
+  .sidebar{position:fixed;top:var(--top);left:0;bottom:0;z-index:55;width:min(330px,88vw);height:auto;background:var(--ground);transform:translateX(-102%);visibility:hidden;transition:transform .25s ease,visibility 0s linear .25s}
+  body.nav-open .sidebar{transform:none;visibility:visible;box-shadow:var(--pop-shadow);transition:transform .25s ease}
+  .scrim{display:block;position:fixed;inset:var(--top) 0 0 0;z-index:54;background:var(--overlay);opacity:0;pointer-events:none;transition:opacity .2s}
+  body.nav-open .scrim{opacity:1;pointer-events:auto}
+  .menu-btn{display:inline-grid}
+}
+@media (max-width:760px){
+  body{font-size:16px}
+  .topbar{gap:8px;padding:0 10px}
+  .brand{display:none}
+  .pill .lbl,.search kbd{display:none}
+  .pill{padding:0 10px}
+  .trace{padding:14px 14px 12px}
+  .trace-body{--name:118px;--gap:10px}
+  .tr-no{display:none}
+  .tick-mid{display:none}
+  .tr-name{font-size:13px}
+  .dq-form{grid-template-columns:1fr}
+  .sim-grid{grid-template-columns:1fr}
+  .ch-nav{grid-template-columns:1fr}
+  .ch-next{grid-column:auto}
+  .ch-head{margin-top:80px}
+}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .tr-bar{transition:none;transform:none}
+  .flash{animation:none;background-color:var(--mark)}
+  .sidebar,.toast,.to-top,.tr-cursor{transition:none}
+}
+@media print{
+  .topbar,.sidebar,.read-bar,.to-top,.toast,.widget,.quiz,.ch-foot,.tbl-filter,.chips,.cover-actions,.cover-help,.scrim,.trace{display:none!important}
+  .layout{display:block}
+  body{background:#fff}
+  .code{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+<div class="read-bar" id="readBar" aria-hidden="true"></div>
+<header class="topbar">
+  <button class="icon-btn menu-btn" id="menuBtn" type="button" aria-label="목차 열기" aria-expanded="false" aria-controls="sidebar">
+    <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="#top">Spring Boot 4 + Kotlin 실무 교과서</a>
+  <div class="search">
+    <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <input id="q" type="search" placeholder="전체 검색" autocomplete="off" spellcheck="false" aria-label="교과서 전체 검색" aria-controls="qResults" aria-expanded="false">
+    <kbd>/</kbd>
+    <div id="qResults" class="q-results" role="listbox" aria-label="검색 결과" hidden></div>
+  </div>
+  <nav class="top-actions" aria-label="모아보기와 설정">
+    <button class="pill" id="b4Btn" type="button" title="Boot 4 변경점 모아보기"><span class="dot b4" aria-hidden="true"></span><span class="lbl">Boot 4 변경점</span><span class="count" id="b4Count"></span></button>
+    <button class="pill" id="verifyBtn" type="button" title="검증 필요 항목 모아보기"><span class="dot verify" aria-hidden="true"></span><span class="lbl">검증 필요</span><span class="count" id="verifyCount"></span></button>
+    <button class="icon-btn" id="themeBtn" type="button" aria-label="밝은 테마와 어두운 테마 전환">
+      <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></svg>
+    </button>
+  </nav>
+</header>
+<div class="layout">
+<aside class="sidebar" id="sidebar" aria-label="목차">
+  <div class="prog">
+    <p class="prog-row" id="progText"></p>
+    <div class="prog-track" aria-hidden="true"><div class="prog-fill" id="progBar"></div></div>
+    <p class="prog-quiz" id="quizText"></p>
+  </div>
+  <ol class="toc" id="toc"></ol>
+  <p class="side-foot">2026년 9월 기준으로 조사한 내용입니다. 진도와 확인 문제 기록은 이 브라우저에만 저장됩니다.</p>
+</aside>
+<div class="scrim" id="scrim" aria-hidden="true"></div>
+<main id="main">
+<section class="cover" id="top" aria-labelledby="coverTitle">
+  <h1 class="cover-title" id="coverTitle">Spring Boot 4 + Kotlin 실무 교과서</h1>
+  <p class="cover-sub">커스텀 인자 주입, Bean Validation, JPA 쿼리 메서드, MVC 확장 포인트, Envers와 soft delete, restdocs-api-spec, OpenTelemetry, 코루틴을 2026년 9월 기준으로 조사해 0장부터 8장까지와 부록으로 엮었습니다.</p>
+  <p class="cover-versions">기준 버전<code>Boot 4.1.1</code><code>Framework 7.0</code><code>Data JPA 4.1</code><code>Hibernate 7.4</code><code>Validator 9.1</code><code>restdocs-api-spec 0.20.1</code><code>Kotlin 2.2+</code></p>
+  <div class="cover-actions">
+    <button class="btn primary" id="startBtn" type="button">처음부터 읽기</button>
+    <button class="btn" id="resumeBtn" type="button">이어서 읽기</button>
+  </div>
+  <div class="trace" id="trace"></div>
+  <p class="cover-help"><kbd>/</kbd> 키로 전체를 검색할 수 있습니다. 상단의 Boot 4 변경점과 검증 필요 버튼은 본문에 흩어진 해당 항목을 한곳에 모아 보여 줍니다.</p>
+</section>
+
+<section class="chapter" id="intro" data-label="" data-title="들어가며">
+<header class="ch-head">
+<h1>먼저 확정할 세 가지</h1>
+<p class="ch-lead">지금 스택(Boot 4.1.x, Kotlin 2.2+, Hibernate 7.4/Envers, soft delete, restdocs-api-spec, OTel)은 운영에 쓸 수 있습니다. 다만 코드를 쓰기 전에 세 가지를 먼저 확정하세요.</p>
+</header>
+<ol class="big-steps">
+<li><strong>Kotlin 컴파일 옵션과 테스트 의존성:</strong> <code>-Xannotation-default-target=param-property</code>를 켜고, Boot 4의 기능별 test 스타터로 정리합니다.</li>
+<li><strong>restdocs-api-spec 버전:</strong> 0.20.x를 씁니다. 메인테이너가 Boot 4에서 “minor compatibility issues”가 남아 있다고 경고했습니다.</li>
+<li><strong><code>@SoftDelete</code> + Envers 검증:</strong> 이 조합에서 REVTYPE이 어떻게 기록되는지는 공식 문서로 확인되지 않았습니다. 통합 테스트로 직접 확인해야 합니다.</li>
+</ol>
+<h2>한눈에 보기</h2>
+<h3>버전 기준</h3>
+<div class="tw"><table>
+<thead><tr><th>라이브러리</th><th>버전</th></tr></thead>
+<tbody>
+<tr><td>Spring Boot</td><td>4.1.1 (2026-08-20)</td></tr>
+<tr><td>Spring Framework</td><td>7.0.x (stable 7.0.9)</td></tr>
+<tr><td>Spring Data JPA</td><td>4.1.0</td></tr>
+<tr><td>Hibernate ORM</td><td>7.4.10.Final</td></tr>
+<tr><td>Hibernate Validator</td><td>9.1.4.Final (Jakarta Validation 3.1.1)</td></tr>
+<tr><td>restdocs-api-spec</td><td>0.20.1</td></tr>
+<tr><td>Spring REST Docs</td><td>4.0</td></tr>
+</tbody>
+</table></div>
+<h3>Boot 4에서 바뀐 핵심 API</h3>
+<ul>
+<li><code>@JsonComponent</code> → <code>@JacksonComponent</code></li>
+<li><code>MappingJackson2HttpMessageConverter</code> → <code>JacksonJsonHttpMessageConverter</code> (기존 것은 deprecated)</li>
+<li>신규 <code>configureMessageConverters(HttpMessageConverters.ServerBuilder)</code></li>
+<li><code>spring-boot-starter-aop</code> → <code>spring-boot-starter-aspectj</code></li>
+<li><code>@AutoConfigureObservability</code> 제거</li>
+<li>OTLP 프로퍼티가 <code>management.opentelemetry.*</code>로 이동</li>
+<li>Hibernate 7에서 <code>@Where</code> 제거</li>
+</ul>
+<h3>soft delete + Envers</h3>
+<ul>
+<li>감사 기록이 남는 것은 <code>EntityManager.remove()</code>를 타는 경로(<code>delete(entity)</code>, <code>deleteBy…</code>)뿐입니다.</li>
+<li><code>deleteAllInBatch</code>, 벌크 JPQL, 네이티브 쿼리는 Envers를 우회합니다.</li>
+<li>권장 조합은 <code>@SQLDelete</code> + <code>@SQLRestriction</code> + <code>store_data_at_delete=true</code>입니다.</li>
+</ul>
+<h3>코루틴</h3>
+<ul>
+<li>MVC에서 suspend나 Flow를 쓰려면 <code>kotlinx-coroutines-reactor</code>가 필요합니다. 테스트에서는 <code>asyncDispatch</code>를 거쳐야 합니다.</li>
+<li>suspend 함수에 <code>@Transactional</code>을 붙이면 <code>ReactiveTransactionManager</code>가 필요합니다. JPA에서는 <code>withContext(Dispatchers.IO) { transactionTemplate.execute { … } }</code> 안에서 트랜잭션을 끝내세요.</li>
+<li>트레이스 전파에는 <code>PropagationContextElement</code>를 씁니다.</li>
+</ul>
+</section>
+
+<section class="chapter" id="ch0" data-label="0장" data-title="버전·공통 함정">
+<header class="ch-head">
+<h1>0장 버전·공통 함정</h1>
+<p class="ch-lead">어떤 버전 조합을 기준으로 삼는지, 그리고 Boot 4로 올라오며 모든 모듈에 공통으로 걸리는 함정을 먼저 정리합니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li>패치 번호를 확인하지 못한 라이브러리는 Boot 4.1.1 BOM을 따릅니다.</li>
+<li>Boot 4는 기능마다 스타터와 test 스타터가 짝으로 나뉘었습니다.</li>
+<li><code>@SpringBootTest</code>는 더 이상 MockMvc를 자동구성하지 않습니다.</li>
+</ul></div>
+<h2>0.1 버전 기준표</h2>
+<div class="tw"><table>
+<thead><tr><th>라이브러리</th><th>기준 버전</th><th>비고</th></tr></thead>
+<tbody>
+<tr><td>Spring Boot</td><td>4.1.1 (4.1.0: 2026-06-10)</td><td>Hibernate 7.4 탑재. 4.0에서 deprecated된 항목은 4.1에서 제거됨</td></tr>
+<tr><td>Spring Framework</td><td>7.0.x (7.1.0-M1)</td><td>Jackson 2 지원은 7.1에서 자동감지가 꺼지고 7.2에서 제거될 예정</td></tr>
+<tr><td>Spring Data JPA</td><td>4.1.0 (4.0 = Spring Data 2025.1)</td><td>AOT repository와 <code>PredicateSpecification</code> 추가, <code>ListenableFuture</code> 제거</td></tr>
+<tr><td>Hibernate ORM/Envers</td><td>7.4.10.Final (2026-09-20)</td><td>7.4에 incubating 단계의 <code>@Audited</code>/<code>@Temporal</code> 추가</td></tr>
+<tr><td>Hibernate Validator</td><td>9.1.4.Final</td><td>Java 17 이상 필요</td></tr>
+<tr><td>Jackson</td><td>3.x (<code>tools.jackson</code>)</td><td>어노테이션은 계속 <code>com.fasterxml.jackson.annotation</code> 패키지</td></tr>
+<tr><td>Kotlin / kotlinx.coroutines</td><td>2.2 이상 필수 / 1.10.x 사용 확인</td><td>최신 패치 번호는 확인하지 못함. Boot BOM을 따르세요<span class="tag verify">검증 필요</span></td></tr>
+<tr><td>restdocs-api-spec</td><td>0.20.1</td><td>Boot 4.x는 0.20.X 이상, Boot 3.x는 0.17.1–0.19.4</td></tr>
+<tr><td>Spring REST Docs</td><td>4.0 (2025-11-19)</td><td>JUnit 6, Framework 7, Jackson 3 기반. REST Assured 통합 제거</td></tr>
+<tr><td>Micrometer/OTel</td><td>Boot BOM 관리</td><td>Logback appender는 아직 <code>-alpha</code></td></tr>
+</tbody>
+</table></div>
+<h2>0.2 Boot 4 공통 함정</h2>
+<ul>
+<li><strong>모듈화:</strong> 기능마다 스타터와 test 스타터가 짝으로 나뉘었습니다(<code>spring-boot-starter-webmvc(-test)</code>, <code>-data-jpa-test</code>, <code>-security-test</code>, <code>-opentelemetry</code>, <code>-restdocs</code>).<span class="tag b4">Boot 4</span>
+<ul>
+<li><code>@WithMockUser</code>를 쓰려면 <code>spring-boot-starter-security-test</code>가 필요합니다.</li>
+<li>Flyway를 쓰려면 <code>spring-boot-starter-flyway</code>가 필요합니다.</li>
+</ul></li>
+<li><strong>점진적 이관:</strong> 먼저 <code>spring-boot-starter-classic</code>으로 빌드를 살려 두고, <code>spring-boot-properties-migrator</code>로 바뀐 프로퍼티를 찾아냅니다.</li>
+<li><strong>테스트 설정:</strong> <code>@SpringBootTest</code>가 더 이상 MockMvc를 자동구성하지 않습니다. <code>@AutoConfigureMockMvc</code>를 붙여야 합니다.<span class="tag b4">Boot 4</span></li>
+<li><strong>헬스 프로브:</strong> 이제 기본으로 켜집니다.<span class="tag b4">Boot 4</span></li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" target="_blank" rel="noopener">Spring Boot 4.0 Migration Guide</a></li>
+<li><a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.1-Release-Notes" target="_blank" rel="noopener">Spring Boot 4.1 Release Notes</a></li>
+<li><a href="https://spring.io/blog/2026/06/10/spring-boot-4/" target="_blank" rel="noopener">Spring Boot 4.1.0 available now (spring.io 블로그)</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch0"></div>
+</section>
+
+<section class="chapter" id="ch1" data-label="1장" data-title="커스텀 인자 주입">
+<header class="ch-head">
+<h1>1장 커스텀 인자 주입 (@LoginUser)</h1>
+<p class="ch-lead">컨트롤러 파라미터에 로그인 사용자 같은 값을 넣는 방법입니다. 리졸버를 직접 만드는 방법, Spring Security의 방법, 더 가벼운 대안을 차례로 봅니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li>커스텀 리졸버는 <code>addArgumentResolvers</code>로 등록하며, 내장 리졸버 뒤에 실행됩니다.</li>
+<li><code>Principal</code> 하위 타입은 내장 리졸버가 먼저 가져가므로 전용 타입(<code>AuthUser</code>)을 씁니다.</li>
+<li>리졸버가 만든 값에는 <code>@Valid</code>가 자동으로 적용되지 않습니다.</li>
+</ul></div>
+<h2>1.1 기본 구성 요소</h2>
+<ul>
+<li><strong><code>supportsParameter(MethodParameter)</code></strong>: 이 리졸버가 처리할 파라미터인지 판단합니다. 보통 어노테이션과 타입을 함께 확인합니다.</li>
+<li><strong><code>resolveArgument(MethodParameter, ModelAndViewContainer?, NativeWebRequest, WebDataBinderFactory?)</code></strong>: 주입할 값을 만듭니다. 원본 요청은 <code>getNativeRequest(HttpServletRequest::class.java)</code>로 꺼냅니다.</li>
+<li><strong><code>WebMvcConfigurer.addArgumentResolvers</code></strong>: 리졸버를 등록합니다. 이렇게 등록한 리졸버는 내장 리졸버 <strong>뒤</strong>에 붙습니다.</li>
+<li><strong><code>MethodParameter.isOptional</code></strong>: 파라미터가 Kotlin nullable 타입이면 true입니다. 값이 필수인지 판단할 때 씁니다.</li>
+</ul>
+<pre class="kt"><code>@Target(AnnotationTarget.VALUE_PARAMETER)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class LoginUser(val required: Boolean = true)
+
+@Component
+class LoginUserResolver(private val users: UserQuery) : HandlerMethodArgumentResolver {
+    override fun supportsParameter(p: MethodParameter) =
+        p.hasParameterAnnotation(LoginUser::class.java) &amp;&amp; p.parameterType == AuthUser::class.java
+    override fun resolveArgument(p: MethodParameter, m: ModelAndViewContainer?,
+                                 r: NativeWebRequest, b: WebDataBinderFactory?): Any? {
+        val jwt = SecurityContextHolder.getContext().authentication?.principal as? Jwt
+        val user = jwt?.let { users.find(it.subject) }
+        if (user == null &amp;&amp; p.getParameterAnnotation(LoginUser::class.java)!!.required &amp;&amp; !p.isOptional)
+            throw UnauthenticatedException()
+        return user
+    }
+}
+@Configuration
+class WebConfig(private val r: LoginUserResolver) : WebMvcConfigurer {
+    override fun addArgumentResolvers(resolvers: MutableList&lt;HandlerMethodArgumentResolver&gt;) { resolvers += r }
+}</code></pre>
+<h2>1.2 우선순위 문제</h2>
+<p>파라미터 타입이 <code>Principal</code>의 하위 타입이면 내장 리졸버가 먼저 가져가서 커스텀 리졸버가 호출되지 않습니다. 해결 방법은 세 가지입니다.</p>
+<ul>
+<li><code>Principal</code>을 구현하지 않는 전용 타입(<code>AuthUser</code>)을 씁니다.</li>
+<li><code>BeanPostProcessor</code>에서 <code>RequestMappingHandlerAdapter.setArgumentResolvers</code>로 커스텀 리졸버를 목록 맨 앞에 넣습니다.</li>
+<li><code>WebMvcRegistrations.getRequestMappingHandlerAdapter()</code>로 어댑터를 교체합니다.</li>
+</ul>
+<h2>1.3 Spring Security 방식</h2>
+<ul>
+<li><strong><code>@AuthenticationPrincipal(expression = "claims['sub']")</code></strong>: <code>AuthenticationPrincipalArgumentResolver</code>가 principal을 주입합니다.</li>
+<li><strong><code>@CurrentUser</code></strong>: <code>@AuthenticationPrincipal</code>을 메타 어노테이션으로 붙여 만든 커스텀 어노테이션입니다. 6.4부터는 <code>AnnotationTemplateExpressionDefaults</code>로 속성 템플릿을 쓸 수 있습니다.</li>
+<li><strong><code>@CurrentSecurityContext(expression = "authentication.name")</code></strong>: SecurityContext에서 표현식으로 값을 꺼내 주입합니다.</li>
+</ul>
+<h2>1.4 대안</h2>
+<ul>
+<li><strong><code>HandlerInterceptor</code> + <code>@RequestAttribute</code></strong>: 인터셉터에서 테넌트 같은 값을 파싱해 요청 속성에 넣고, 핸들러에서 꺼내 씁니다.</li>
+<li><strong><code>@ControllerAdvice</code>의 <code>@ModelAttribute</code></strong>: 모든 핸들러에 공통 모델 값을 넣습니다.</li>
+<li><strong><code>Converter&lt;String, OrderId&gt;</code> / <code>Formatter</code></strong>: <code>@PathVariable</code>, <code>@RequestParam</code> 값을 커스텀 타입으로 변환합니다.</li>
+<li><strong><code>@RequestHeader("Idempotency-Key") key: String?</code></strong>: 헤더 값을 바로 주입합니다.</li>
+</ul>
+<h2>1.5 검증·테스트·suspend</h2>
+<ul>
+<li><strong>검증:</strong> 리졸버가 만든 값에는 <code>@Valid</code>가 자동으로 적용되지 않습니다. <code>binderFactory.createBinder(...)</code>로 바인더를 만들어 <code>validate()</code>를 호출하고, 실패하면 <code>MethodArgumentNotValidException</code>을 던지세요.</li>
+<li><strong>테스트:</strong>
+<ul>
+<li><code>standaloneSetup(ctrl).setCustomArgumentResolvers(r)</code>로 리졸버를 직접 등록합니다.</li>
+<li><code>@WebMvcTest</code>에서는 <code>@MockitoBean</code>을 씁니다. Boot 4에서 <code>@MockBean</code>이 제거됐습니다.<span class="tag b4">Boot 4</span></li>
+<li>인증 사용자는 <code>@WithMockUser</code>나 <code>SecurityMockMvcRequestPostProcessors.user()</code> / <code>authentication()</code> / <code>jwt { }</code>로 주입합니다.</li>
+<li>복잡한 인증 상태는 커스텀 <code>@WithSecurityContext</code>로 만듭니다.</li>
+</ul></li>
+<li><strong>suspend 컨트롤러:</strong> 리졸버는 코루틴이 시작되기 전에 요청 스레드에서 실행되므로 안전합니다. 다만 코루틴 본문에서 디스패처를 바꾼 뒤에는 <code>SecurityContextHolder</code>가 비어 있을 수 있습니다.</li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0-Migration-Guide" target="_blank" rel="noopener">Spring Boot 4.0 Migration Guide</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch1"></div>
+</section>
+
+<section class="chapter" id="ch2" data-label="2장" data-title="Bean Validation">
+<header class="ch-head">
+<h1>2장 Bean Validation</h1>
+<p class="ch-lead">Jakarta Validation 3.1의 내장 제약과 Hibernate Validator 추가 제약을 타입별로 정리하고, Kotlin에서 어노테이션이 엉뚱한 곳에 붙는 함정과 MVC 메서드 검증의 예외 구분을 다룹니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li><code>@NotNull</code>, <code>@NotEmpty</code>, <code>@NotBlank</code>, <code>@Null</code>을 뺀 모든 제약은 null을 유효한 값으로 봅니다.</li>
+<li>Kotlin에서는 컴파일 옵션이나 <code>@field:</code>로 어노테이션 적용 대상을 확실히 합니다.</li>
+<li>파라미터 제약 실패는 <code>HandlerMethodValidationException</code>, 바디 객체 실패는 <code>MethodArgumentNotValidException</code>입니다.</li>
+</ul></div>
+<h2>2.1 Jakarta 내장 제약 전체</h2>
+<p>분류 버튼으로 필요한 타입의 제약만 골라 볼 수 있습니다.</p>
+<div class="chips" data-for="bvCore" role="group" aria-label="제약 분류">
+<button type="button" data-cat="all" class="on" aria-pressed="true">전체</button>
+<button type="button" data-cat="common" aria-pressed="false">공통</button>
+<button type="button" data-cat="bool" aria-pressed="false">boolean</button>
+<button type="button" data-cat="num" aria-pressed="false">숫자</button>
+<button type="button" data-cat="str" aria-pressed="false">문자열</button>
+<button type="button" data-cat="coll" aria-pressed="false">컬렉션</button>
+<button type="button" data-cat="time" aria-pressed="false">날짜·시간</button>
+</div>
+<div class="tw"><table id="bvCore">
+<thead><tr><th>분류</th><th>제약</th><th>적용 타입</th><th>속성·의미</th></tr></thead>
+<tbody>
+<tr data-cat="common"><td>공통</td><td><code>@Null</code>, <code>@NotNull</code></td><td>전체</td><td>null 여부</td></tr>
+<tr data-cat="bool"><td>boolean</td><td><code>@AssertTrue</code>, <code>@AssertFalse</code></td><td>boolean/Boolean</td><td>참/거짓</td></tr>
+<tr data-cat="num"><td>숫자</td><td><code>@Min</code>, <code>@Max(value)</code></td><td>BigDecimal, BigInteger, 정수형</td><td>하한/상한. double/float는 지원하지 않음</td></tr>
+<tr data-cat="num str"><td>숫자</td><td><code>@DecimalMin</code>, <code>@DecimalMax(value, inclusive)</code></td><td>숫자, CharSequence</td><td>경계값을 문자열로 지정</td></tr>
+<tr data-cat="num"><td>숫자</td><td><code>@Positive(OrZero)</code>, <code>@Negative(OrZero)</code></td><td>숫자</td><td>부호</td></tr>
+<tr data-cat="num str"><td>숫자</td><td><code>@Digits(integer, fraction)</code></td><td>숫자, CharSequence</td><td>정수부·소수부 자릿수</td></tr>
+<tr data-cat="str"><td>문자열</td><td><code>@Pattern(regexp, flags)</code></td><td>CharSequence</td><td>Flag: UNIX_LINES, CASE_INSENSITIVE, COMMENTS, MULTILINE, DOTALL, UNICODE_CASE, CANON_EQ</td></tr>
+<tr data-cat="str"><td>문자열</td><td><code>@Email(regexp, flags)</code></td><td>CharSequence</td><td>기본 규칙이 느슨하므로 regexp로 좁히세요</td></tr>
+<tr data-cat="str"><td>문자열</td><td><code>@NotBlank</code></td><td>CharSequence</td><td>앞뒤 공백을 제거한 길이가 0보다 커야 함</td></tr>
+<tr data-cat="str coll"><td>문자열·컬렉션</td><td><code>@NotEmpty</code>, <code>@Size(min, max)</code></td><td>CharSequence, Collection, Map, 배열</td><td>비어 있지 않음 / 크기 범위</td></tr>
+<tr data-cat="time"><td>날짜·시간</td><td><code>@Past(OrPresent)</code>, <code>@Future(OrPresent)</code></td><td>Date, Calendar, Instant, LocalDate(Time), LocalTime, MonthDay, Offset/ZonedDateTime, OffsetTime, Year, YearMonth, Hijrah/Japanese/Minguo/ThaiBuddhistDate</td><td>“현재”는 <code>ClockProvider</code> 기준. HV의 <code>temporalValidationTolerance</code>(<code>hibernate.validator.temporal_validation_tolerance</code>)로 허용 오차를 줄 수 있음</td></tr>
+</tbody>
+</table></div>
+<div class="callout note"><p><code>@NotNull</code>, <code>@NotEmpty</code>, <code>@NotBlank</code>, <code>@Null</code>을 제외한 모든 제약은 null을 유효한 값으로 봅니다. null도 막으려면 <code>@NotNull</code>을 함께 붙이세요.</p></div>
+<h2>2.2 Hibernate Validator 추가 제약</h2>
+<div class="tw"><table data-filter="Hibernate Validator 제약에서 찾기">
+<thead><tr><th>제약</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td><code>@Length</code>, <code>@CodePointLength(normalizationStrategy)</code></td><td>문자열 길이 / 코드포인트 기준 길이</td></tr>
+<tr><td><code>@Range(min,max)</code></td><td>Min과 Max를 합친 제약</td></tr>
+<tr><td><code>@URL(protocol,host,port,regexp)</code>, <code>@UUID(allowEmpty,allowNil,version,variant,letterCase)</code></td><td>형식 검증</td></tr>
+<tr><td><code>@UniqueElements</code>, <code>@Normalized(form)</code></td><td>원소 중복 금지 / 유니코드 정규화 형식</td></tr>
+<tr><td><code>@DurationMin</code>, <code>@DurationMax</code></td><td><code>Duration</code> 범위</td></tr>
+<tr><td><code>@ISBN</code>, <code>@EAN</code>, <code>@CreditCardNumber</code>, <code>@LuhnCheck</code>, <code>@Mod10Check</code>, <code>@Mod11Check</code></td><td>코드·체크섬</td></tr>
+<tr><td><code>@Currency</code></td><td><code>MonetaryAmount</code>의 통화</td></tr>
+<tr><td><code>@BitcoinAddress</code></td><td>HV 9.0에서 추가</td></tr>
+<tr><td><code>@ScriptAssert</code>, <code>@ParameterScriptAssert</code></td><td>스크립트 기반 교차 검증(권장하지 않음)</td></tr>
+<tr><td><code>@ConstraintComposition(AND/OR/ALL_FALSE)</code></td><td>여러 제약을 불리언으로 합성</td></tr>
+<tr><td>국가별</td><td>브라질 <code>@CPF</code>, <code>@CNPJ(format = NUMERIC/ALPHANUMERIC)</code>, <code>@TituloEleitoral</code>; 폴란드 <code>@NIP</code>, <code>@PESEL</code>, <code>@REGON</code>; 러시아 <code>@INN</code>; <strong>한국 <code>@KorRRN</code></strong></td></tr>
+</tbody>
+</table></div>
+<div class="callout verify"><p class="callout-title">한국 주민등록번호 <code>@KorRRN</code><span class="tag verify">검증 필요</span></p><p>HV 9.0에 새로 들어온 주민등록번호 제약입니다. 패키지는 <code>org.hibernate.validator.constraints.kor</code>이고, 체크섬 옵션의 속성명은 javadoc에서 확인하세요.</p></div>
+<h2>2.3 컨테이너·그룹·커스텀 제약</h2>
+<ul>
+<li><strong>컨테이너 원소 제약:</strong> <code>List&lt;@NotBlank String&gt;</code>, <code>Map&lt;@NotNull K, @Positive Int&gt;</code>, <code>Optional&lt;@Min(1) Int&gt;</code>처럼 원소 타입에 직접 붙입니다.
+<ul>
+<li>컨테이너 쪽에는 <code>@Valid</code>가 필요 없습니다.</li>
+<li>위반 경로는 <code>parts[1].&lt;list element&gt;</code> 형태로 나옵니다.</li>
+</ul></li>
+<li><strong>cascade:</strong> <code>@Valid</code>를 붙이거나 <code>List&lt;@Valid Person&gt;</code>처럼 씁니다. 직접 만든 컨테이너 타입은 <code>ValueExtractor</code>를 구현해야 합니다.</li>
+<li><strong>그룹:</strong>
+<ul>
+<li><code>groups</code> 속성으로 제약마다 그룹을 지정합니다.</li>
+<li><code>@GroupSequence</code>는 앞 그룹이 실패하면 뒤 그룹 검증을 중단합니다.</li>
+<li><code>@GroupSequenceProvider</code>(HV)는 시퀀스를 동적으로 정합니다.</li>
+<li><code>@ConvertGroup(from, to)</code>는 그룹을 변환합니다.</li>
+<li>Spring에서는 <code>@Validated(OnCreate::class)</code>로 그룹을 지정합니다.</li>
+</ul></li>
+<li><strong>커스텀 제약:</strong>
+<ul>
+<li><code>@Constraint(validatedBy = [V::class])</code>를 붙이고 <code>message</code>, <code>groups</code>, <code>payload</code>를 반드시 선언합니다.</li>
+<li><code>ConstraintValidator</code>에는 Spring 빈을 주입할 수 있습니다(<code>SpringConstraintValidatorFactory</code> 덕분입니다).</li>
+<li>단, JPA pre-persist 검증 경로에서는 주입이 안 될 수 있습니다. 이때는 <code>jakarta.persistence.validation.factory</code>를 설정하세요.</li>
+</ul></li>
+<li><strong>교차 필드 검증:</strong> 기본 위반을 끄고 특정 필드에 위반을 붙입니다.</li>
+</ul>
+<pre class="kt"><code>ctx.disableDefaultConstraintViolation()
+ctx.buildConstraintViolationWithTemplate("{period.invalid}")
+    .addPropertyNode("end")
+    .addConstraintViolation()</code></pre>
+<ul>
+<li><strong>합성 제약:</strong> <code>@ReportAsSingleViolation</code>, <code>@OverridesAttribute(constraint = Size::class, name = "max")</code>를 씁니다. HV에서는 <code>HibernateConstraintValidatorContext.addMessageParameter</code>로 메시지 파라미터를 추가할 수 있습니다.</li>
+</ul>
+<h2>2.4 Kotlin 함정</h2>
+<h3>use-site target</h3>
+<ul>
+<li>Kotlin 2.1까지는 생성자 프로퍼티에 붙인 어노테이션이 파라미터에만 적용됐습니다. 그래서 <code>@field:</code>, <code>@param:</code>, <code>@get:</code>을 명시해야 했습니다.</li>
+<li>Kotlin 2.2의 새 규칙(param-property)은 파라미터와 프로퍼티/필드에 함께 붙입니다. 다만 2.2의 기본 동작은 경고만 내는 과도기 모드입니다.</li>
+<li>Spring Initializr는 <code>-Xannotation-default-target=param-property</code>를 기본으로 켭니다(#1666).</li>
+<li>예전 동작이 필요하면 <code>-Xannotation-default-target=first-only</code>를 쓰세요.</li>
+<li><code>@all:</code>은 아직 프리뷰입니다.</li>
+</ul>
+<pre class="kt" data-label="build.gradle.kts"><code>kotlin {
+    compilerOptions {
+        freeCompilerArgs.addAll("-Xjsr305=strict", "-Xannotation-default-target=param-property")
+    }
+}</code></pre>
+<h3>non-null 필드에 null이 들어올 때</h3>
+<ul>
+<li>jackson-module-kotlin이 Bean Validation보다 먼저 <code>HttpMessageNotReadableException</code>을 던집니다.</li>
+<li>해결책 1: 필드를 <code>String?</code> + <code>@field:NotNull</code>로 선언합니다.</li>
+<li>해결책 2: 예외 핸들러에서 원인 예외의 path를 읽어 필드 오류로 바꿉니다.</li>
+</ul>
+<h2>2.5 MVC 메서드 검증·설정</h2>
+<h3>예외 종류</h3>
+<ul>
+<li><strong><code>MethodArgumentNotValidException</code>:</strong> <code>@Valid @RequestBody</code>나 <code>@ModelAttribute</code> 객체가 검증에 실패할 때 납니다.</li>
+<li><strong><code>HandlerMethodValidationException</code>:</strong> 파라미터에 직접 붙은 제약(예: <code>@RequestParam @Min(1)</code>)이 실패할 때 납니다.
+<ul>
+<li>Spring 6.1부터는 <code>@Validated</code> 없이도 동작합니다.</li>
+<li>클래스에 <code>@Validated</code>를 붙이면 AOP 방식으로 바뀌어 <code>ConstraintViolationException</code>이 납니다. 그러니 컨트롤러에서는 <code>@Validated</code>를 빼세요.</li>
+</ul></li>
+<li><code>ResponseEntityExceptionHandler</code>가 두 예외를 모두 처리합니다.</li>
+</ul>
+<h3>메시지와 설정</h3>
+<ul>
+<li><strong>메시지:</strong> <code>ValidationMessages.properties</code>나 <code>LocalValidatorFactoryBean.setValidationMessageSource</code>로 정의합니다. 메시지 안에서 <code>{min}</code>, <code>${validatedValue}</code>를 참조할 수 있습니다.</li>
+<li><strong>fail-fast:</strong> <code>hibernate.validator.fail_fast=true</code> 또는 <code>ValidationConfigurationCustomizer</code>로 켭니다. HV 9.1에는 property 위반 단위의 fail-fast 모드도 있습니다.</li>
+<li><strong><code>@ConfigurationProperties</code> + <code>@Validated</code>:</strong> 중첩 객체까지 검증하려면 <code>@field:Valid</code>가 필요합니다.</li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://docs.jboss.org/hibernate/stable/validator/reference/en-US/html_single/" target="_blank" rel="noopener">Hibernate Validator 9.1 Reference Guide</a></li>
+<li><a href="https://hibernate.org/validator/releases/9.0/" target="_blank" rel="noopener">Hibernate Validator 9.0 series</a></li>
+<li><a href="https://kotlinlang.org/docs/whatsnew22.html" target="_blank" rel="noopener">What's new in Kotlin 2.2.0</a></li>
+<li><a href="https://github.com/spring-io/initializr/issues/1666" target="_blank" rel="noopener">spring-io/initializr #1666</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch2"></div>
+</section>
+
+<section class="chapter" id="ch3" data-label="3장" data-title="Spring Data JPA 쿼리 메서드">
+<header class="ch-head">
+<h1>3장 Spring Data JPA 쿼리 메서드</h1>
+<p class="ch-lead">메서드 이름만으로 쿼리를 만드는 키워드 전체와 반환 타입, 프로젝션, Specification을 정리합니다. 마지막으로 soft delete 필터와 어떻게 맞물리는지 봅니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li>메서드 이름은 Subject(<code>find…By</code>)와 Predicate(조건 키워드)로 나뉩니다.</li>
+<li><code>Containing</code>과 <code>IgnoreCase</code>는 일반 인덱스를 타지 못합니다.</li>
+<li><code>delete(entity)</code>, <code>deleteById</code>, <code>deleteBy…</code>만 soft delete와 Envers를 거칩니다.</li>
+</ul></div>
+<h2>3.1 Subject·Predicate 키워드</h2>
+<div class="tw"><table>
+<thead><tr><th>Subject</th><th>의미</th></tr></thead>
+<tbody>
+<tr><td><code>find/read/get/query/search/stream…By</code></td><td>조회</td></tr>
+<tr><td><code>exists…By</code>, <code>count…By</code></td><td>존재 여부, 개수</td></tr>
+<tr><td><code>delete…By</code>, <code>remove…By</code></td><td>엔티티를 조회한 뒤 한 건씩 <code>remove</code>. 반환 타입은 void, 건수, 목록 중 선택</td></tr>
+<tr><td><code>First&lt;N&gt;</code>, <code>Top&lt;N&gt;</code>, <code>Distinct</code></td><td>결과 개수 제한, 중복 제거</td></tr>
+</tbody>
+</table></div>
+<div class="tw"><table data-filter="키워드 표에서 찾기 (예: Like)">
+<thead><tr><th>키워드</th><th>예시</th><th>JPQL</th></tr></thead>
+<tbody>
+<tr><td><code>And</code> / <code>Or</code></td><td><code>findByLastnameAndFirstname</code></td><td><code>a = ?1 and/or b = ?2</code></td></tr>
+<tr><td><code>Is</code>, <code>Equals</code></td><td><code>findByFirstnameIs</code></td><td><code>= ?1</code> (값이 null이면 <code>is null</code>)</td></tr>
+<tr><td><code>Between</code></td><td><code>findByStartDateBetween</code></td><td><code>between ?1 and ?2</code></td></tr>
+<tr><td><code>LessThan(Equal)</code>, <code>GreaterThan(Equal)</code></td><td><code>findByAgeLessThan</code></td><td><code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></td></tr>
+<tr><td><code>After</code> / <code>Before</code></td><td><code>findByStartDateAfter</code></td><td><code>&gt;</code> / <code>&lt;</code></td></tr>
+<tr><td><code>IsNull</code>/<code>Null</code>, <code>IsNotNull</code>/<code>NotNull</code></td><td><code>findByAgeIsNull</code></td><td><code>is (not) null</code></td></tr>
+<tr><td><code>Like</code> / <code>NotLike</code></td><td><code>findByFirstnameLike</code></td><td><code>(not) like ?1</code></td></tr>
+<tr><td><code>StartingWith</code> / <code>EndingWith</code> / <code>Containing</code></td><td><code>findByFirstnameContaining</code></td><td><code>like</code>에 바인딩하는 값의 뒤/앞/양쪽에 <code>%</code>를 붙임</td></tr>
+<tr><td><code>OrderBy</code></td><td><code>findByAgeOrderByLastnameDesc</code></td><td><code>order by … desc</code></td></tr>
+<tr><td><code>Not</code></td><td><code>findByLastnameNot</code></td><td><code>&lt;&gt; ?1</code></td></tr>
+<tr><td><code>In</code> / <code>NotIn</code></td><td><code>findByAgeIn(ages)</code></td><td><code>(not) in ?1</code></td></tr>
+<tr><td><code>True</code> / <code>False</code></td><td><code>findByActiveTrue()</code></td><td><code>= true/false</code></td></tr>
+<tr><td><code>IgnoreCase</code></td><td><code>findByFirstnameIgnoreCase</code></td><td><code>UPPER(a) = UPPER(?1)</code></td></tr>
+<tr><td><code>IsEmpty</code>, <code>IsNotEmpty</code></td><td>컬렉션 속성</td><td><code>is (not) empty</code></td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>동의어:</strong> Commons의 <code>IsBetween</code>, <code>StartsWith</code>, <code>Contains</code>, <code>IsIn</code>, <code>IsTrue</code> 같은 동의어도 쓸 수 있습니다.</li>
+<li><strong>JPA에서 지원하지 않거나 제한적인 키워드:</strong> <code>Near</code>, <code>Within</code>, <code>Regex</code>, <code>Exists</code></li>
+<li><strong>기타:</strong> <code>AllIgnoreCase</code>를 쓸 수 있습니다. 중첩 경로는 <code>findByAddress_ZipCode</code>처럼 <code>_</code>로 구분합니다.</li>
+<li><strong>성능 함정:</strong> <code>IgnoreCase</code>와 <code>Containing</code>은 일반 인덱스를 타지 못합니다. 함수 인덱스나 trigram 인덱스를 검토하세요.</li>
+</ul>
+
+<div class="widget" id="dq">
+<div class="widget-bar"><h3>쿼리 메서드 해석기</h3><p>메서드 이름을 입력하면 키워드별로 나누고, 어떤 JPQL과 바인딩 값이 만들어지는지 보여 줍니다.</p></div>
+<div class="widget-body">
+<div class="dq-form">
+<label class="field">엔티티<input id="dqEntity" value="Member" spellcheck="false" autocomplete="off"></label>
+<label class="field">메서드 이름<input id="dqInput" value="findTop3ByAgeGreaterThanAndNameContainingIgnoreCaseOrderByAgeDesc" spellcheck="false" autocomplete="off"></label>
+</div>
+<p class="dq-exlabel">예시를 누르면 바로 해석합니다.</p>
+<div class="dq-examples">
+<button type="button" class="dq-ex">findDistinctByLastnameAndFirstname</button>
+<button type="button" class="dq-ex">findByStartDateBetween</button>
+<button type="button" class="dq-ex">findByEmailOrPhoneAndActiveTrue</button>
+<button type="button" class="dq-ex">countByStatusIn</button>
+<button type="button" class="dq-ex">existsByEmailIgnoreCase</button>
+<button type="button" class="dq-ex">deleteByLastLoginAtBefore</button>
+<button type="button" class="dq-ex">findByAddress_ZipCodeStartingWith</button>
+<button type="button" class="dq-ex">findFirstByOrderByCreatedAtDescIdDesc</button>
+<button type="button" class="dq-ex">findByTagsIsNotEmpty</button>
+</div>
+<div class="dq-tokens" id="dqTokens" aria-label="메서드 이름 분해 결과"></div>
+<pre class="dq-jpql" id="dqJpql"></pre>
+<table class="dq-params" id="dqParams"></table>
+<ul class="msgs" id="dqMsgs" aria-live="polite"></ul>
+<p class="widget-foot">학습용 근사 변환기입니다. 실제로 만들어지는 쿼리는 Spring Data 버전과 DB 방언에 따라 다릅니다.</p>
+</div>
+</div>
+
+<h2>3.2 반환 타입·파라미터·프로젝션</h2>
+<h3>반환 타입</h3>
+<ul>
+<li><strong>단건:</strong> <code>T?</code>(없으면 null, 2건 이상이면 <code>IncorrectResultSizeDataAccessException</code>), <code>Optional&lt;T&gt;</code>, Vavr <code>Option</code></li>
+<li><strong>다건:</strong> <code>List</code>, <code>Set</code>, <code>Collection</code>, <code>Iterator</code>, <code>Streamable</code>(커스텀 래퍼 포함), Vavr 컬렉션</li>
+<li><strong>스트림:</strong> <code>Stream&lt;T&gt;</code>는 트랜잭션 안에서 <code>use {}</code>로 닫아야 합니다.</li>
+<li><strong>페이징:</strong> <code>Page</code>(count 쿼리가 추가로 실행됨), <code>Slice</code>, <code>Window</code></li>
+<li><strong>비동기:</strong> <code>CompletableFuture</code>, <code>Future</code>를 <code>@Async</code>와 함께 씁니다. 2025.1에서 <code>ListenableFuture</code>는 제거됐습니다.</li>
+<li><strong>기타:</strong> <code>SearchResults</code>(벡터 검색), <code>GeoResults</code></li>
+<li><code>Mono</code>/<code>Flux</code>/<code>Flow</code>는 리액티브 스토어 전용입니다.</li>
+</ul>
+<h3>파라미터</h3>
+<ul>
+<li><code>Pageable</code>, <code>Sort</code>, <code>Limit.of(n)</code></li>
+<li><code>ScrollPosition.keyset()</code> / <code>offset()</code>을 받고 <code>Window&lt;T&gt;</code>를 반환합니다. 키셋 방식은 정렬 키가 유일해야 하므로 id를 tie-breaker로 넣으세요.</li>
+<li><code>JpaSort.unsafe(...)</code></li>
+<li>Kotlin에서는 <code>Sort.by(User::lastname.name)</code>, <code>(Book::author / Author::name).toDotPath()</code>로 속성명을 타입 안전하게 씁니다.</li>
+</ul>
+<h3>프로젝션</h3>
+<ul>
+<li>인터페이스 기반: closed 또는 open(<code>@Value("#{…}")</code>)</li>
+<li>DTO 기반: data class 생성자 파라미터 이름으로 매핑됩니다.</li>
+<li>동적 프로젝션: <code>fun &lt;T&gt; findByLastname(n: String, type: Class&lt;T&gt;): List&lt;T&gt;</code></li>
+</ul>
+<h3>어노테이션</h3>
+<ul>
+<li><code>@Query</code>, <code>@NativeQuery</code>(3.4 이상), <code>@Modifying(clearAutomatically, flushAutomatically)</code></li>
+<li><code>@EntityGraph(attributePaths, type)</code>, <code>@Lock</code>, <code>@QueryHints</code>, <code>@Meta</code></li>
+<li>SpEL <code>#{#entityName}</code></li>
+<li>Query by Example: <code>ExampleMatcher.matching().withIgnoreNullValues()</code></li>
+</ul>
+<h3>Spring Data JPA 4의 Specification 변경<span class="tag b4">Boot 4</span></h3>
+<ul>
+<li><code>PredicateSpecification</code>, <code>Specification</code>, <code>UpdateSpecification</code>, <code>DeleteSpecification</code>으로 나뉘었습니다.</li>
+<li>조합용으로 <code>unrestricted()</code>, <code>allOf</code>, <code>anyOf</code>가 있습니다.</li>
+<li>update/delete by spec은 벌크 연산이라 영속성 컨텍스트와 동기화되지 않습니다.</li>
+</ul>
+<h3>2025.1 신규 기능</h3>
+<ul>
+<li>AOT repository: 기동이 빨라지고, 잘못된 메서드명을 빌드 시점에 잡아 줍니다.</li>
+<li>JPQL 기반 파생 쿼리</li>
+<li>벡터 검색</li>
+</ul>
+<p><strong>Kotlin 지원:</strong> nullable 반환 타입과 <code>findByIdOrNull</code>을 쓸 수 있습니다.</p>
+
+<h2>3.3 soft delete와의 상호작용</h2>
+<div class="tw"><table>
+<thead><tr><th>경로</th><th>필터 (<code>@SQLRestriction</code>/<code>@SoftDelete</code>)</th><th>soft-delete UPDATE</th><th>Envers</th></tr></thead>
+<tbody>
+<tr><td>파생 <code>findBy…</code>, JPQL</td><td>적용</td><td>–</td><td>–</td></tr>
+<tr><td>네이티브 쿼리</td><td><strong>미적용</strong></td><td>–</td><td>–</td></tr>
+<tr><td><code>delete(entity)</code>, <code>deleteById</code>, <code>deleteBy…</code></td><td>–</td><td>적용(엔티티를 로드한 뒤 remove)</td><td>기록</td></tr>
+<tr><td><code>deleteAllInBatch</code>, <code>@Modifying</code>, spec 벌크</td><td>–</td><td><code>@SQLDelete</code>는 우회함. <code>@SoftDelete</code>가 HQL delete를 어떻게 번역하는지는 버전별로 확인 필요<span class="tag verify">검증 필요</span></td><td><strong>우회</strong></td></tr>
+</tbody>
+</table></div>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://docs.spring.io/spring-data/jpa/reference/jpa/specifications.html" target="_blank" rel="noopener">Spring Data JPA Reference: Specifications</a></li>
+<li><a href="https://docs.spring.io/spring-data/jpa/reference/api/java/org/springframework/data/jpa/repository/JpaSpecificationExecutor.html" target="_blank" rel="noopener">JpaSpecificationExecutor Javadoc</a></li>
+<li><a href="https://github.com/spring-projects/spring-data-commons/wiki/Spring-Data-2025.1-Release-Notes" target="_blank" rel="noopener">Spring Data 2025.1 Release Notes</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch3"></div>
+</section>
+
+<section class="chapter" id="ch4" data-label="4장" data-title="MVC 확장 포인트">
+<header class="ch-head">
+<h1>4장 MVC 확장 포인트</h1>
+<p class="ch-lead">메시지 컨버터, 반환값 처리, Advice, 예외 처리, <code>WebMvcConfigurer</code>까지 Spring MVC에 끼어드는 지점을 정리합니다. Jackson 3로 넘어가며 바뀐 부분을 특히 챙깁니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li>Jackson 3 컨버터와 새 <code>configureMessageConverters(ServerBuilder)</code> API를 씁니다.</li>
+<li>커스텀 반환값 핸들러도 내장 처리기 뒤에 붙으므로 순서를 직접 조정해야 합니다.</li>
+<li>공통 응답 봉투는 <code>ResponseBodyAdvice</code>로 만들되 <code>String</code>과 <code>ProblemDetail</code>은 제외합니다.</li>
+</ul></div>
+<h2>4.1 메시지 컨버터</h2>
+<ul>
+<li><strong><code>AbstractHttpMessageConverter</code>:</strong> <code>supports</code>, <code>readInternal</code>, <code>writeInternal</code>만 구현하면 커스텀 포맷 컨버터가 됩니다.</li>
+<li><strong><code>SmartHttpMessageConverter</code>:</strong> Spring 7에서는 <code>GenericHttpMessageConverter</code> 대신 이쪽이 중심입니다. <code>ResolvableType</code>과 hints를 받습니다.</li>
+<li><strong>Jackson 3 컨버터(Spring 7 신규):</strong> <code>JacksonJsonHttpMessageConverter</code>, <code>JacksonXmlHttpMessageConverter</code>, <code>JacksonSmileHttpMessageConverter</code>, <code>JacksonCborHttpMessageConverter</code>, <code>JacksonYamlHttpMessageConverter</code>가 있습니다.<span class="tag b4">Boot 4</span></li>
+<li><strong><code>MappingJackson2HttpMessageConverter</code>:</strong> 7.0부터 deprecated(forRemoval)입니다. <code>@JsonView</code> 처리는 hints 방식으로 바뀌었습니다.<span class="tag b4">Boot 4</span></li>
+<li><strong><code>KotlinSerializationJsonHttpMessageConverter</code>:</strong> <code>@Serializable</code> 클래스 전용입니다. Boot 4에서 <code>spring-boot-starter-kotlinx-serialization-json</code>을 쓰면 Jackson보다 앞에 등록됩니다.</li>
+<li><strong>등록 방법:</strong> <code>List</code>를 받는 예전 <code>configureMessageConverters</code>와 <code>extendMessageConverters</code>는 deprecated입니다. 새 API는 다음과 같습니다.<span class="tag b4">Boot 4</span></li>
+</ul>
+<pre class="kt"><code>override fun configureMessageConverters(builder: HttpMessageConverters.ServerBuilder) {
+    builder.withJsonConverter(JacksonJsonHttpMessageConverter(JsonMapper.builder().findAndAddModules().build()))
+        .addCustomConverter(CsvHttpMessageConverter())
+}</code></pre>
+<h3>Boot 4에서 바뀐 점</h3>
+<ul>
+<li>Boot의 <code>HttpMessageConverters</code> 빈 클래스는 deprecated입니다.<span class="tag b4">Boot 4</span></li>
+<li><code>JsonMapperBuilderCustomizer</code>가 <code>Jackson2ObjectMapperBuilderCustomizer</code>를 대체합니다. 4.1에서는 <code>JsonFactoryBuilderCustomizer</code> 등이 추가됐습니다.<span class="tag b4">Boot 4</span></li>
+<li><code>@JsonComponent</code>는 <code>@JacksonComponent</code>로, <code>@JsonMixin</code>은 <code>@JacksonMixin</code>으로 바뀌었습니다.<span class="tag b4">Boot 4</span></li>
+<li><code>spring.jackson.read/write.*</code>는 <code>spring.jackson.json.read/write.*</code>로 옮겨졌습니다.<span class="tag b4">Boot 4</span></li>
+<li><code>spring.jackson.use-jackson2-defaults</code>를 켜면 Boot 3.x 기본값에 가깝게 맞출 수 있습니다.</li>
+<li>Jackson 3에서는 <code>WRITE_DATES_AS_TIMESTAMPS</code> 기본값이 false이고, 예외가 unchecked입니다.</li>
+</ul>
+<h2>4.2 반환값·Advice·예외</h2>
+<h3>반환값 핸들러</h3>
+<ul>
+<li>커스텀 <code>HandlerMethodReturnValueHandler</code>는 내장 핸들러 뒤에 등록됩니다. 그래서 <code>@RestController</code>의 반환값은 <code>RequestResponseBodyMethodProcessor</code>가 먼저 가져갑니다.</li>
+<li>해결하려면 <code>RequestMappingHandlerAdapter.setReturnValueHandlers</code>로 순서를 바꾸거나 <code>WebMvcRegistrations</code>를 쓰세요.</li>
+<li>비동기 반환 타입은 <code>AsyncHandlerMethodReturnValueHandler</code>로 구분합니다.</li>
+</ul>
+<h3>Body Advice</h3>
+<ul>
+<li><strong><code>ResponseBodyAdvice</code>:</strong> 응답을 공통 봉투로 감쌀 때 씁니다.
+<ul>
+<li><code>String</code> 반환은 감싸면 <code>ClassCastException</code>이 나므로 제외하세요.</li>
+<li><code>ProblemDetail</code>도 제외해야 문서화된 스펙과 어긋나지 않습니다.</li>
+<li>7.0에서 <code>determineWriteHints</code>가 추가됐습니다.</li>
+</ul></li>
+<li><strong><code>RequestBodyAdvice</code>:</strong> 7.0에서 <code>determineReadHints</code>가 추가됐습니다.</li>
+<li><code>@JsonView</code>는 Jackson 3에서 hints 기반으로 동작합니다.</li>
+</ul>
+<h3>예외 처리</h3>
+<ul>
+<li><code>@RestControllerAdvice</code> + <code>ResponseEntityExceptionHandler</code>에서 <code>handleMethodArgumentNotValid</code>와 <code>handleHandlerMethodValidationException</code>을 override합니다.</li>
+<li><code>ProblemDetail</code>(RFC 9457)은 <code>setProperty</code>로 필드를 추가하고, <code>spring.mvc.problemdetails.enabled=true</code>로 켭니다.</li>
+<li><code>ErrorResponse</code>와 <code>ErrorResponseException</code>은 메시지 키로 <code>problemDetail.title.*</code>를 씁니다.</li>
+<li>그 밖에 <code>HandlerExceptionResolver</code>와 <code>addErrorResponseInterceptors</code>(6.2 이상)가 있습니다.</li>
+</ul>
+<h3>인터셉터·필터</h3>
+<ul>
+<li><code>HandlerInterceptor</code>는 <code>preHandle</code>, <code>postHandle</code>, <code>afterCompletion</code>을 제공합니다.</li>
+<li><code>AsyncHandlerInterceptor.afterConcurrentHandlingStarted</code>는 비동기 처리가 시작될 때 호출됩니다. ThreadLocal은 여기서 정리하세요.</li>
+<li><code>OncePerRequestFilter</code>를 async 재디스패치에서도 실행하려면 <code>shouldNotFilterAsyncDispatch()</code>가 false를 반환하게 합니다.</li>
+<li><code>ContentCachingRequestWrapper</code>는 바디를 읽은 뒤에야 캐시가 채워집니다.</li>
+<li><code>ContentCachingResponseWrapper</code>는 마지막에 <code>copyBodyToResponse()</code>를 반드시 호출해야 합니다.</li>
+</ul>
+<h2>4.3 WebMvcConfigurer·변환·비동기</h2>
+<div class="tw"><table data-filter="WebMvcConfigurer 메서드에서 찾기">
+<thead><tr><th>메서드</th><th>용도</th></tr></thead>
+<tbody>
+<tr><td><code>configurePathMatch</code></td><td>예: <code>addPathPrefix("/api") { it.isAnnotationPresent(RestController::class.java) }</code></td></tr>
+<tr><td><code>configureContentNegotiation</code>, <code>configureAsyncSupport</code>, <code>configureDefaultServletHandling</code></td><td>콘텐츠 협상, 비동기 타임아웃과 executor, 기본 서블릿</td></tr>
+<tr><td><code>addFormatters</code>, <code>addInterceptors</code></td><td>변환기, 인터셉터(pathPatterns, order)</td></tr>
+<tr><td><code>addResourceHandlers</code>, <code>addCorsMappings</code>, <code>addViewControllers</code>, <code>configureViewResolvers</code></td><td>정적 리소스, CORS, 뷰</td></tr>
+<tr><td><code>addArgumentResolvers</code>, <code>addReturnValueHandlers</code></td><td>인자·반환값 처리</td></tr>
+<tr><td><code>configureMessageConverters(ServerBuilder)</code></td><td>7.0 신규<span class="tag b4">Boot 4</span></td></tr>
+<tr><td><code>configureHandlerExceptionResolvers</code>, <code>extendHandlerExceptionResolvers</code></td><td>예외 리졸버</td></tr>
+<tr><td><code>configureApiVersioning</code></td><td>7.0 신규. <code>useRequestHeader</code>, <code>usePathSegment</code>, <code>useQueryParam</code>, <code>useMediaTypeParameter</code>, <code>setDefaultVersion</code>으로 설정하고 <code>@GetMapping(version = "1.1+")</code>로 매핑. Boot 프로퍼티는 <code>spring.mvc.apiversion.*</code><span class="tag b4">Boot 4</span></td></tr>
+<tr><td><code>getValidator</code>, <code>getMessageCodesResolver</code></td><td>전역 Validator 교체</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong><code>WebMvcRegistrations</code>:</strong> HandlerMapping, HandlerAdapter, ExceptionHandlerExceptionResolver를 교체합니다.</li>
+<li><strong>변환:</strong>
+<ul>
+<li>기본 변환기: <code>Converter</code>, <code>ConverterFactory</code>(예: String을 모든 Enum으로), <code>GenericConverter</code>/<code>ConditionalGenericConverter</code></li>
+<li>포맷터: <code>Formatter</code>, <code>FormatterRegistrar</code>, <code>AnnotationFormatterFactory</code></li>
+<li><code>@InitBinder</code>에서 <code>setAllowedFields</code>로 대량 할당(mass assignment)을 막습니다.</li>
+</ul></li>
+<li><strong>비동기 반환 타입:</strong>
+<ul>
+<li><code>Callable</code>, <code>DeferredResult</code>, <code>StreamingResponseBody</code>, <code>ResponseBodyEmitter</code>, <code>SseEmitter</code>를 쓸 수 있습니다.</li>
+<li><code>Mono</code>, <code>Flux</code>, <code>Flow</code>, suspend도 지원합니다. <code>text/event-stream</code>이나 NDJSON이면 스트리밍하고, JSON이면 전부 모은 뒤 한 번에 응답합니다.</li>
+</ul></li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://docs.spring.io/spring-framework/reference/web/webmvc/mvc-config/message-converters.html" target="_blank" rel="noopener">Spring Framework Reference: Message Converters</a></li>
+<li><a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/deprecated-list.html" target="_blank" rel="noopener">Spring Framework Deprecated List</a></li>
+<li><a href="https://github.com/spring-projects/spring-framework/issues/33798" target="_blank" rel="noopener">spring-framework #33798 (Revisit Jackson support)</a></li>
+<li><a href="https://docs.spring.io/spring-boot/4.0/reference/features/json.html" target="_blank" rel="noopener">Spring Boot 4.0 Reference: JSON</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch4"></div>
+</section>
+
+<section class="chapter" id="ch5" data-label="5장" data-title="Envers + soft delete">
+<header class="ch-head">
+<h1>5장 Envers + soft delete</h1>
+<p class="ch-lead">soft delete 구현 방식에 따라 Envers 이력이 어떻게 남는지, 어떤 삭제 경로가 감사를 우회하는지, 운영에서 자주 부딪히는 유니크 제약과 복구 문제를 어떻게 푸는지 다룹니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li><code>@SQLDelete</code>로 지우면 DEL, 플래그를 직접 바꾸면 MOD로 기록됩니다.</li>
+<li><code>store_data_at_delete=true</code>로 삭제 시점의 데이터를 남깁니다.</li>
+<li>벌크 쓰기와 네이티브 쓰기는 soft delete와 감사를 모두 우회합니다.</li>
+</ul></div>
+<h2>5.1 방식별 REVTYPE</h2>
+<p>REVTYPE은 Envers가 감사 테이블에 남기는 변경 종류로, 0은 ADD(추가), 1은 MOD(수정), 2는 DEL(삭제)을 뜻합니다.</p>
+<div class="tw"><table>
+<thead><tr><th>방식</th><th>remove 시 실행되는 SQL</th><th>REVTYPE</th><th>확신도</th></tr></thead>
+<tbody>
+<tr><td><code>@SQLDelete</code> + <code>@SQLRestriction</code></td><td>커스텀 UPDATE</td><td><strong>DEL</strong> (delete 이벤트가 발생함)</td><td>높음</td></tr>
+<tr><td>직접 <code>deleted = true</code>로 수정</td><td>일반 UPDATE</td><td><strong>MOD</strong></td><td>높음</td></tr>
+<tr><td><code>@SoftDelete</code> (6.4 이상, 7.0부터 TIMESTAMP 지원)</td><td><code>DeleteCoordinatorSoft</code>가 UPDATE 실행</td><td><strong>DEL로 추정(미확인)</strong><span class="tag verify">검증 필요</span></td><td>낮음~중간</td></tr>
+</tbody>
+</table></div>
+<div class="callout verify">
+<p class="callout-title"><code>@SoftDelete</code>가 DEL로 추정되는 이유와 한계</p>
+<ul>
+<li>삭제 경로에서 UPDATE를 실행하므로 DEL로 기록될 것으로 봅니다.</li>
+<li>하지만 이를 확정해 주는 공식 문서나 JIRA 이슈는 찾지 못했습니다.</li>
+<li>정황 증거로, spring-data-jpa #4155에 “<code>@SoftDelete</code>로 삭제할 때 <code>AuditorAware</code>가 호출되지 않는다”는 보고가 있습니다.</li>
+<li>도입하기 전에 REVTYPE을 확인하는 통합 테스트를 반드시 작성하세요.</li>
+</ul>
+</div>
+<h3>관련 설정과 제약</h3>
+<ul>
+<li><strong>DEL 행의 데이터:</strong> 기본 설정에서는 DEL 행에 id만 남습니다. <code>store_data_at_delete=true</code>를 권장합니다.</li>
+<li><strong><code>@SoftDelete</code>의 제약:</strong>
+<ul>
+<li>strategy는 <code>DELETED</code>, <code>ACTIVE</code>, <code>TIMESTAMP</code> 중 하나입니다.</li>
+<li><code>converter</code>를 TIMESTAMP와 함께 쓰면 <code>UnsupportedMappingException</code>이 납니다. converter는 null을 반환하면 안 됩니다.</li>
+<li>삭제 컬럼은 엔티티 필드로 노출되지 않습니다.</li>
+</ul></li>
+<li><strong>7.4의 incubating <code>@Audited</code>:</strong> 문서에는 “backward compatible with Hibernate Envers”라고 되어 있지만, 아직 incubating이므로 운영 적용은 보류하세요.</li>
+</ul>
+
+<div class="widget" id="sim">
+<div class="widget-bar"><h3>삭제 경로 시뮬레이터</h3><p>soft delete 방식과 삭제 경로를 고르면 실행되는 SQL, soft delete 적용 여부, Envers 이력을 보여 줍니다.</p></div>
+<div class="widget-body">
+<fieldset class="seg"><legend>soft delete 방식</legend><div class="seg-opts">
+<label><input type="radio" name="simA" value="sqldelete" checked><span>@SQLDelete + @SQLRestriction</span></label>
+<label><input type="radio" name="simA" value="softdelete"><span>@SoftDelete</span></label>
+</div></fieldset>
+<fieldset class="seg"><legend>삭제 경로</legend><div class="seg-opts">
+<label><input type="radio" name="simP" value="remove" checked><span>repo.delete(entity), deleteById, 파생 deleteBy…</span></label>
+<label><input type="radio" name="simP" value="bulk"><span>deleteAllInBatch, @Modifying JPQL, Specification 벌크</span></label>
+<label><input type="radio" name="simP" value="native"><span>네이티브 DELETE 쿼리</span></label>
+<label><input type="radio" name="simP" value="flag"><span>deleted 필드를 직접 true로 수정</span></label>
+</div></fieldset>
+<div class="sim-out" id="simOut" aria-live="polite"></div>
+<p class="widget-foot">5.1과 3.3의 표를 조합한 것입니다. 확신도가 낮은 조합은 도입 전에 통합 테스트로 확인하세요.</p>
+</div>
+</div>
+
+<h2>5.2 Envers 설정 키</h2>
+<p>모두 <code>spring.jpa.properties.org.hibernate.envers.*</code> 아래에 둡니다.</p>
+<div class="tw"><table data-filter="설정 키에서 찾기">
+<thead><tr><th>키</th><th>기본값</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td><code>audit_table_suffix</code>, <code>audit_table_prefix</code></td><td><code>_AUD</code>, ""</td><td>감사 테이블 이름</td></tr>
+<tr><td><code>revision_field_name</code>, <code>revision_type_field_name</code></td><td><code>REV</code>, <code>REVTYPE</code></td><td>컬럼 이름</td></tr>
+<tr><td><code>store_data_at_delete</code></td><td>false</td><td>DEL 행에도 데이터를 보존. true 권장</td></tr>
+<tr><td><code>audit_strategy</code></td><td>Default</td><td><code>…strategy.internal.ValidityAuditStrategy</code>로 바꾸면 <code>REVEND</code>가 생겨 시점 조회가 빨라짐</td></tr>
+<tr><td><code>audit_strategy_validity_store_revend_timestamp</code> (+<code>_end_rev_field_name</code>, <code>_revend_timestamp_field_name</code>, <code>_numeric</code>, <code>_legacy_placement</code>)</td><td>false</td><td><code>REVEND_TSTMP</code> 저장(파티셔닝용)</td></tr>
+<tr><td><code>allow_identifier_reuse</code></td><td>false</td><td>undelete나 id 재사용이 있으면 true</td></tr>
+<tr><td><code>global_with_modified_flag</code>, <code>modified_flag_suffix</code></td><td>false, <code>_MOD</code></td><td>컬럼별 변경 플래그</td></tr>
+<tr><td><code>track_entities_changed_in_revision</code></td><td>false</td><td><code>REVCHANGES</code> 테이블 사용</td></tr>
+<tr><td><code>revision_on_collection_change</code></td><td>true</td><td>소유하지 않은 쪽 컬렉션이 바뀌어도 리비전 생성</td></tr>
+<tr><td><code>do_not_audit_optimistic_locking_field</code></td><td>true</td><td><code>@Version</code>은 감사하지 않음</td></tr>
+<tr><td><code>default_schema</code>, <code>default_catalog</code>, <code>find_by_revision_exact_match</code></td><td>–</td><td>스키마 분리, find 시 리비전 정확 일치</td></tr>
+</tbody>
+</table></div>
+
+<h2>5.3 @Where 제거·필터·연관 엔티티</h2>
+<ul>
+<li><strong><code>@Where</code> 제거:</strong> Hibernate 7에서 <code>@Where</code>와 <code>@WhereJoinTable</code>이 제거됐습니다. <code>@SQLRestriction</code>과 <code>@SQLJoinTableRestriction</code>으로 바꾸세요.<span class="tag b4">Boot 4</span></li>
+<li><strong>관리자 화면처럼 필터를 꺼야 할 때:</strong> <code>@SQLRestriction</code>은 끌 수 없으므로 <code>@FilterDef</code> + <code>@Filter</code>를 씁니다.</li>
+</ul>
+<pre class="kt"><code>@Entity @Audited
+@FilterDef(name = "notDeleted", defaultCondition = "deleted = false", autoEnabled = true, applyToLoadByKey = true)
+@Filter(name = "notDeleted")
+@SQLDelete(sql = "update member set deleted = true where id = ? and version = ?")
+class Member { @Id @GeneratedValue var id: Long = 0; @Version var version: Long = 0; var deleted = false }
+// 관리자: em.unwrap(Session::class.java).disableFilter("notDeleted")</code></pre>
+<ul>
+<li>필터는 기본적으로 <code>find()</code>에는 적용되지 않습니다. <code>autoEnabled</code>, <code>applyToLoadByKey</code>가 어느 버전에서 도입됐는지는 javadoc에서 확인하세요.<span class="tag verify">검증 필요</span></li>
+<li><strong>삭제된 연관 엔티티:</strong> 로드할 때 <code>EntityNotFoundException</code>이 납니다. 대응 방법은 세 가지입니다.
+<ul>
+<li>연관 엔티티까지 연쇄로 soft delete합니다.</li>
+<li><code>@NotFound(IGNORE)</code>를 씁니다. 이 경우 EAGER 로딩이 강제됩니다.</li>
+<li>연관 대상 엔티티에서 <code>@SQLRestriction</code>을 뺍니다.</li>
+</ul></li>
+<li><strong><code>targetAuditMode = NOT_AUDITED</code>:</strong> 이 설정의 연관은 현재 테이블에서 읽기 때문에 필터에 걸립니다. 양쪽 엔티티를 모두 <code>@Audited</code>로 맞추세요.</li>
+</ul>
+
+<h2>5.4 우회 경로·유니크·버전·복구</h2>
+<h3>Envers와 <code>@SQLDelete</code>를 모두 우회하는 경로</h3>
+<ul>
+<li>해당 경로: <code>@Modifying</code> JPQL, <code>deleteAllInBatch</code>, Criteria 벌크, 네이티브 쿼리, <code>StatelessSession</code>.</li>
+<li>대량 삭제가 필요하면 <code>findAllById</code> → <code>deleteAll</code> → flush/clear를 청크 단위로 반복하세요.</li>
+<li>트랜잭션 밖에서 일어난 쓰기는 감사되지 않습니다.</li>
+</ul>
+<h3>유니크 제약</h3>
+<ul>
+<li>PostgreSQL은 부분 인덱스를 씁니다: <code>create unique index … on member(email) where deleted = false</code></li>
+<li>MySQL은 <code>unique(email, deleted_token)</code>을 두고 활성 행에는 0, 삭제된 행에는 id를 넣습니다. 생성 컬럼(generated column)으로 풀 수도 있습니다.</li>
+<li><code>(email, deleted_at)</code> 조합은 NULL이 여러 개 허용되므로 중복을 막지 못할 수 있습니다.</li>
+<li><code>_AUD</code> 테이블에는 unique 제약을 복제하지 마세요.</li>
+</ul>
+<h3><code>@SQLDelete</code> + <code>@Version</code></h3>
+<ul>
+<li>파라미터 바인딩 순서는 <strong>id, version</strong>입니다(<code>where id = ? and version = ?</code>).</li>
+</ul>
+<h3>cascade</h3>
+<ul>
+<li><code>CascadeType.REMOVE</code>나 <code>orphanRemoval</code>을 쓰면 자식마다 UPDATE와 DEL이 기록됩니다.</li>
+<li>DB의 <code>ON DELETE CASCADE</code>는 soft delete에서 동작하지 않습니다.</li>
+</ul>
+<h3>복구(undelete)</h3>
+<ul>
+<li>네이티브 update로 되돌리면 감사 기록이 남지 않습니다.</li>
+<li><code>@Filter</code>를 끄고 엔티티를 로드한 뒤 수정하면 MOD로 기록됩니다.</li>
+<li>이 경우 <code>allow_identifier_reuse</code>도 검토하세요.</li>
+</ul>
+
+<h2>5.5 RevisionEntity·조회 API</h2>
+<pre class="kt"><code>@Entity @Table(name = "revinfo") @RevisionEntity(UserRevisionListener::class)
+class Revision(
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @RevisionNumber var id: Long = 0,
+    @RevisionTimestamp var timestamp: Long = 0,
+    var actorId: String? = null,
+)
+class UserRevisionListener : RevisionListener {
+    override fun newRevision(rev: Any) {
+        (rev as Revision).actorId = SecurityContextHolder.getContext().authentication?.name ?: "system"
+    }
+}</code></pre>
+<h3>RevisionEntity 설계</h3>
+<ul>
+<li><strong>REVINFO id 타입:</strong> 기본은 int입니다. 새로 시작한다면 Long으로 두세요. 나중에 바꾸려면 모든 <code>_AUD.REV</code> FK를 함께 마이그레이션해야 합니다.</li>
+<li><strong>리스너에 빈 주입:</strong> <code>SpringBeanContainer</code>로 가능할 수 있지만 버전별로 테스트가 필요합니다. <code>SecurityContextHolder</code>에 정적으로 접근하는 방식이 가장 안전하며, 비동기 상황에 대비해 fallback 값을 두세요.<span class="tag verify">검증 필요</span></li>
+<li><strong><code>EntityTrackingRevisionListener.entityChanged</code>:</strong> 엔티티별 변경 내역을 기록할 때 씁니다.</li>
+</ul>
+<h3>조회 API</h3>
+<ul>
+<li><strong>AuditReader:</strong> <code>AuditReaderFactory.get(em)</code>으로 얻습니다. <code>find(cls, id, rev)</code>, <code>getRevisions</code>, <code>findRevision</code>, <code>getRevisionDate</code>를 제공합니다.</li>
+<li><strong>AuditQuery:</strong>
+<ul>
+<li><code>createQuery().forRevisionsOfEntity(cls, false, true)</code>는 <code>[entity, rev, RevisionType]</code>을 반환하며 삭제 이력도 포함합니다.</li>
+<li>그 밖에 <code>forEntitiesAtRevision</code>, <code>forRevisionsOfEntityWithChanges</code>가 있습니다.</li>
+<li>조건은 <code>AuditEntity.id().eq</code>, <code>AuditEntity.revisionType().eq(RevisionType.DEL)</code>, <code>property("email").hasChanged()</code>, <code>revisionNumber().maximize()</code>처럼 겁니다.</li>
+</ul></li>
+<li><strong>Spring Data Envers:</strong>
+<ul>
+<li><code>RevisionRepository&lt;T, ID, N&gt;</code>의 <code>findRevisions(id[, pageable])</code>, <code>findRevision</code>, <code>findLastChangeRevision</code>을 씁니다.</li>
+<li><code>metadata.revisionType</code>은 INSERT/UPDATE/DELETE입니다.</li>
+<li><code>@EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean::class)</code>로 켭니다.</li>
+</ul></li>
+</ul>
+<h3>운영·역할 분담</h3>
+<ul>
+<li><strong>스키마 관리:</strong> 운영에서는 <code>ddl-auto=validate</code>와 Flyway를 함께 씁니다(Boot 4에서는 <code>spring-boot-starter-flyway</code> 필요). <code>_AUD</code> 컬럼에는 NOT NULL을 걸지 마세요.<span class="tag b4">Boot 4</span></li>
+<li><strong>Kotlin 플러그인:</strong> <code>plugin.jpa</code>와 <code>plugin.spring</code>을 적용합니다. <code>allOpen { annotation("jakarta.persistence.Entity") }</code>가 없으면 프록시가 동작하지 않습니다. data class 엔티티는 피하세요.</li>
+<li><strong>JPA Auditing과의 역할 분담:</strong>
+<ul>
+<li>JPA Auditing(<code>@CreatedBy</code>, <code>@LastModifiedDate</code>, <code>AuditorAware</code>)은 현재 행을 채웁니다.</li>
+<li>Envers는 변경 이력을 남깁니다.</li>
+<li>삭제한 사람은 REVINFO의 <code>actorId</code>로 추적합니다.</li>
+</ul></li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://docs.hibernate.org/orm/7.0/migration-guide/" target="_blank" rel="noopener">Hibernate ORM 7.0 Migration Guide</a></li>
+<li><a href="https://docs.hibernate.org/orm/7.4/whats-new/" target="_blank" rel="noopener">What's New in Hibernate ORM 7.4</a></li>
+<li><a href="https://docs.hibernate.org/orm/7.1/javadocs/org/hibernate/annotations/SoftDelete.html" target="_blank" rel="noopener">@SoftDelete Javadoc</a></li>
+<li><a href="https://docs.hibernate.org/orm/7.0/javadocs/org/hibernate/envers/configuration/EnversSettings.html" target="_blank" rel="noopener">EnversSettings Javadoc</a></li>
+<li><a href="https://github.com/spring-projects/spring-data-jpa/issues/4155" target="_blank" rel="noopener">spring-data-jpa #4155</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch5"></div>
+</section>
+
+<section class="chapter" id="ch6" data-label="6장" data-title="restdocs-api-spec">
+<header class="ch-head">
+<h1>6장 epages restdocs-api-spec</h1>
+<p class="ch-lead">테스트로 OpenAPI 스펙을 만드는 restdocs-api-spec의 스니펫 옵션과 Gradle 플러그인 설정을 정리합니다. Boot 4와의 호환성부터 확인하고 시작하세요.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li>Boot 4에서는 0.20.x를 쓰되, 남아 있는 호환성 문제를 염두에 둡니다.</li>
+<li><code>pathParameters</code>는 <code>RestDocumentationRequestBuilders</code>로 요청해야 문서화됩니다.</li>
+<li>제약을 스펙에 반영하려면 <code>ConstrainedFields</code>와 <code>@field:</code> 적용이 필요합니다.</li>
+</ul></div>
+<h2>6.1 호환성</h2>
+<ul>
+<li><strong>Boot 4.x:</strong> 0.20.x 이상을 써야 하며 최신 버전은 0.20.1입니다. 릴리스 노트에 이런 경고가 있습니다: “0.20.x line may still contain minor compatibility issues, especially when used with Spring Boot 4”.</li>
+<li><strong>REST Docs 4.0:</strong> REST Assured 통합이 제거됐습니다. <code>restdocs-api-spec-restassured</code>를 쓰던 테스트는 MockMvc나 WebTestClient로 옮기세요.<span class="tag b4">Boot 4</span></li>
+<li><strong>테스트 스타터:</strong> Boot 4.0.4부터 <code>spring-boot-starter-restdocs</code>를 씁니다.<span class="tag b4">Boot 4</span></li>
+<li><strong>패키지 이동:</strong> <code>@AutoConfigureRestDocs</code>와 <code>@WebMvcTest</code>가 <code>org.springframework.boot.&lt;tech&gt;.test.autoconfigure</code>로 옮겨졌습니다. OpenRewrite로 일괄 변경할 수 있습니다.<span class="tag b4">Boot 4</span></li>
+<li><strong>Gradle 플러그인:</strong> Plugin Portal에는 0.19.x까지만 보입니다. 0.20.x는 Maven Central에서 확인하세요.<span class="tag verify">검증 필요</span></li>
+</ul>
+<h2>6.2 스니펫 API</h2>
+<div class="tw"><table>
+<thead><tr><th><code>ResourceSnippetParameters.builder()</code> 메서드</th><th>설명</th></tr></thead>
+<tbody>
+<tr><td><code>summary</code>, <code>description</code>, <code>tag</code>/<code>tags</code></td><td>메타데이터</td></tr>
+<tr><td><code>privateResource</code></td><td><code>separatePublicApi</code> 사용 시 공개 스펙에서 제외</td></tr>
+<tr><td><code>deprecated</code></td><td>deprecated 표시</td></tr>
+<tr><td><code>requestSchema(Schema.schema("Name"))</code>, <code>responseSchema</code></td><td>스키마 이름. 같은 이름이면 <code>$ref</code>로 재사용</td></tr>
+<tr><td><code>requestFields</code>, <code>responseFields</code>, <code>requestHeaders</code>, <code>responseHeaders</code></td><td>바디 필드와 헤더</td></tr>
+<tr><td><code>pathParameters</code></td><td>요청을 <code>RestDocumentationRequestBuilders.get("/x/{id}", id)</code>로 보내야 함</td></tr>
+<tr><td><code>queryParameters</code>, <code>formParameters</code></td><td>REST Docs 3.0에서 둘로 분리됨</td></tr>
+<tr><td><code>links</code>, <code>build()</code></td><td>HAL 링크, 빌드</td></tr>
+</tbody>
+</table></div>
+<h3>리소스·파라미터</h3>
+<ul>
+<li><code>ResourceDocumentation.resource(String)</code> 또는 <code>resource(params)</code>로 <code>resource.json</code>을 만듭니다.</li>
+<li><code>parameterWithName("page").type(SimpleType.INTEGER).optional().defaultValue(0)</code>처럼 타입을 지정합니다. 타입은 STRING/INTEGER/NUMBER/BOOLEAN 중 하나이며, 지정하지 않으면 string으로 추정됩니다.</li>
+</ul>
+<h3><code>MockMvcRestDocumentationWrapper.document</code> 오버로드</h3>
+<ul>
+<li><code>(id, vararg snippets)</code></li>
+<li><code>(id, requestPreprocessor, responsePreprocessor, vararg snippets)</code></li>
+<li><code>(id, description, privateResource, …)</code></li>
+<li>정확한 시그니처는 소스에서 확인하세요.<span class="tag verify">검증 필요</span></li>
+</ul>
+<h3>전처리</h3>
+<ul>
+<li><code>preprocessRequest(prettyPrint(), modifyHeaders().remove("Authorization"), modifyUris().scheme("https").host("api.example.com").removePort())</code></li>
+<li><code>preprocessResponse(prettyPrint())</code></li>
+</ul>
+<h3>필드 기술</h3>
+<ul>
+<li>기본은 <code>fieldWithPath</code>와 <code>subsectionWithPath</code>입니다. 공통 봉투를 쓰는 응답은 <code>beneathPath("data").withSubsectionId("data")</code>로 안쪽만 기술합니다.</li>
+<li><code>relaxed*</code>는 최소한으로만 쓰세요.</li>
+<li>타입(<code>JsonFieldType</code>): STRING/NUMBER/BOOLEAN/OBJECT/ARRAY/NULL/VARIES</li>
+<li><code>.optional()</code>은 0.19.1부터 nullable로 렌더링됩니다.</li>
+<li><code>.ignored()</code>로 필드를 제외하고, <code>.attributes(key("format").value("date-time"))</code>로 추가 속성을 붙입니다.</li>
+<li>enum 값은 description에 <code>Status.entries.joinToString()</code>을 넣는 방식이 가장 이식성이 좋습니다. 스키마 쪽 enum 처리는 확인이 필요합니다.<span class="tag verify">검증 필요</span></li>
+</ul>
+<h3>Bean Validation 반영</h3>
+<ul>
+<li><code>ConstrainedFields(Req::class.java).withPath("name")</code>으로 만든 필드만 제약이 스펙에 반영됩니다.</li>
+<li>매핑 규칙:
+<ul>
+<li><code>@NotNull</code>, <code>@NotEmpty</code>, <code>@NotBlank</code> → required</li>
+<li><code>@NotEmpty</code>, <code>@NotBlank</code> → <code>minLength=1</code></li>
+<li><code>@Length</code> → minLength, maxLength</li>
+<li><code>@Pattern</code> → pattern</li>
+<li><code>@Min</code>, <code>@Max</code> → minimum, maximum</li>
+<li><code>@Size</code> → 최소·최대 길이</li>
+</ul></li>
+<li>제약을 필드에서 읽기 때문에 Kotlin에서는 <code>@field:</code>를 붙이거나 param-property 옵션을 켜야 합니다.</li>
+</ul>
+<h2>6.3 Gradle 플러그인</h2>
+<div class="tw"><table>
+<thead><tr><th>블록</th><th>옵션</th></tr></thead>
+<tbody>
+<tr><td>공통</td><td><code>separatePublicApi</code>(false), <code>outputDirectory</code>(<code>build/api-spec</code>), <code>snippetsDirectory</code>(<code>build/generated-snippets</code>)</td></tr>
+<tr><td><code>openapi {}</code></td><td><code>host</code>, <code>basePath</code>, <code>schemes</code>, <code>title</code>, <code>description</code>, <code>version</code>, <code>format</code>, <code>tagDescriptionsPropertiesFile</code>, <code>oauth2SecuritySchemeDefinition { flows, tokenUrl, authorizationUrl, scopeDescriptionsPropertiesFile }</code>, <code>outputFileNamePrefix</code></td></tr>
+<tr><td><code>openapi3 {}</code></td><td><code>server</code>/<code>servers</code>(변수 지원), <code>title</code>, <code>description</code>, <code>version</code>, <code>format</code>, <code>contact</code>, <code>tagDescriptionsPropertiesFile</code>, <code>oauth2SecuritySchemeDefinition</code>, <code>outputFileNamePrefix</code>(<code>openapi3</code>)</td></tr>
+<tr><td><code>postman {}</code></td><td><code>title</code>, <code>version</code>, <code>baseUrl</code>, <code>separatePublicApi</code>, <code>outputFileNamePrefix</code></td></tr>
+</tbody>
+</table></div>
+<pre class="kt" data-label="build.gradle.kts"><code>plugins { id("com.epages.restdocs-api-spec") version "0.20.1" }
+dependencies {
+    testImplementation("org.springframework.boot:spring-boot-starter-restdocs")
+    testImplementation("com.epages:restdocs-api-spec-mockmvc:0.20.1")
+}
+configure&lt;com.epages.restdocs.apispec.gradle.OpenApi3Extension&gt; {
+    setServer("https://api.example.com"); title = "Member API"; version = "1.0.0"; format = "yaml"
+}
+tasks.register&lt;Copy&gt;("copyOpenApi") {
+    dependsOn("openapi3")
+    from(layout.buildDirectory.file("api-spec/openapi3.yaml")); into(layout.buildDirectory.dir("resources/main/static/docs"))
+}</code></pre>
+<ul>
+<li><strong>인증 헤더:</strong> JWT와 Basic 헤더를 자동으로 감지합니다.</li>
+<li><strong>Swagger UI 연결:</strong> 생성된 <code>static/docs/openapi3.yaml</code>을 정적 swagger-ui나 redoc에 연결하세요. springdoc 3.0.x는 Jackson 2를 끌어오는 이슈(#3200, #3216)가 있어 권장하지 않습니다.</li>
+</ul>
+<h2>6.4 Kotlin 사용 패턴</h2>
+<ul>
+<li>요청은 <code>mockMvc.perform(RestDocumentationRequestBuilders.get(...))</code> 방식을 권장합니다. Kotlin DSL을 쓴다면 <code>andDo { handle(document(…)) }</code>로 연결합니다.</li>
+<li>반복되는 설정은 확장 함수로 묶어 두면 편합니다.</li>
+</ul>
+<pre class="kt"><code>fun ResultActions.docs(id: String, tag: String, summary: String, block: ResourceSnippetParametersBuilder.() -&gt; Unit) =
+    andDo(MockMvcRestDocumentationWrapper.document(id, preprocessRequest(prettyPrint()), preprocessResponse(prettyPrint()),
+        resource(ResourceSnippetParameters.builder().tag(tag).summary(summary).apply(block).build())))</code></pre>
+<ul>
+<li>공통 설정은 <code>@AutoConfigureRestDocs(uriScheme, uriHost)</code>나 <code>RestDocsMockMvcConfigurationCustomizer</code>로 합니다.</li>
+<li>커스텀 스니펫은 <code>TemplatedSnippet</code>으로 만들 수 있지만 OpenAPI 결과에는 반영되지 않습니다.</li>
+<li>suspend 엔드포인트는 <code>asyncDispatch</code> 결과에 <code>document()</code>를 겁니다(8.1 참조).</li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://github.com/ePages-de/restdocs-api-spec/blob/master/README.md" target="_blank" rel="noopener">restdocs-api-spec README</a></li>
+<li><a href="https://github.com/ePages-de/restdocs-api-spec/releases" target="_blank" rel="noopener">restdocs-api-spec Releases</a></li>
+<li><a href="https://github.com/springdoc/springdoc-openapi/issues/3200" target="_blank" rel="noopener">springdoc-openapi #3200</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch6"></div>
+</section>
+
+<section class="chapter" id="ch7" data-label="7장" data-title="OpenTelemetry / Micrometer Tracing">
+<header class="ch-head">
+<h1>7장 OpenTelemetry / Micrometer Tracing</h1>
+<p class="ch-lead">Boot 4의 새 OpenTelemetry 스타터 구성, span과 Observation을 직접 만드는 API, baggage와 커스텀 exporter, 그리고 로그·메트릭·k8s까지 관측성 전체를 이어 봅니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li><code>spring-boot-starter-opentelemetry</code> 하나로 트레이스, 메트릭, 로그 내보내기를 구성합니다.</li>
+<li>OTLP 프로퍼티가 <code>management.opentelemetry.*</code>로 옮겨졌습니다.</li>
+<li>값 종류가 많은 키는 반드시 high cardinality로 둡니다.</li>
+</ul></div>
+<h2>7.1 Boot 4 구성</h2>
+<h3><code>spring-boot-starter-opentelemetry</code> (Boot 4 신규)<span class="tag b4">Boot 4</span></h3>
+<ul>
+<li>SDK, Micrometer 브리지, OTLP 메트릭을 한 번에 가져오며 actuator 없이도 동작합니다.</li>
+<li>테스트용 <code>-test</code> 스타터가 따로 있습니다.</li>
+<li>로그 export는 4.0.1부터 actuator 밖으로 옮겨졌습니다(#48488).</li>
+</ul>
+<h3>프로퍼티 (Boot 4에서 변경)</h3>
+<div class="tw"><table>
+<thead><tr><th>용도</th><th>프로퍼티</th></tr></thead>
+<tbody>
+<tr><td>트레이스</td><td><code>management.opentelemetry.tracing.export.otlp.endpoint</code> (3.x의 <code>management.otlp.tracing.endpoint</code> 대체)<span class="tag b4">Boot 4</span></td></tr>
+<tr><td>로그</td><td><code>management.opentelemetry.logging.export.otlp.endpoint</code>, <code>transport=http|grpc</code></td></tr>
+<tr><td>메트릭</td><td><code>management.otlp.metrics.export.url</code></td></tr>
+<tr><td>샘플링</td><td><code>management.tracing.sampling.probability</code> (기본 0.1)</td></tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>테스트 어노테이션:</strong> <code>@AutoConfigureObservability</code>가 제거되고 <code>@AutoConfigureMetrics</code>와 <code>@AutoConfigureTracing</code>으로 나뉘었습니다.<span class="tag b4">Boot 4</span></li>
+<li><strong>Boot 4.1 추가 사항:</strong>
+<ul>
+<li>OTLP 로그 exporter 빌더 커스터마이저</li>
+<li><code>management.tracing.exemplars.filter</code></li>
+<li><code>@Async</code> 컨텍스트 자동 전파</li>
+<li>Kafka/Rabbit ObservationConvention 빈 자동 적용</li>
+</ul></li>
+</ul>
+<h2>7.2 API</h2>
+<pre class="kt"><code>fun pay(cmd: PayCmd) {
+    val span = tracer.nextSpan().name("pg.approve").tag("pg", cmd.pg).start()
+    try { tracer.withSpan(span).use { span.event("sent"); pg.approve(cmd) } }
+    catch (e: Exception) { span.error(e); throw e } finally { span.end() }
+}
+fun payObserved(cmd: PayCmd) = Observation.createNotStarted("payment.approve", registry)
+    .lowCardinalityKeyValue("pg", cmd.pg).highCardinalityKeyValue("order.id", cmd.orderId)
+    .observe { pg.approve(cmd) }</code></pre>
+<h3>핵심 타입</h3>
+<ul>
+<li><strong><code>Tracer</code>:</strong> <code>nextSpan</code>, <code>startScopedSpan</code>, <code>withSpan</code>(반드시 <code>use</code>로 닫기), <code>currentSpan</code></li>
+<li><strong><code>Span</code>:</strong> <code>tag</code>, <code>event</code>, <code>error</code>, <code>end</code></li>
+<li><strong><code>CurrentTraceContext.wrap(Runnable)</code>:</strong> 다른 스레드로 컨텍스트를 넘깁니다.</li>
+<li><strong><code>Propagator.inject/extract</code>:</strong> 커스텀 전송 계층에 컨텍스트를 싣고 꺼냅니다.</li>
+</ul>
+<h3>어노테이션</h3>
+<ul>
+<li>조건: AspectJ 의존성이 있고 <code>management.observations.annotations.enabled=true</code>여야 동작합니다.
+<ul>
+<li><code>@NewSpan</code>, <code>@ContinueSpan</code>, <code>@SpanTag</code>에는 <code>SpanAspect</code>가 필요합니다.</li>
+<li><code>@Observed</code>에는 <code>ObservedAspect</code>가 필요합니다.</li>
+<li><code>@Timed</code>, <code>@Counted</code>, <code>@MeterTag</code>에는 각각의 Aspect가 필요합니다.</li>
+</ul></li>
+<li>Boot 4에서 AspectJ 스타터 이름이 <code>spring-boot-starter-aspectj</code>로 바뀌었습니다.<span class="tag b4">Boot 4</span></li>
+<li>같은 클래스 안에서의 자기 호출(self-invocation)과 private 메서드에는 적용되지 않습니다.</li>
+</ul>
+<h3>확장 포인트</h3>
+<ul>
+<li><code>ObservationHandler</code></li>
+<li><code>ObservationFilter</code>: 공통 태그를 붙일 때 씁니다.</li>
+<li><code>ObservationPredicate</code>: 예를 들어 <code>/actuator</code> 요청을 제외할 때 씁니다.</li>
+<li><code>GlobalObservationConvention</code>: <code>DefaultServerRequestObservationConvention</code>을 상속해 <code>http.server.requests</code> 태그를 바꿀 때 씁니다.</li>
+<li><code>ObservationRegistryCustomizer</code></li>
+</ul>
+<div class="callout warn"><p class="callout-title">카디널리티</p><p>사용자 id처럼 값 종류가 많은 키는 반드시 high cardinality로 두세요. low로 두면 메트릭 시계열이 폭증합니다.</p></div>
+<h3>Baggage</h3>
+<ul>
+<li>원격 전파할 필드는 <code>management.tracing.baggage.remote-fields</code>로 지정합니다.</li>
+<li>MDC에 넣을 필드는 <code>…baggage.correlation.fields</code>로 지정합니다.</li>
+<li>전파 형식은 <code>management.tracing.propagation.type=W3C|B3</code>로 고릅니다.</li>
+<li>코드에서는 <code>tracer.createBaggageInScope(k, v).use { }</code>로 씁니다.</li>
+</ul>
+<h3>확장 빈</h3>
+<ul>
+<li><code>SpanExporter</code> 빈은 <code>BatchSpanProcessor</code>에 자동으로 연결됩니다.</li>
+<li><code>SpanProcessor</code>는 PII 마스킹 같은 용도로 씁니다.</li>
+<li><code>Sampler</code> 예시: <code>Sampler.parentBased(Sampler.traceIdRatioBased(0.2))</code></li>
+<li><code>SdkTracerProviderBuilderCustomizer</code></li>
+</ul>
+<p><strong>Resource:</strong> <code>management.opentelemetry.resource-attributes.*</code>로 지정합니다. <code>OTEL_*</code> 환경변수를 어디까지 지원하는지는 레퍼런스에서 확인하세요.<span class="tag verify">검증 필요</span></p>
+<h2>7.3 계측 방식 비교</h2>
+<div class="tw"><table>
+<thead><tr><th>방식</th><th>장점</th><th>단점</th></tr></thead>
+<tbody>
+<tr><td><strong>Boot 스타터 (권장)</strong></td><td>공식 지원, Observation과 일관됨, 설정이 <code>management.*</code> 하나로 통일</td><td>라이브러리 자동계측 범위가 좁음</td></tr>
+<tr><td>OTel Spring Boot starter</td><td><code>otel.*</code> 설정, 네이티브 이미지 지원</td><td>일부 alpha 의존성</td></tr>
+<tr><td>OTel Java agent</td><td>코드 수정 없음, 자동계측 범위가 가장 넓음, <code>@WithSpan</code> 지원</td><td>버전 호환 문제, 브리지와 함께 쓰면 span 중복</td></tr>
+</tbody>
+</table></div>
+<p><code>@WithSpan</code>은 agent나 OTel starter에서만 동작합니다. 두 방식을 함께 쓰지 마세요.</p>
+<h2>7.4 전파·로그·메트릭·k8s</h2>
+<h3>컨텍스트 전파</h3>
+<ul>
+<li><strong>Executor:</strong> <code>ContextPropagatingTaskDecorator</code>를 <code>ThreadPoolTaskExecutor.setTaskDecorator</code>에 등록하거나, <code>ContextSnapshotFactory…captureAll().wrap(r)</code>로 작업을 감쌉니다.</li>
+<li><strong>Reactor:</strong> <code>spring.reactor.context-propagation=auto</code></li>
+<li><strong>코루틴:</strong> <code>withContext(Dispatchers.IO + PropagationContextElement())</code>를 씁니다. Flow를 반환하는 엔드포인트에서는 전파가 안 되는 이슈(#36427)가 있으니, 그 경우 <code>observationRegistry.asContextElement()</code>를 쓰세요.</li>
+<li><strong>메시징:</strong> 다음 프로퍼티는 기본값이 false라서, 켜지 않으면 트레이스가 끊깁니다.
+<ul>
+<li><code>spring.kafka.template.observation-enabled</code>, <code>spring.kafka.listener.observation-enabled</code></li>
+<li><code>spring.rabbitmq.template.observation-enabled</code>, <code>spring.rabbitmq.listener.simple.observation-enabled</code></li>
+</ul></li>
+<li><strong>RestClient:</strong> Boot가 주입한 <code>RestClient.Builder</code>로 만들어야 전파됩니다. <code>RestClient.create()</code>로 만들면 전파되지 않습니다.</li>
+</ul>
+<h3>Logback</h3>
+<ul>
+<li><code>logging.pattern.correlation</code>으로 MDC의 traceId와 spanId를 출력합니다.</li>
+<li>구조화 로그는 <code>logging.structured.format.console=ecs|logstash</code>로 켭니다.</li>
+<li>OTLP로 로그를 보내려면 <code>opentelemetry-logback-appender-1.0</code>(alpha)을 추가하고 <code>OpenTelemetryAppender</code>를 선언한 다음 설치합니다.</li>
+</ul>
+<pre class="kt"><code>@Component
+class OtelAppenderInstaller(private val otel: OpenTelemetry) : InitializingBean {
+    override fun afterPropertiesSet() = OpenTelemetryAppender.install(otel)
+}</code></pre>
+<h3>Prometheus</h3>
+<ul>
+<li><strong>미터 종류:</strong> <code>Counter</code>, <code>Timer.builder(…).publishPercentileHistogram()</code>, <code>DistributionSummary</code>, <code>Gauge</code>
+<ul>
+<li><code>Gauge</code>는 대상을 약참조로 잡으므로 대상 객체를 강참조로 따로 유지해야 합니다.</li>
+</ul></li>
+<li><strong>등록과 필터:</strong> <code>MeterBinder</code> 빈으로 등록하고, <code>MeterFilter.denyNameStartsWith</code>, <code>maximumAllowableTags</code>, <code>commonTags</code>로 거릅니다.</li>
+<li><strong>공통 태그:</strong> <code>management.metrics.tags.*</code></li>
+<li><strong>히스토그램·SLO:</strong> <code>management.metrics.distribution.percentiles-histogram.http.server.requests=true</code>, <code>…slo.http.server.requests=100ms,300ms,1s</code></li>
+<li><strong>exemplar:</strong> trace id가 자동으로 붙습니다. OpenMetrics 포맷으로 스크레이프해야 보입니다.</li>
+</ul>
+<h3>k8s</h3>
+<ul>
+<li><strong>헬스 프로브:</strong> 기본으로 켜집니다. liveness에는 DB를 넣지 말고, readiness에만 <code>include=readinessState,db</code>로 넣으세요.</li>
+<li><strong>종료:</strong> <code>server.shutdown=graceful</code>과 <code>spring.lifecycle.timeout-per-shutdown-phase=30s</code>를 설정합니다. <code>terminationGracePeriodSeconds</code>는 이보다 길게 잡고, <code>preStop</code>에 sleep을 넣습니다.</li>
+<li><strong>리소스 속성:</strong> Downward API로 받은 <code>POD_NAME</code>을 <code>resource-attributes.k8s.pod.name</code>에 넣거나, Collector의 <code>k8sattributes</code>를 씁니다.</li>
+<li><strong>Collector 배치:</strong> DaemonSet agent와 gateway Deployment(tail sampling 담당)의 두 단으로 구성하세요.</li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://spring.io/blog/2025/11/18/opentelemetry-with-spring-boot/" target="_blank" rel="noopener">OpenTelemetry with Spring Boot (spring.io 블로그)</a></li>
+<li><a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.0.0-RC1-Release-Notes" target="_blank" rel="noopener">Spring Boot 4.0.0-RC1 Release Notes</a></li>
+<li><a href="https://github.com/spring-projects/spring-boot/wiki/Spring-Boot-4.1.0-M1-Release-Notes" target="_blank" rel="noopener">Spring Boot 4.1.0-M1 Release Notes</a></li>
+<li><a href="https://dimitri.codes/opentelemetry-starter/" target="_blank" rel="noopener">OpenTelemetry starter 튜토리얼 (dimitri.codes)</a></li>
+<li><a href="https://docs.spring.io/spring-framework/reference/languages/kotlin/coroutines.html" target="_blank" rel="noopener">Spring Framework Reference: Kotlin Coroutines</a></li>
+<li><a href="https://github.com/spring-projects/spring-framework/issues/36427" target="_blank" rel="noopener">spring-framework #36427</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch7"></div>
+</section>
+
+<section class="chapter" id="ch8" data-label="8장" data-title="Kotlin 코루틴 + Spring">
+<header class="ch-head">
+<h1>8장 Kotlin 코루틴 + Spring</h1>
+<p class="ch-lead">코루틴을 Spring MVC, 트랜잭션, 스케줄러, 메시징과 함께 쓸 때 필요한 의존성과 함정, 자주 쓰는 타입과 연산자를 정리합니다. 가상 스레드와 어떻게 나눠 쓸지도 다룹니다.</p>
+</header>
+<div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
+<li>MVC의 suspend와 Flow에는 <code>kotlinx-coroutines-reactor</code>가 필요하고, 테스트는 <code>asyncDispatch</code>를 거칩니다.</li>
+<li>JPA 트랜잭션은 <code>withContext</code> + <code>TransactionTemplate</code> 안에서 끝내고, 그 안에서 suspend하지 않습니다.</li>
+<li>기본은 가상 스레드와 동기 코드로 가고, 코루틴은 fan-out과 스트리밍에만 씁니다.</li>
+</ul></div>
+<h2>8.1 MVC</h2>
+<ul>
+<li><strong>필수 의존성:</strong> <code>kotlinx-coroutines-reactor</code>가 필요합니다.</li>
+<li><strong>동작 방식:</strong> suspend 함수는 Mono로 바뀌어 비동기 요청으로 처리됩니다.</li>
+<li><strong>Flow 반환:</strong> SSE나 NDJSON이면 스트리밍되고, JSON이면 전부 모은 뒤 응답합니다.</li>
+<li><strong>테스트:</strong> <code>asyncDispatch</code>가 필요합니다. 첫 요청에 문서화를 걸면 바디가 빈 스니펫이 생성되니, 문서화는 <code>asyncDispatch</code> 쪽에 거세요.</li>
+</ul>
+<pre class="kt"><code>val r = mockMvc.perform(RestDocumentationRequestBuilders.get("/members/{id}", 1))
+    .andExpect(request().asyncStarted()).andReturn()
+mockMvc.perform(asyncDispatch(r)).andExpect(status().isOk)
+    .andDo(MockMvcRestDocumentationWrapper.document("member-get", resource("회원 조회")))</code></pre>
+<h2>8.2 트랜잭션·JPA</h2>
+<ul>
+<li><strong>suspend + <code>@Transactional</code>:</strong> 리액티브 트랜잭션으로 처리되므로 <code>ReactiveTransactionManager</code>가 필요합니다. JPA에서는 사실상 쓸 수 없습니다.</li>
+<li><strong>원인:</strong> EntityManager가 ThreadLocal에 묶여 있습니다. 코루틴이 다른 스레드에서 재개되면 트랜잭션을 잃고, <code>LazyInitializationException</code>이 나거나 커밋이 누락됩니다.</li>
+<li><strong>해결:</strong> 트랜잭션 블록 안에서는 suspend하지 않습니다.</li>
+</ul>
+<pre class="kt"><code>suspend fun rename(id: Long, name: String) = withContext(dbDispatcher + PropagationContextElement()) {
+    tx.execute { repo.findByIdOrNull(id)!!.also { it.rename(name) }.toDto() }!!
+}</code></pre>
+<ul>
+<li><strong>HikariCP 풀 고갈:</strong> IO 디스패처는 64개까지 병렬 실행하지만 커넥션 풀은 기본 10개입니다. <code>val dbDispatcher = Dispatchers.IO.limitedParallelism(maxPoolSize)</code>로 병렬도를 맞추거나 <code>Semaphore</code>로 제한하세요.</li>
+</ul>
+<h2>8.3 스케줄러·이벤트·메시징</h2>
+<h3>스케줄러·이벤트</h3>
+<ul>
+<li><strong><code>@Scheduled suspend fun</code>:</strong> 리액터 브리지가 있으면 지원됩니다. 에러가 나면 WARN 로그를 남기고 다음 주기를 계속 실행합니다.</li>
+<li><strong><code>@Async</code>·<code>@EventListener</code>의 suspend 지원:</strong> 확인하지 못했습니다. 앱의 <code>CoroutineScope</code>에서 <code>launch</code>하거나 <code>CompletableFuture</code>를 반환하세요.<span class="tag verify">검증 필요</span></li>
+<li><strong>Spring 7 <code>PropagationContextElement</code>:</strong> Micrometer, MDC, Reactor Context를 복원합니다. suspend 컨트롤러에는 자동으로 적용됩니다.<span class="tag b4">Boot 4</span></li>
+</ul>
+<h3>Spring Kafka</h3>
+<ul>
+<li>3.2부터 async 반환 타입(<code>CompletableFuture</code>, <code>Mono</code>, suspend)을 지원합니다.</li>
+<li><code>Unit</code>을 반환하면 자동 ack가 되지 않는다는 보고가 있습니다(#3739). <code>Acknowledgment.acknowledge()</code>를 직접 호출하세요.</li>
+<li>메시지 순서가 중요하면 async 리스너를 쓰지 마세요.</li>
+<li>열린 이슈가 두 개 있습니다: 리밸런스 후 fetch가 멈추는 문제(#4687), stop 후에도 작업이 남는 문제(#4519).<span class="tag verify">검증 필요</span></li>
+<li>전송 결과는 <code>kafkaTemplate.send(t, k, v).await()</code>로 기다립니다.</li>
+</ul>
+<h3>Spring AMQP</h3>
+<ul>
+<li><code>@RabbitListener</code>도 <code>CompletableFuture</code>, <code>Mono</code>, suspend를 지원합니다.</li>
+<li>ack 동작은 레퍼런스에서 확인하세요.<span class="tag verify">검증 필요</span></li>
+</ul>
+<h2>8.4 타입과 연산자</h2>
+<div class="tw"><table data-filter="타입·연산자에서 찾기 (예: flatMap)">
+<thead><tr><th>분류</th><th>항목</th></tr></thead>
+<tbody>
+<tr><td>스코프·잡</td><td><code>CoroutineScope</code>(빈으로 두고 <code>@PreDestroy</code>에서 cancel), <code>SupervisorJob</code>, <code>CoroutineName</code>, <code>coroutineScope {}</code>(하나가 실패하면 전체 취소), <code>supervisorScope {}</code></td></tr>
+<tr><td>디스패처</td><td><code>Default</code>, <code>IO</code>(64), <code>Unconfined</code>(사용 금지), <code>limitedParallelism(n)</code>, <code>Executors.newVirtualThreadPerTaskExecutor().asCoroutineDispatcher()</code>(close 필요)</td></tr>
+<tr><td>빌더·제어</td><td><code>launch</code>, <code>async</code>/<code>await</code>, <code>awaitAll</code>, <code>withContext</code>, <code>withTimeout(OrNull)</code>, <code>runBlocking</code>(요청 스레드·코루틴·트랜잭션 안에서 사용 금지), <code>runInterruptible</code>, <code>NonCancellable</code>, <code>CoroutineExceptionHandler</code>(최상위 launch에서만 동작), <code>ensureActive</code>, <code>yield</code></td></tr>
+<tr><td>동기화·채널</td><td><code>Mutex.withLock</code>(재진입 불가), <code>Semaphore.withPermit</code>, <code>Channel(RENDEZVOUS/BUFFERED/UNLIMITED/CONFLATED)</code>, <code>produce</code>, <code>select</code></td></tr>
+<tr><td>Flow 연산자</td><td><code>map</code>, <code>filter</code>, <code>transform</code>, <code>onEach</code>, <code>flatMapMerge(concurrency)</code>, <code>flatMapConcat</code>, <code>flatMapLatest</code>, <code>buffer</code>, <code>conflate</code>, <code>debounce</code>, <code>sample</code>, <code>zip</code>, <code>combine</code>, <code>catch</code>(업스트림 예외만 잡음), <code>retry</code>/<code>retryWhen</code>, <code>onStart</code>/<code>onCompletion</code>, <code>flowOn</code>, <code>take</code>, <code>distinctUntilChanged</code>, <code>chunked</code>(버전 확인 필요), <code>launchIn</code></td></tr>
+<tr><td>생성·공유</td><td><code>flow {}</code>, <code>flowOf</code>, <code>asFlow</code>, <code>channelFlow</code>, <code>callbackFlow</code>(<code>awaitClose</code> 필수), <code>MutableSharedFlow</code>, <code>MutableStateFlow</code>, <code>shareIn</code>/<code>stateIn</code></td></tr>
+<tr><td>브리지</td><td><code>mono {}</code>, <code>flux {}</code>, <code>awaitSingle(OrNull)</code>, <code>awaitFirst</code>, <code>Flux.asFlow()</code>, <code>Flow.asFlux()</code>, <code>CompletableFuture.await()</code>, <code>Deferred.asCompletableFuture()</code></td></tr>
+<tr><td>컨텍스트</td><td><code>MDCContext()</code>(kotlinx-coroutines-slf4j), <code>ThreadContextElement</code>(테넌트·보안 컨텍스트), <code>PropagationContextElement()</code>, <code>observationRegistry.asContextElement()</code></td></tr>
+<tr><td>테스트</td><td><code>runTest</code>, <code>StandardTestDispatcher</code>, <code>UnconfinedTestDispatcher</code>, <code>advanceUntilIdle</code>, <code>advanceTimeBy</code>, <code>runCurrent</code>, <code>backgroundScope</code>, Turbine</td></tr>
+</tbody>
+</table></div>
+<pre class="kt"><code>class SecurityContextElement(private val ctx: SecurityContext) :
+    ThreadContextElement&lt;SecurityContext?&gt;, AbstractCoroutineContextElement(Key) {
+    companion object Key : CoroutineContext.Key&lt;SecurityContextElement&gt;
+    override fun updateThreadContext(context: CoroutineContext): SecurityContext? =
+        SecurityContextHolder.getContext().also { SecurityContextHolder.setContext(ctx) }
+    override fun restoreThreadContext(context: CoroutineContext, oldState: SecurityContext?) {
+        if (oldState == null) SecurityContextHolder.clearContext() else SecurityContextHolder.setContext(oldState)
+    }
+}</code></pre>
+<h2>8.5 가상 스레드</h2>
+<ul>
+<li><code>spring.threads.virtual.enabled=true</code>를 켜면 Tomcat, <code>@Async</code>, <code>@Scheduled</code>, 리스너가 가상 스레드에서 실행됩니다.</li>
+<li>블로킹 JPA 위주의 MVC라면 <strong>가상 스레드 + 동기 코드</strong>가 가장 부담 없는 선택입니다. 코루틴은 여러 호출을 동시에 보내는 fan-out과 Flow 스트리밍에만 쓰세요.</li>
+<li>커넥션 풀이 병목이 되는 문제는 가상 스레드에서도 똑같이 생깁니다.</li>
+</ul>
+<div class="sources"><p class="sources-title">근거 자료</p><ul>
+<li><a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/core/PropagationContextElement.html" target="_blank" rel="noopener">PropagationContextElement Javadoc</a></li>
+<li><a href="https://docs.spring.io/spring-framework/docs/current/javadoc-api/org/springframework/scheduling/annotation/Scheduled.html" target="_blank" rel="noopener">@Scheduled Javadoc</a></li>
+<li><a href="https://docs.spring.io/spring-kafka/reference/kafka/receiving-messages/async-returns.html" target="_blank" rel="noopener">Spring for Apache Kafka: Async Returns</a></li>
+<li><a href="https://github.com/spring-projects/spring-kafka/discussions/3739" target="_blank" rel="noopener">spring-kafka discussion #3739</a></li>
+<li><a href="https://github.com/spring-projects/spring-kafka/issues/4687" target="_blank" rel="noopener">spring-kafka #4687</a></li>
+<li><a href="https://github.com/spring-projects/spring-kafka/issues/4519" target="_blank" rel="noopener">spring-kafka #4519</a></li>
+</ul></div>
+<div class="quiz" data-quiz="ch8"></div>
+</section>
+
+<section class="chapter" id="appA" data-label="부록 A" data-title="권장 사항">
+<header class="ch-head">
+<h1>부록 A 권장 사항</h1>
+<p class="ch-lead">여덟 개 장의 결론을 도입 순서대로 모았습니다.</p>
+</header>
+<ol class="big-steps">
+<li><strong>빌드:</strong> param-property 옵션, <code>plugin.jpa</code>/<code>plugin.spring</code>/<code>allOpen</code>, Boot 4 test 스타터부터 정리하세요.</li>
+<li><strong>soft delete:</strong> 기본 조합은 <code>@SQLDelete</code>(바인딩 순서 id, version) + <code>@SQLRestriction</code>(관리자 화면이 필요하면 <code>@Filter</code>) + <code>store_data_at_delete=true</code>입니다. <code>@SoftDelete</code>는 REVTYPE 테스트를 통과한 뒤에만 쓰세요.</li>
+<li><strong>감사 대상 보호:</strong> 감사 대상 엔티티에는 벌크 쓰기와 네이티브 쓰기를 금지하고, <code>_AUD</code> 테이블은 Flyway로 관리하세요.</li>
+<li><strong>API 문서:</strong> restdocs-api-spec 0.20.1과 MockMvc를 씁니다. suspend 엔드포인트는 <code>asyncDispatch</code>에서 문서화하고, 제약은 <code>ConstrainedFields</code>로 반영하세요.</li>
+<li><strong>관측성:</strong> <code>spring-boot-starter-opentelemetry</code> 하나로 통일하세요. agent와 함께 쓰지 말고, Kafka/Rabbit observation을 켜세요.</li>
+<li><strong>동시성 모델:</strong> 기본은 가상 스레드로 가고, 코루틴은 fan-out과 스트리밍에만 쓰세요. JPA는 <code>withContext</code> + <code>TransactionTemplate</code> 안에 격리합니다.</li>
+</ol>
+</section>
+
+<section class="chapter" id="appB" data-label="부록 B" data-title="주의 사항">
+<header class="ch-head">
+<h1>부록 B 주의 사항</h1>
+<p class="ch-lead">이 교과서에서 확정하지 못한 부분입니다. 상단의 검증 필요 버튼을 누르면 본문에서 해당 위치를 바로 찾을 수 있습니다.</p>
+</header>
+<ul>
+<li><strong><code>@SoftDelete</code> + Envers:</strong> REVTYPE이 DEL이라는 것은 추정입니다. 공식 문서나 JIRA로 확인하지 못했습니다.</li>
+<li><strong>최신 GA 번호:</strong> Kotlin, kotlinx.coroutines, Jackson, Micrometer, OTel SDK의 최신 GA 번호는 직접 확인하지 못했습니다. Boot 4.1.1 BOM을 기준으로 삼으세요.</li>
+<li><strong>javadoc이나 소스에서 다시 확인할 항목:</strong>
+<ul>
+<li><code>@KorRRN</code>의 속성명</li>
+<li>restdocs-api-spec의 오버로드 시그니처와 enum 스키마 처리</li>
+<li><code>@FilterDef</code> 신규 속성이 도입된 버전</li>
+<li><code>OTEL_*</code> 환경변수 지원 범위</li>
+<li><code>@SoftDelete</code>가 HQL delete를 어떻게 번역하는지</li>
+<li>Spring 7에서 <code>@EventListener</code>와 <code>@Async</code>의 suspend 지원 여부</li>
+<li>AMQP suspend 리스너의 ack 동작</li>
+</ul></li>
+<li><strong>Spring Kafka suspend 리스너:</strong> 관련 이슈(#4687, #4519)가 아직 열려 있는 것으로 보입니다. 메시지 순서가 중요하면 동기 리스너 + 가상 스레드를 택하세요.</li>
+</ul>
+</section>
+</main>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <h3 id="modalTitle"></h3>
+      <button class="icon-btn" id="modalClose" type="button" aria-label="닫기">
+        <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button class="to-top" id="toTop" type="button" aria-label="맨 위로">
+  <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M12 19V5M6 11l6-6 6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+</button>
+<script>
+/* core.js: DOM에 의존하지 않는 로직. node로 단위 테스트할 수 있게 분리했다. */
+var TB = (function () {
+  "use strict";
+
+  function esc(s) {
+    return String(s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  /* `백틱` 구간만 <code>로 바꾼다. 나머지는 이스케이프. */
+  function mdCode(s) {
+    return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
+  }
+
+  /* ---------- Kotlin 하이라이터 (IntelliJ 계열 토큰 분류) ---------- */
+  var KT_KW = {};
+  ("fun val var class object interface annotation data sealed enum companion override private protected public " +
+    "internal open abstract suspend inline reified return if else when try catch finally throw for while do in is as " +
+    "null true false this super import package typealias by init lateinit const vararg out where operator infix " +
+    "tailrec crossinline noinline")
+    .split(" ")
+    .forEach(function (k) { KT_KW[k] = 1; });
+
+  var KT_RE = /(\/\*[\s\S]*?\*\/|\/\/[^\n]*)|("""[\s\S]*?"""|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])+')|(@(?:[a-z]+:)?[A-Za-z_][A-Za-z0-9_]*)|(\b\d[\d_]*(?:\.\d+)?[LlFf]?\b)|([A-Za-z_][A-Za-z0-9_]*)/g;
+
+  function highlightKotlin(src) {
+    var out = "", last = 0, m;
+    KT_RE.lastIndex = 0;
+    while ((m = KT_RE.exec(src)) !== null) {
+      out += esc(src.slice(last, m.index));
+      var t = m[0], cls = "";
+      if (m[1]) cls = "c";
+      else if (m[2]) cls = "s";
+      else if (m[3]) cls = "a";
+      else if (m[4]) cls = "n";
+      else if (m[5]) {
+        if (Object.prototype.hasOwnProperty.call(KT_KW, t)) cls = "k";
+        else if (/^[A-Z]/.test(t)) cls = "t";
+        else if (src.charAt(KT_RE.lastIndex) === "(") cls = "f";
+      }
+      out += cls ? '<span class="tk-' + cls + '">' + esc(t) + "</span>" : esc(t);
+      last = KT_RE.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+
+  /* ---------- JPQL 하이라이터 ---------- */
+  var JP_RE = /(--[^\n]*|\/\*[\s\S]*?\*\/)|(\?\d+)|\b(select|distinct|count|from|where|and|or|not|like|in|between|is|null|empty|order|by|asc|desc|upper|true|false)\b/g;
+
+  function highlightJpql(src) {
+    var out = "", last = 0, m;
+    JP_RE.lastIndex = 0;
+    while ((m = JP_RE.exec(src)) !== null) {
+      out += esc(src.slice(last, m.index));
+      var cls = m[1] ? "c" : m[2] ? "p" : "k";
+      out += '<span class="jp-' + cls + '">' + esc(m[0]) + "</span>";
+      last = JP_RE.lastIndex;
+    }
+    return out + esc(src.slice(last));
+  }
+
+  /* ---------- 파생 쿼리 메서드 해석기 ----------
+     Spring Data Commons Part.Type 키워드 목록을 기준으로 한 학습용 근사 변환. */
+  var DQ = [
+    { kw: ["IsNotNull", "NotNull"], t: "IS_NOT_NULL", n: 0 },
+    { kw: ["IsNull", "Null"], t: "IS_NULL", n: 0 },
+    { kw: ["IsBetween", "Between"], t: "BETWEEN", n: 2 },
+    { kw: ["IsLessThanEqual", "LessThanEqual"], t: "LTE", n: 1 },
+    { kw: ["IsLessThan", "LessThan"], t: "LT", n: 1 },
+    { kw: ["IsGreaterThanEqual", "GreaterThanEqual"], t: "GTE", n: 1 },
+    { kw: ["IsGreaterThan", "GreaterThan"], t: "GT", n: 1 },
+    { kw: ["IsBefore", "Before"], t: "BEFORE", n: 1 },
+    { kw: ["IsAfter", "After"], t: "AFTER", n: 1 },
+    { kw: ["IsNotLike", "NotLike"], t: "NOT_LIKE", n: 1 },
+    { kw: ["IsLike", "Like"], t: "LIKE", n: 1 },
+    { kw: ["IsStartingWith", "StartingWith", "StartsWith"], t: "STARTING_WITH", n: 1 },
+    { kw: ["IsEndingWith", "EndingWith", "EndsWith"], t: "ENDING_WITH", n: 1 },
+    { kw: ["IsNotEmpty", "NotEmpty"], t: "IS_NOT_EMPTY", n: 0 },
+    { kw: ["IsEmpty", "Empty"], t: "IS_EMPTY", n: 0 },
+    { kw: ["IsNotContaining", "NotContaining", "NotContains"], t: "NOT_CONTAINING", n: 1 },
+    { kw: ["IsContaining", "Containing", "Contains"], t: "CONTAINING", n: 1 },
+    { kw: ["IsNotIn", "NotIn"], t: "NOT_IN", n: 1 },
+    { kw: ["IsIn", "In"], t: "IN", n: 1 },
+    { kw: ["IsNear", "Near"], t: "NEAR", n: 1, bad: true },
+    { kw: ["IsWithin", "Within"], t: "WITHIN", n: 1, bad: true },
+    { kw: ["MatchesRegex", "Matches", "Regex"], t: "REGEX", n: 1, bad: true },
+    { kw: ["Exists"], t: "EXISTS", n: 0, bad: true },
+    { kw: ["IsTrue", "True"], t: "TRUE", n: 0 },
+    { kw: ["IsFalse", "False"], t: "FALSE", n: 0 },
+    { kw: ["IsNot", "Not"], t: "NOT", n: 1 },
+    { kw: ["Is", "Equals"], t: "EQ", n: 1 }
+  ];
+
+  var STRINGISH = { EQ: 1, NOT: 1, LIKE: 1, NOT_LIKE: 1, STARTING_WITH: 1, ENDING_WITH: 1, CONTAINING: 1, NOT_CONTAINING: 1 };
+  var LEADING_WILDCARD = { ENDING_WITH: 1, CONTAINING: 1, NOT_CONTAINING: 1 };
+
+  function decap(s) { return s ? s.charAt(0).toLowerCase() + s.slice(1) : s; }
+  function toPath(raw) { return raw.split("_").filter(Boolean).map(decap).join("."); }
+
+  function parseOrder(s) {
+    var out = [], re = /([A-Z][A-Za-z0-9_]*?)(Asc|Desc)(?=[A-Z]|$)/g, m, last = 0;
+    while ((m = re.exec(s)) !== null) {
+      if (m.index > last) out.push({ prop: s.slice(last, m.index), dir: "asc" });
+      out.push({ prop: m[1], dir: m[2].toLowerCase() });
+      last = re.lastIndex;
+    }
+    if (last < s.length) out.push({ prop: s.slice(last), dir: "asc" });
+    return out;
+  }
+
+  function buildCond(t, path, ic, i) {
+    var L = ic ? "upper(" + path + ")" : path;
+    var P = ic ? "upper(?" + i + ")" : "?" + i;
+    switch (t) {
+      case "EQ": return L + " = " + P;
+      case "NOT": return L + " <> " + P;
+      case "BETWEEN": return path + " between ?" + i + " and ?" + (i + 1);
+      case "LT": case "BEFORE": return path + " < ?" + i;
+      case "LTE": return path + " <= ?" + i;
+      case "GT": case "AFTER": return path + " > ?" + i;
+      case "GTE": return path + " >= ?" + i;
+      case "IS_NULL": return path + " is null";
+      case "IS_NOT_NULL": return path + " is not null";
+      case "LIKE": case "STARTING_WITH": case "ENDING_WITH": case "CONTAINING": return L + " like " + P;
+      case "NOT_LIKE": case "NOT_CONTAINING": return L + " not like " + P;
+      case "IN": return path + " in ?" + i;
+      case "NOT_IN": return path + " not in ?" + i;
+      case "TRUE": return path + " = true";
+      case "FALSE": return path + " = false";
+      case "IS_EMPTY": return path + " is empty";
+      case "IS_NOT_EMPTY": return path + " is not empty";
+      default: return "/* " + t + ": JPA 미지원 */";
+    }
+  }
+
+  var BIND = {
+    STARTING_WITH: "값 + '%'",
+    ENDING_WITH: "'%' + 값",
+    CONTAINING: "'%' + 값 + '%'",
+    NOT_CONTAINING: "'%' + 값 + '%'",
+    IN: "컬렉션",
+    NOT_IN: "컬렉션"
+  };
+
+  function parseDerivedQuery(input, entity) {
+    var r = { ok: false, errors: [], warnings: [], notes: [], params: [], tokens: [], jpql: "", verb: "" };
+    var name = String(input == null ? "" : input).trim().replace(/^fun\s+/, "").replace(/\s*\([\s\S]*$/, "");
+    if (!name) { r.errors.push("메서드 이름을 입력하세요. 예: findByLastnameAndFirstname"); return r; }
+    if (!/^[A-Za-z_][A-Za-z0-9_]*$/.test(name)) {
+      r.errors.push("영문 메서드 이름만 입력할 수 있습니다. 예: findByLastnameAndFirstname");
+      return r;
+    }
+    var m = /^(find|read|get|query|search|stream|count|exists|delete|remove)([A-Z][A-Za-z0-9_]*?)?By(.*)$/.exec(name);
+    if (!m) {
+      r.errors.push("find, read, get, query, search, stream, count, exists, delete, remove 중 하나로 시작하고 By가 들어가야 합니다.");
+      return r;
+    }
+    var verb = m[1], mid = m[2] || "", rest = m[3];
+    r.verb = verb;
+    var E = String(entity == null ? "" : entity).replace(/[^A-Za-z0-9_]/g, "") || "Member";
+    var a = E.charAt(0).toLowerCase();
+    var distinct = mid.indexOf("Distinct") >= 0;
+    var lm = /(First|Top)(\d*)/.exec(mid);
+    var limit = lm ? (lm[2] ? parseInt(lm[2], 10) : 1) : null;
+
+    r.tokens.push({ kind: "verb", text: verb });
+    if (distinct) r.tokens.push({ kind: "mod", text: "Distinct" });
+    if (lm) r.tokens.push({ kind: "mod", text: lm[1] + " " + limit });
+    r.tokens.push({ kind: "by", text: "By" });
+
+    var where = rest, order = "";
+    var ob = rest.indexOf("OrderBy");
+    if (ob >= 0) { where = rest.slice(0, ob); order = rest.slice(ob + 7); }
+    var allIc = false;
+    var aim = /(AllIgnoreCase|AllIgnoringCase)$/.exec(where);
+    if (aim && aim.index > 0) { allIc = true; where = where.slice(0, aim.index); }
+
+    var idx = 1, usedIc = false, lead = false, hasEq = false, icOnNonString = false;
+    var groups = where ? where.split(/Or(?=[A-Z])/) : [];
+    var groupSql = [];
+    for (var gi = 0; gi < groups.length; gi++) {
+      if (gi > 0) r.tokens.push({ kind: "op", text: "Or" });
+      var parts = groups[gi].split(/And(?=[A-Z])/), conds = [];
+      for (var pi = 0; pi < parts.length; pi++) {
+        if (pi > 0) r.tokens.push({ kind: "op", text: "And" });
+        var p = parts[pi], ic = allIc;
+        var icm = /(IgnoreCase|IgnoringCase)$/.exec(p);
+        if (icm && icm.index > 0) { ic = true; p = p.slice(0, icm.index); }
+        var type = null, kw = "";
+        for (var ti = 0; ti < DQ.length && !type; ti++) {
+          for (var ki = 0; ki < DQ[ti].kw.length; ki++) {
+            var k = DQ[ti].kw[ki];
+            if (p.length > k.length && p.slice(-k.length) === k) { type = DQ[ti]; kw = k; break; }
+          }
+        }
+        if (!type) type = { t: "EQ", n: 1 };
+        var propRaw = kw ? p.slice(0, p.length - kw.length) : p;
+        if (!propRaw) { r.errors.push("속성 이름이 비어 있는 조건이 있습니다: " + (parts[pi] || "(빈 조건)")); continue; }
+        var prop = toPath(propRaw), path = a + "." + prop;
+        var effIc = ic && !!STRINGISH[type.t];
+        if (ic && !STRINGISH[type.t]) icOnNonString = true;
+        if (effIc) usedIc = true;
+        if (LEADING_WILDCARD[type.t]) lead = true;
+        if (type.t === "EQ") hasEq = true;
+        if (type.bad) r.warnings.push("`" + kw + "`는 JPA에서 지원하지 않거나 제한적인 키워드입니다.");
+        conds.push(buildCond(type.t, path, effIc, idx));
+        r.tokens.push({ kind: "cond", prop: prop, kw: kw || "(=)", ic: ic });
+        if (type.t === "BETWEEN") {
+          r.params.push({ i: idx, prop: prop, bind: "시작값" });
+          r.params.push({ i: idx + 1, prop: prop, bind: "끝값" });
+        } else if (type.n === 1) {
+          r.params.push({ i: idx, prop: prop, bind: (BIND[type.t] || "값") + (effIc ? " (대문자로 비교)" : "") });
+        }
+        idx += type.n;
+      }
+      if (conds.length) groupSql.push(conds);
+    }
+    if (r.errors.length) return r;
+
+    var orders = order ? parseOrder(order) : [];
+    orders.forEach(function (o) { r.tokens.push({ kind: "order", text: "OrderBy " + toPath(o.prop) + " " + o.dir }); });
+    if (allIc) r.tokens.push({ kind: "mod", text: "AllIgnoreCase" });
+
+    var lines = [];
+    if (verb === "count") lines.push("select count(" + (distinct ? "distinct " : "") + a + ")");
+    else lines.push("select " + (distinct ? "distinct " : "") + a);
+    lines.push("from " + E + " " + a);
+    if (groupSql.length === 1) {
+      lines.push("where " + groupSql[0].join("\n  and "));
+    } else if (groupSql.length > 1) {
+      lines.push("where " + groupSql.map(function (g) { return g.length > 1 ? "(" + g.join(" and ") + ")" : g[0]; }).join("\n   or "));
+    }
+    if (orders.length) {
+      lines.push("order by " + orders.map(function (o) { return a + "." + toPath(o.prop) + " " + o.dir; }).join(", "));
+    }
+    if (limit) lines.push("-- 결과를 최대 " + limit + "건으로 제한 (" + lm[1] + ")");
+    if (verb === "exists") lines.push("-- 결과가 한 건이라도 있으면 true를 반환");
+    if (verb === "delete" || verb === "remove") lines.push("-- 조회된 엔티티마다 em.remove() 호출");
+    r.jpql = lines.join("\n");
+
+    if (lead) r.warnings.push("앞에 `%`가 붙는 LIKE(Containing, EndingWith)는 일반 B-tree 인덱스를 타지 못합니다. 함수 인덱스나 trigram 인덱스를 검토하세요.");
+    if (usedIc) r.warnings.push("IgnoreCase는 `upper()` 비교로 바뀌어 일반 인덱스를 타지 못합니다. 함수 인덱스를 검토하세요.");
+    if (limit && !orders.length) r.warnings.push("정렬 없이 Top/First를 쓰면 어떤 행이 선택될지 보장되지 않습니다. OrderBy를 함께 쓰세요.");
+    if (icOnNonString) r.notes.push("IgnoreCase는 문자열 비교(=, <>, like)에만 적용했습니다.");
+    if (verb === "delete" || verb === "remove") {
+      r.notes.push("벌크 DELETE가 아닙니다. 엔티티를 조회한 뒤 한 건씩 remove하므로 `@SQLDelete`와 Envers가 동작합니다.");
+    }
+    if (verb === "stream") r.notes.push("`Stream<T>` 반환은 트랜잭션 안에서 `use {}`로 닫아야 합니다.");
+    if (verb === "exists") r.notes.push("exists 쿼리의 실제 SQL 형태는 버전에 따라 다를 수 있습니다.");
+    if (hasEq) r.notes.push("= 조건에 null을 넘기면 `is null`로 바뀝니다.");
+    r.notes.push("soft delete 필터(`@SQLRestriction`, `@SoftDelete`)는 파생 쿼리에 자동으로 붙습니다. 네이티브 쿼리에는 붙지 않습니다.");
+    r.ok = true;
+    return r;
+  }
+
+  /* ---------- 삭제 경로 시뮬레이터 (보고서 5.1, 3.3 표 기준) ---------- */
+  var SIM = {
+    approaches: [
+      { id: "sqldelete", label: "@SQLDelete + @SQLRestriction" },
+      { id: "softdelete", label: "@SoftDelete" }
+    ],
+    paths: [
+      { id: "remove", label: "repo.delete(entity), deleteById, 파생 deleteBy…" },
+      { id: "bulk", label: "deleteAllInBatch, @Modifying JPQL, Specification 벌크" },
+      { id: "native", label: "네이티브 DELETE 쿼리" },
+      { id: "flag", label: "엔티티의 deleted 필드를 직접 true로 수정" }
+    ],
+    table: {
+      "sqldelete:remove": {
+        sql: "update member set deleted = true where id = ? and version = ?",
+        sqlNote: "`@SQLDelete`에 적은 커스텀 UPDATE가 실행됩니다.",
+        soft: ["ok", "적용됨 (엔티티를 로드한 뒤 remove)"],
+        envers: ["ok", "기록됨, REVTYPE 2 (DEL)"],
+        conf: ["ok", "높음"],
+        notes: [
+          "기본 설정에서는 DEL 행에 id만 남습니다. `store_data_at_delete=true`를 권장합니다.",
+          "`@Version`과 함께 쓰면 바인딩 순서는 id, version입니다."
+        ]
+      },
+      "sqldelete:bulk": {
+        sql: "delete from member where …",
+        sqlNote: "벌크 연산은 `@SQLDelete`를 우회하므로 행이 실제로 삭제됩니다.",
+        soft: ["bad", "우회됨 (물리 삭제)"],
+        envers: ["bad", "기록 안 됨"],
+        conf: ["ok", "높음"],
+        notes: ["대량 삭제가 필요하면 `findAllById` → `deleteAll` → flush/clear를 청크 단위로 반복하세요."]
+      },
+      "sqldelete:native": {
+        sql: "(작성한 네이티브 SQL이 그대로 실행됨)",
+        sqlNote: "Hibernate 매핑이 끼어들지 않으므로 `@SQLDelete`가 적용되지 않습니다.",
+        soft: ["bad", "우회됨"],
+        envers: ["bad", "기록 안 됨"],
+        conf: ["ok", "높음"],
+        notes: ["네이티브 조회에도 `@SQLRestriction`이 적용되지 않습니다."]
+      },
+      "sqldelete:flag": {
+        sql: "update member set deleted = ?, … where id = ?",
+        sqlNote: "dirty checking에 의한 일반 UPDATE입니다.",
+        soft: ["ok", "적용됨 (수동 플래그)"],
+        envers: ["warn", "기록됨, REVTYPE 1 (MOD)"],
+        conf: ["ok", "높음"],
+        notes: [
+          "삭제가 MOD로 남으므로, 이력에서 삭제를 구분하려면 deleted 값의 변화를 봐야 합니다.",
+          "`global_with_modified_flag`를 켜면 `AuditEntity.property(\"deleted\").hasChanged()`로 찾을 수 있습니다."
+        ]
+      },
+      "softdelete:remove": {
+        sql: "update member set deleted = … where id = ?",
+        sqlNote: "Hibernate의 `DeleteCoordinatorSoft`가 DELETE 대신 UPDATE를 실행합니다.",
+        soft: ["ok", "적용됨"],
+        envers: ["warn", "DEL로 추정 (공식 확인 안 됨)"],
+        conf: ["warn", "낮음~중간"],
+        notes: [
+          "도입 전에 REVTYPE을 확인하는 통합 테스트를 반드시 작성하세요.",
+          "spring-data-jpa #4155에 `@SoftDelete`로 삭제할 때 `AuditorAware`가 호출되지 않는다는 보고가 있습니다."
+        ]
+      },
+      "softdelete:bulk": {
+        sql: "(버전별 확인 필요)",
+        sqlNote: "`@SoftDelete`가 HQL delete를 어떻게 번역하는지는 버전별로 확인해야 합니다.",
+        soft: ["warn", "확인 필요"],
+        envers: ["bad", "기록 안 됨"],
+        conf: ["warn", "낮음"],
+        notes: ["감사 대상 엔티티에는 벌크 쓰기를 금지하는 편이 안전합니다."]
+      },
+      "softdelete:native": {
+        sql: "(작성한 네이티브 SQL이 그대로 실행됨)",
+        sqlNote: "네이티브 DELETE는 행을 실제로 지웁니다.",
+        soft: ["bad", "우회됨"],
+        envers: ["bad", "기록 안 됨"],
+        conf: ["ok", "높음"],
+        notes: ["네이티브 조회에도 soft delete 필터가 적용되지 않습니다."]
+      },
+      "softdelete:flag": {
+        sql: "(해당 없음)",
+        sqlNote: "이 조합은 코드로 표현할 수 없습니다.",
+        soft: ["na", "해당 없음"],
+        envers: ["na", "해당 없음"],
+        conf: ["ok", "높음"],
+        notes: ["`@SoftDelete`의 삭제 컬럼은 엔티티 필드로 노출되지 않아 직접 수정할 수 없습니다."]
+      }
+    },
+    result: function (approach, path) { return this.table[approach + ":" + path] || null; }
+  };
+
+  var api = {
+    esc: esc,
+    mdCode: mdCode,
+    highlightKotlin: highlightKotlin,
+    highlightJpql: highlightJpql,
+    parseDerivedQuery: parseDerivedQuery,
+    SIM: SIM,
+    QUIZ: {}
+  };
+  if (typeof module !== "undefined" && module.exports) module.exports = api;
+  return api;
+})();
+/* quiz.js: 장별 확인 문제. q/o/e는 신뢰된 HTML, a는 정답 인덱스. */
+TB.QUIZ = {
+  ch0: [
+    {
+      q: "Boot 4에서 <code>@SpringBootTest</code> 테스트에 MockMvc를 주입받으려면 무엇이 필요할까요?",
+      o: ["아무것도 필요 없습니다. 여전히 자동구성됩니다.", "<code>@AutoConfigureMockMvc</code>를 붙입니다.", "<code>spring-boot-starter-classic</code>을 반드시 추가합니다.", "<code>@WebMvcTest</code>로만 가능합니다."],
+      a: 1,
+      e: "Boot 4에서는 <code>@SpringBootTest</code>가 더 이상 MockMvc를 자동구성하지 않습니다. <code>@AutoConfigureMockMvc</code>를 붙여야 합니다."
+    },
+    {
+      q: "Boot 4에서 <code>@WithMockUser</code>를 쓰려면 어떤 test 스타터가 필요할까요?",
+      o: ["<code>spring-boot-starter-webmvc-test</code>", "<code>spring-boot-starter-security-test</code>", "<code>spring-boot-starter-restdocs</code>", "<code>spring-boot-starter-classic</code>"],
+      a: 1,
+      e: "Boot 4는 기능마다 스타터와 test 스타터가 짝으로 나뉘었습니다. 보안 테스트 지원은 <code>spring-boot-starter-security-test</code>에 있습니다."
+    },
+    {
+      q: "Boot 3에서 4로 올릴 때 이름이 바뀐 프로퍼티를 찾아 주는 도구는?",
+      o: ["<code>spring-boot-properties-migrator</code>", "<code>spring-boot-configuration-processor</code>", "<code>spring-boot-devtools</code>", "<code>spring-boot-starter-actuator</code>"],
+      a: 0,
+      e: "먼저 <code>spring-boot-starter-classic</code>으로 빌드를 살려 두고, <code>spring-boot-properties-migrator</code>로 바뀐 프로퍼티를 찾아냅니다."
+    }
+  ],
+  ch1: [
+    {
+      q: "<code>WebMvcConfigurer.addArgumentResolvers</code>로 등록한 커스텀 리졸버는 언제 실행될까요?",
+      o: ["내장 리졸버보다 먼저", "내장 리졸버 뒤에", "<code>@Order</code> 값에 따라", "등록 순서와 무관하게 무작위로"],
+      a: 1,
+      e: "이렇게 등록한 리졸버는 내장 리졸버 <strong>뒤</strong>에 붙습니다. 그래서 내장 리졸버가 먼저 가져가는 타입이면 호출되지 않습니다."
+    },
+    {
+      q: "<code>@LoginUser</code> 파라미터 타입이 <code>Principal</code>의 하위 타입이면 어떤 일이 생길까요?",
+      o: ["컴파일 에러가 납니다.", "내장 리졸버가 먼저 가져가서 커스텀 리졸버가 호출되지 않습니다.", "항상 null이 주입됩니다.", "리졸버가 두 번 호출됩니다."],
+      a: 1,
+      e: "<code>Principal</code> 하위 타입은 내장 리졸버가 먼저 처리합니다. <code>Principal</code>을 구현하지 않는 전용 타입(<code>AuthUser</code>)을 쓰거나, 리졸버 목록 맨 앞에 넣거나, <code>WebMvcRegistrations</code>로 어댑터를 교체하세요."
+    },
+    {
+      q: "커스텀 리졸버가 만든 값에 <code>@Valid</code>를 붙이면 어떻게 될까요?",
+      o: ["자동으로 검증됩니다.", "자동으로 적용되지 않습니다. 바인더를 만들어 직접 <code>validate()</code>를 호출해야 합니다.", "<code>ConstraintViolationException</code>이 자동으로 던져집니다.", "컴파일 에러가 납니다."],
+      a: 1,
+      e: "리졸버가 만든 값에는 <code>@Valid</code>가 자동으로 적용되지 않습니다. <code>binderFactory.createBinder(...)</code>로 바인더를 만들어 <code>validate()</code>를 호출하고, 실패하면 <code>MethodArgumentNotValidException</code>을 던지세요."
+    }
+  ],
+  ch2: [
+    {
+      q: "<code>@Size(min = 2)</code>가 붙은 <code>String?</code> 필드에 null이 들어오면?",
+      o: ["위반으로 처리됩니다.", "유효한 값으로 통과합니다.", "<code>NullPointerException</code>이 납니다.", "빈 문자열로 바뀐 뒤 위반으로 처리됩니다."],
+      a: 1,
+      e: "<code>@NotNull</code>, <code>@NotEmpty</code>, <code>@NotBlank</code>, <code>@Null</code>을 제외한 모든 제약은 null을 유효한 값으로 봅니다. null도 막으려면 <code>@NotNull</code>을 함께 붙이세요."
+    },
+    {
+      q: "생성자 프로퍼티에 붙인 어노테이션을 파라미터와 프로퍼티/필드에 함께 적용하게 하는 Kotlin 컴파일 옵션은?",
+      o: ["<code>-Xjsr305=strict</code>", "<code>-Xannotation-default-target=param-property</code>", "<code>-Xannotation-default-target=first-only</code>", "<code>-Xemit-jvm-type-annotations</code>"],
+      a: 1,
+      e: "Kotlin 2.1까지는 생성자 프로퍼티 어노테이션이 파라미터에만 적용됐습니다. <code>param-property</code>를 켜면 파라미터와 프로퍼티/필드에 함께 붙고, Spring Initializr도 이 옵션을 기본으로 켭니다. <code>first-only</code>는 예전 동작으로 되돌리는 옵션입니다."
+    },
+    {
+      q: "클래스에 <code>@Validated</code>가 없는 컨트롤러에서 <code>@RequestParam @Min(1) page: Int</code> 검증이 실패하면 어떤 예외가 날까요?",
+      o: ["<code>MethodArgumentNotValidException</code>", "<code>HandlerMethodValidationException</code>", "<code>ConstraintViolationException</code>", "<code>HttpMessageNotReadableException</code>"],
+      a: 1,
+      e: "파라미터에 직접 붙은 제약이 실패하면 <code>HandlerMethodValidationException</code>이 납니다. 클래스에 <code>@Validated</code>를 붙이면 AOP 방식으로 바뀌어 <code>ConstraintViolationException</code>이 나므로, 컨트롤러에서는 <code>@Validated</code>를 빼세요."
+    },
+    {
+      q: "Kotlin data class의 non-null 필드(<code>val name: String</code>)에 JSON으로 null이 들어오면?",
+      o: ["<code>@NotNull</code> 위반 오류로 응답합니다.", "Bean Validation보다 먼저 <code>HttpMessageNotReadableException</code>이 납니다.", "빈 문자열로 채워집니다.", "검증 없이 통과합니다."],
+      a: 1,
+      e: "jackson-module-kotlin이 Bean Validation보다 먼저 예외를 던집니다. 필드를 <code>String?</code> + <code>@field:NotNull</code>로 선언하거나, 예외 핸들러에서 원인 예외의 path를 읽어 필드 오류로 바꾸세요."
+    }
+  ],
+  ch3: [
+    {
+      q: "<code>findByFirstnameContaining(\"ab\")</code>에서 <code>like</code>에 바인딩되는 값은?",
+      o: ["<code>ab%</code>", "<code>%ab</code>", "<code>%ab%</code>", "<code>ab</code>"],
+      a: 2,
+      e: "<code>StartingWith</code>는 뒤에, <code>EndingWith</code>는 앞에, <code>Containing</code>은 양쪽에 <code>%</code>를 붙입니다. 앞에 <code>%</code>가 붙으면 일반 인덱스를 타지 못합니다."
+    },
+    {
+      q: "다음 중 <code>@SQLDelete</code>와 Envers를 <strong>모두 우회</strong>하는 삭제 경로는?",
+      o: ["<code>repo.delete(entity)</code>", "<code>deleteById(id)</code>", "파생 <code>deleteByEmail(email)</code>", "<code>deleteAllInBatch()</code>"],
+      a: 3,
+      e: "<code>delete(entity)</code>, <code>deleteById</code>, <code>deleteBy…</code>는 엔티티를 로드한 뒤 <code>remove</code>하므로 soft delete와 Envers가 동작합니다. <code>deleteAllInBatch</code>, <code>@Modifying</code> JPQL, 네이티브 쿼리는 둘 다 우회합니다."
+    },
+    {
+      q: "반환 타입을 <code>Page&lt;T&gt;</code>로 두면 추가로 일어나는 일은?",
+      o: ["count 쿼리가 한 번 더 실행됩니다.", "정렬이 무시됩니다.", "트랜잭션 없이 실행됩니다.", "결과가 캐시됩니다."],
+      a: 0,
+      e: "<code>Page</code>는 전체 개수를 알아야 하므로 count 쿼리가 추가로 실행됩니다."
+    },
+    {
+      q: "키셋 스크롤(<code>ScrollPosition.keyset()</code>)을 쓸 때 주의할 점은?",
+      o: ["정렬 키가 유일해야 하므로 id를 tie-breaker로 넣습니다.", "반드시 네이티브 쿼리여야 합니다.", "<code>Page</code>만 반환할 수 있습니다.", "정렬을 지정하면 안 됩니다."],
+      a: 0,
+      e: "키셋 방식은 정렬 키가 유일해야 합니다. id를 tie-breaker로 넣으세요. 반환 타입은 <code>Window&lt;T&gt;</code>입니다."
+    }
+  ],
+  ch4: [
+    {
+      q: "Spring Framework 7에서 deprecated(forRemoval)된 컨버터는?",
+      o: ["<code>JacksonJsonHttpMessageConverter</code>", "<code>MappingJackson2HttpMessageConverter</code>", "<code>KotlinSerializationJsonHttpMessageConverter</code>", "<code>StringHttpMessageConverter</code>"],
+      a: 1,
+      e: "Jackson 3 기반 <code>JacksonJsonHttpMessageConverter</code>가 새로 들어왔고, Jackson 2용 <code>MappingJackson2HttpMessageConverter</code>는 7.0부터 deprecated(forRemoval)입니다."
+    },
+    {
+      q: "<code>ResponseBodyAdvice</code>로 모든 응답을 공통 봉투로 감쌀 때 제외해야 할 두 가지는?",
+      o: ["<code>List</code>와 <code>Map</code>", "<code>String</code>과 <code>ProblemDetail</code>", "<code>Unit</code>과 <code>Nothing</code>", "<code>ResponseEntity</code>와 <code>HttpEntity</code>"],
+      a: 1,
+      e: "<code>String</code> 반환을 감싸면 <code>ClassCastException</code>이 납니다. <code>ProblemDetail</code>도 제외해야 문서화된 스펙과 어긋나지 않습니다."
+    },
+    {
+      q: "Spring 7 API 버저닝에서 1.1 이상 버전에 매핑하는 방법은?",
+      o: ["<code>@GetMapping(version = \"1.1+\")</code>", "<code>@ApiVersion(\"1.1\")</code>", "<code>@Versioned(1.1)</code>", "<code>@RequestMapping(apiVersion = 1)</code>"],
+      a: 0,
+      e: "<code>configureApiVersioning</code>에서 버전을 전달하는 방식(헤더, 경로, 쿼리, 미디어 타입)을 고르고, 매핑에는 <code>version</code> 속성을 씁니다. Boot 프로퍼티는 <code>spring.mvc.apiversion.*</code>입니다."
+    },
+    {
+      q: "Boot 4에서 <code>@JsonComponent</code>의 새 이름은?",
+      o: ["<code>@JacksonComponent</code>", "<code>@JsonMapperComponent</code>", "<code>@JsonSerializerComponent</code>", "바뀌지 않았습니다."],
+      a: 0,
+      e: "<code>@JsonComponent</code>는 <code>@JacksonComponent</code>로, <code>@JsonMixin</code>은 <code>@JacksonMixin</code>으로 바뀌었습니다."
+    }
+  ],
+  ch5: [
+    {
+      q: "<code>@SQLDelete</code> + <code>@SQLRestriction</code> 엔티티를 <code>repo.delete(entity)</code>로 지우면 Envers REVTYPE은?",
+      o: ["0 (ADD)", "1 (MOD)", "2 (DEL)", "기록되지 않습니다."],
+      a: 2,
+      e: "실제 SQL은 커스텀 UPDATE지만 delete 이벤트가 발생하므로 DEL(2)로 기록됩니다. 반대로 <code>deleted = true</code>로 직접 수정하면 MOD(1)로 남습니다."
+    },
+    {
+      q: "기본 설정에서 DEL 행에는 무엇이 남을까요?",
+      o: ["모든 컬럼", "id만", "아무것도 남지 않습니다.", "id와 version"],
+      a: 1,
+      e: "기본 설정에서는 DEL 행에 id만 남습니다. <code>org.hibernate.envers.store_data_at_delete=true</code>로 삭제 시점의 데이터를 보존하세요."
+    },
+    {
+      q: "<code>@SQLDelete</code>와 <code>@Version</code>을 함께 쓸 때 SQL 파라미터의 바인딩 순서는?",
+      o: ["id, version", "version, id", "이름 기반이라 순서는 무관합니다.", "version만 바인딩됩니다."],
+      a: 0,
+      e: "<code>where id = ? and version = ?</code>처럼 id, version 순서로 바인딩됩니다."
+    },
+    {
+      q: "Hibernate 7에서 제거된 <code>@Where</code>를 직접 대체하는 어노테이션은?",
+      o: ["<code>@SQLWhere</code>", "<code>@SQLRestriction</code>", "<code>@WhereClause</code>", "<code>@Restriction</code>"],
+      a: 1,
+      e: "<code>@Where</code>, <code>@WhereJoinTable</code>은 <code>@SQLRestriction</code>, <code>@SQLJoinTableRestriction</code>으로 바꿉니다. 필터를 켜고 끌 수 있어야 하면 <code>@FilterDef</code> + <code>@Filter</code>를 씁니다."
+    }
+  ],
+  ch6: [
+    {
+      q: "Boot 4.x 프로젝트에서 써야 하는 restdocs-api-spec 버전은?",
+      o: ["0.17.x", "0.19.x", "0.20.x 이상", "어떤 버전이든 호환됩니다."],
+      a: 2,
+      e: "Boot 4.x는 0.20.x 이상(최신 0.20.1), Boot 3.x는 0.17.1–0.19.4입니다. 0.20.x도 Boot 4에서 사소한 호환성 문제가 남아 있을 수 있다는 경고가 있습니다."
+    },
+    {
+      q: "<code>pathParameters</code>를 문서화하려면 요청을 무엇으로 만들어야 할까요?",
+      o: ["<code>MockMvcRequestBuilders.get(\"/x/1\")</code>", "<code>RestDocumentationRequestBuilders.get(\"/x/{id}\", id)</code>", "<code>RestAssured.given()</code>", "<code>WebClient.create()</code>"],
+      a: 1,
+      e: "경로 템플릿을 알아야 하므로 <code>RestDocumentationRequestBuilders</code>로 요청을 만듭니다. REST Docs 4.0에서 REST Assured 통합은 제거됐습니다."
+    },
+    {
+      q: "Bean Validation 제약이 OpenAPI 스키마에 반영되는 필드는?",
+      o: ["모든 필드에 자동으로 반영됩니다.", "<code>ConstrainedFields(Req::class.java).withPath(...)</code>로 만든 필드만", "<code>@Schema</code>를 붙인 필드만", "반영되지 않습니다."],
+      a: 1,
+      e: "<code>ConstrainedFields</code>로 만든 필드만 반영됩니다. 제약을 필드에서 읽기 때문에 Kotlin에서는 <code>@field:</code>를 붙이거나 param-property 옵션을 켜야 합니다."
+    }
+  ],
+  ch7: [
+    {
+      q: "Boot 4에서 OTLP 트레이스를 보낼 엔드포인트를 지정하는 프로퍼티는?",
+      o: ["<code>management.otlp.tracing.endpoint</code>", "<code>management.opentelemetry.tracing.export.otlp.endpoint</code>", "<code>otel.exporter.otlp.endpoint</code>", "<code>management.tracing.otlp.url</code>"],
+      a: 1,
+      e: "Boot 4에서 OTLP 트레이스 설정이 <code>management.opentelemetry.tracing.export.otlp.*</code>로 옮겨졌습니다. 3.x의 <code>management.otlp.tracing.endpoint</code>를 대체합니다."
+    },
+    {
+      q: "<code>management.tracing.sampling.probability</code>의 기본값은?",
+      o: ["1.0", "0.5", "0.1", "0.0"],
+      a: 2,
+      e: "기본값은 0.1(10%)입니다. 운영에 맞는 비율을 직접 지정하세요."
+    },
+    {
+      q: "사용자 id처럼 값 종류가 많은 키를 low cardinality로 두면?",
+      o: ["메트릭 시계열이 폭증합니다.", "트레이스가 끊깁니다.", "로그가 누락됩니다.", "아무 문제 없습니다."],
+      a: 0,
+      e: "low cardinality 키는 메트릭 태그가 되므로 시계열이 폭증합니다. 이런 키는 반드시 high cardinality로 두세요."
+    },
+    {
+      q: "<code>@WithSpan</code>이 동작하는 환경은?",
+      o: ["Boot 스타터만 쓰면 자동으로 동작합니다.", "OTel Java agent나 OTel Spring Boot starter에서만", "Micrometer 브리지에서만", "어디서든 동작합니다."],
+      a: 1,
+      e: "<code>@WithSpan</code>은 agent나 OTel starter에서만 동작합니다. Boot 스타터(Micrometer 브리지)에서는 <code>@NewSpan</code>, <code>@Observed</code>를 씁니다. 두 방식을 함께 쓰면 span이 중복됩니다."
+    }
+  ],
+  ch8: [
+    {
+      q: "Spring MVC에서 suspend 컨트롤러나 Flow 반환을 쓰려면 필요한 의존성은?",
+      o: ["<code>kotlinx-coroutines-reactor</code>", "<code>kotlinx-coroutines-slf4j</code>", "<code>spring-boot-starter-webflux</code>", "<code>kotlinx-coroutines-test</code>"],
+      a: 0,
+      e: "suspend 함수는 Mono로 바뀌어 비동기 요청으로 처리되므로 리액터 브리지인 <code>kotlinx-coroutines-reactor</code>가 필요합니다."
+    },
+    {
+      q: "suspend 엔드포인트를 MockMvc로 문서화할 때 <code>document()</code>는 어디에 걸어야 할까요?",
+      o: ["첫 <code>perform</code> 결과", "<code>asyncDispatch</code> 결과", "양쪽 모두", "문서화할 수 없습니다."],
+      a: 1,
+      e: "첫 요청에 문서화를 걸면 바디가 빈 스니펫이 생성됩니다. <code>asyncStarted()</code>를 확인한 뒤 <code>asyncDispatch</code> 결과에 <code>document()</code>를 거세요."
+    },
+    {
+      q: "블로킹 JPA를 코루틴에서 쓸 때 권장하는 패턴은?",
+      o: ["suspend 함수에 <code>@Transactional</code>을 붙입니다.", "<code>withContext(dbDispatcher) { transactionTemplate.execute { … } }</code> 안에서 트랜잭션을 끝냅니다.", "<code>runBlocking</code> 안에서 트랜잭션을 시작합니다.", "<code>Dispatchers.Unconfined</code>에서 실행합니다."],
+      a: 1,
+      e: "suspend + <code>@Transactional</code>은 <code>ReactiveTransactionManager</code>가 필요해 JPA에서는 사실상 쓸 수 없습니다. 트랜잭션 블록 안에서는 suspend하지 마세요."
+    },
+    {
+      q: "IO 디스패처의 병렬도(64)가 HikariCP 기본 풀(10)보다 커서 생기는 문제를 막는 방법은?",
+      o: ["<code>Dispatchers.IO.limitedParallelism(maxPoolSize)</code>로 병렬도를 맞춥니다.", "<code>Dispatchers.Default</code>로 바꿉니다.", "<code>runBlocking</code>으로 감쌉니다.", "풀 크기를 1로 줄입니다."],
+      a: 0,
+      e: "<code>limitedParallelism(maxPoolSize)</code>로 병렬도를 풀 크기에 맞추거나 <code>Semaphore</code>로 제한하세요. 이 병목은 가상 스레드에서도 똑같이 생깁니다."
+    }
+  ]
+};
+/* ui.js: 화면 동작 */
+(function () {
+  "use strict";
+
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function mk(tag, cls, html) {
+    var e = document.createElement(tag);
+    if (cls) e.className = cls;
+    if (html != null) e.innerHTML = html;
+    return e;
+  }
+  var store = {
+    get: function (k, d) {
+      try { var v = window.localStorage.getItem("sb4tb." + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; }
+    },
+    set: function (k, v) {
+      try { window.localStorage.setItem("sb4tb." + k, JSON.stringify(v)); } catch (e) { /* 저장할 수 없는 환경이면 무시 */ }
+    }
+  };
+  var reduceMotion = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+
+  function cleanText(el) {
+    var c = el.cloneNode(true);
+    $$(".tag", c).forEach(function (t) { t.parentNode.removeChild(t); });
+    return c.textContent.replace(/\s+/g, " ").trim();
+  }
+  function chLabel(ch) {
+    var l = ch.getAttribute("data-label");
+    return (l ? l + " " : "") + ch.getAttribute("data-title");
+  }
+  function scrollToEl(el, block) {
+    if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: block || "start" });
+  }
+  function flash(el) {
+    if (!el) return;
+    scrollToEl(el, "center");
+    el.classList.remove("flash");
+    void el.offsetWidth;
+    el.classList.add("flash");
+    setTimeout(function () { el.classList.remove("flash"); }, 2100);
+  }
+
+  /* ---------- 토스트 ---------- */
+  var toastEl = $("#toast"), toastTimer = null;
+  function toast(msg) {
+    toastEl.textContent = msg;
+    toastEl.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 1800);
+  }
+
+  /* ---------- 테마 ---------- */
+  function currentTheme() {
+    var t = document.documentElement.getAttribute("data-theme");
+    if (t) return t;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  $("#themeBtn").addEventListener("click", function () {
+    var next = currentTheme() === "dark" ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", next);
+    store.set("theme", next);
+    toast(next === "dark" ? "어두운 테마로 바꿨어요" : "밝은 테마로 바꿨어요");
+  });
+
+  /* ---------- 장 정보와 예상 읽기 시간 ---------- */
+  var chapters = $$("section.chapter");
+  var spans = [], total = 0;
+  chapters.forEach(function (ch) {
+    var len = ch.textContent.replace(/\s+/g, " ").length;
+    var min = Math.max(1, Math.round(len / 380));
+    spans.push({ ch: ch, start: total, dur: min });
+    total += min;
+  });
+  spans.forEach(function (s) {
+    s.l = (s.start / total) * 100;
+    s.w = (s.dur / total) * 100;
+  });
+  function spanStyle(s) { return "--l:" + s.l.toFixed(3) + "%;--w:" + s.w.toFixed(3) + "%"; }
+
+  /* ---------- 읽기 트레이스 (표지) ---------- */
+  var trace = $("#trace");
+  var traceRows = {};
+  (function buildTrace() {
+    var head = mk("div", "trace-head");
+    head.appendChild(mk("h2", "trace-title", "읽기 트레이스"));
+    head.appendChild(mk("p", "trace-meta", chapters.length + "개 장, 예상 읽기 시간 약 " + total + "분"));
+    trace.appendChild(head);
+
+    var body = mk("div", "trace-body");
+    var axis = mk("div", "trace-axis");
+    axis.appendChild(mk("span", "trace-axis-name", "장"));
+    var ticks = mk("span", "trace-ticks");
+    [0, 25, 50, 75, 100].forEach(function (p) {
+      var t = mk("span", "tick", Math.round((total * p) / 100) + "분");
+      t.style.left = p + "%";
+      if (p === 100) t.classList.add("tick-end");
+      if (p === 25 || p === 75) t.classList.add("tick-mid");
+      ticks.appendChild(t);
+    });
+    axis.appendChild(ticks);
+    body.appendChild(axis);
+
+    var ol = mk("ol", "trace-rows");
+    spans.forEach(function (s, i) {
+      var ch = s.ch, li = mk("li", "tr-row");
+      var a = mk("a", "tr-link");
+      a.href = "#" + ch.id;
+      var name = mk("span", "tr-name");
+      var label = ch.getAttribute("data-label");
+      name.appendChild(mk("span", "tr-no", label ? TB.esc(label) : ""));
+      var ttl = mk("span", "tr-title");
+      ttl.textContent = ch.getAttribute("data-title");
+      ttl.title = chLabel(ch);
+      name.appendChild(ttl);
+      var track = mk("span", "tr-track");
+      var bar = mk("span", "tr-bar");
+      bar.setAttribute("style", spanStyle(s) + ";--i:" + i);
+      var dur = mk("span", "tr-dur" + (s.l + s.w > 84 ? " left" : ""), s.dur + "분");
+      dur.setAttribute("style", spanStyle(s));
+      track.appendChild(bar);
+      track.appendChild(dur);
+      a.appendChild(name);
+      a.appendChild(track);
+      li.appendChild(a);
+      ol.appendChild(li);
+      traceRows[ch.id] = li;
+    });
+    body.appendChild(ol);
+    var cursor = mk("div", "tr-cursor");
+    cursor.setAttribute("aria-hidden", "true");
+    body.appendChild(cursor);
+    trace.appendChild(body);
+    trace.appendChild(mk("p", "trace-note", "막대 하나가 한 장이고, 길이는 예상 읽기 시간입니다. 막대를 누르면 그 장으로 이동하고, 세로선은 지금 읽고 있는 위치를 가리킵니다."));
+    requestAnimationFrame(function () { requestAnimationFrame(function () { trace.classList.add("ready"); }); });
+  })();
+
+  /* ---------- 목차 ---------- */
+  var toc = $("#toc"), linkFor = {}, spy = [];
+  spans.forEach(function (s) {
+    var ch = s.ch, li = mk("li", "toc-ch"), a = mk("a", "toc-link");
+    a.href = "#" + ch.id;
+    var top = mk("span", "toc-top");
+    var label = ch.getAttribute("data-label");
+    var nm = mk("span", "toc-name");
+    nm.textContent = (label ? label + " " : "") + ch.getAttribute("data-title");
+    top.appendChild(nm);
+    top.appendChild(mk("span", "toc-min", s.dur + "분"));
+    var track = mk("span", "toc-track");
+    var bar = mk("span", "toc-bar");
+    bar.setAttribute("style", spanStyle(s));
+    track.appendChild(bar);
+    a.appendChild(top);
+    a.appendChild(track);
+    li.appendChild(a);
+    linkFor[ch.id] = a;
+    spy.push(ch);
+    var h2s = $$("h2", ch);
+    if (h2s.length) {
+      var sub = mk("ol", "toc-sub");
+      h2s.forEach(function (h, j) {
+        if (!h.id) h.id = ch.id + "-" + (j + 1);
+        var sli = mk("li"), sa = mk("a", "toc-sublink");
+        sa.href = "#" + h.id;
+        sa.textContent = cleanText(h);
+        sli.appendChild(sa);
+        sub.appendChild(sli);
+        linkFor[h.id] = sa;
+        spy.push(h);
+      });
+      li.appendChild(sub);
+    }
+    toc.appendChild(li);
+  });
+
+  /* ---------- 장 머리의 위치 막대 ---------- */
+  var quizCount = {};
+  Object.keys(TB.QUIZ).forEach(function (k) { quizCount[k] = TB.QUIZ[k].length; });
+  spans.forEach(function (s) {
+    var head = $(".ch-head", s.ch);
+    if (!head) return;
+    var meter = mk("div", "ch-meter");
+    var track = mk("span", "ch-track");
+    track.setAttribute("aria-hidden", "true");
+    var seg = mk("span", "ch-seg");
+    seg.setAttribute("style", spanStyle(s));
+    track.appendChild(seg);
+    var q = quizCount[s.ch.id];
+    meter.appendChild(track);
+    meter.appendChild(mk("span", "ch-time", "읽는 데 약 " + s.dur + "분" + (q ? ", 확인 문제 " + q + "개" : "")));
+    head.appendChild(meter);
+  });
+
+  /* ---------- 장 끝: 완료 표시와 이전/다음 ---------- */
+  var done = store.get("done", {});
+  chapters.forEach(function (ch, i) {
+    var foot = mk("footer", "ch-foot");
+    var btn = mk("button", "done-btn", '<span class="done-box" aria-hidden="true"></span><span class="lbl"></span>');
+    btn.type = "button";
+    btn.addEventListener("click", function () {
+      if (done[ch.id]) delete done[ch.id];
+      else done[ch.id] = true;
+      store.set("done", done);
+      renderProgress();
+      toast(done[ch.id] ? chLabel(ch) + "을(를) 완료로 표시했어요" : "완료 표시를 해제했어요");
+    });
+    foot.appendChild(btn);
+    var nav = mk("nav", "ch-nav");
+    nav.setAttribute("aria-label", "장 이동");
+    var prev = chapters[i - 1], next = chapters[i + 1];
+    if (prev) {
+      var pa = mk("a", "ch-prev", "<small>이전 장</small>");
+      pa.href = "#" + prev.id;
+      pa.appendChild(document.createTextNode(chLabel(prev)));
+      nav.appendChild(pa);
+    }
+    if (next) {
+      var na = mk("a", "ch-next", "<small>다음 장</small>");
+      na.href = "#" + next.id;
+      na.appendChild(document.createTextNode(chLabel(next)));
+      nav.appendChild(na);
+    }
+    foot.appendChild(nav);
+    ch.appendChild(foot);
+  });
+
+  function renderProgress() {
+    var n = 0;
+    chapters.forEach(function (ch) {
+      var d = !!done[ch.id];
+      if (d) n++;
+      linkFor[ch.id].parentNode.classList.toggle("done", d);
+      if (traceRows[ch.id]) traceRows[ch.id].classList.toggle("done", d);
+      var btn = $(".done-btn", ch);
+      btn.classList.toggle("on", d);
+      btn.setAttribute("aria-pressed", d ? "true" : "false");
+      $(".lbl", btn).textContent = d ? "완료로 표시됨 (다시 누르면 해제)" : "이 장을 완료로 표시";
+    });
+    $("#progText").textContent = chapters.length + "개 장 중 " + n + "개 완료";
+    $("#progBar").style.width = (chapters.length ? (n / chapters.length) * 100 : 0) + "%";
+  }
+
+  /* ---------- 코드 블록 ---------- */
+  function copyText(t) {
+    function fallback() {
+      return new Promise(function (res, rej) {
+        var ta = document.createElement("textarea");
+        ta.value = t;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        try { if (document.execCommand("copy")) res(); else rej(new Error("copy")); } catch (e) { rej(e); }
+        document.body.removeChild(ta);
+      });
+    }
+    if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(t).catch(fallback);
+    return fallback();
+  }
+  var copySvg = '<svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M5 15V6a2 2 0 0 1 2-2h8" fill="none" stroke="currentColor" stroke-width="2"/></svg>';
+  $$("pre.kt").forEach(function (pre) {
+    var code = pre.querySelector("code") || pre;
+    var src = code.textContent.replace(/^\n+/, "").replace(/\s+$/, "");
+    code.innerHTML = TB.highlightKotlin(src);
+    var wrap = mk("div", "code");
+    var bar = mk("div", "code-bar");
+    bar.appendChild(mk("span", "code-lang", TB.esc(pre.getAttribute("data-label") || "Kotlin")));
+    var btn = mk("button", "copy-btn", copySvg + "<span>복사</span>");
+    btn.type = "button";
+    btn.setAttribute("aria-label", "코드 복사");
+    btn.addEventListener("click", function () {
+      copyText(src).then(function () {
+        toast("코드를 복사했어요");
+        btn.classList.add("ok");
+        setTimeout(function () { btn.classList.remove("ok"); }, 1300);
+      }, function () { toast("복사하지 못했어요. 코드를 직접 선택해 복사하세요"); });
+    });
+    bar.appendChild(btn);
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(bar);
+    wrap.appendChild(pre);
+  });
+
+  /* ---------- 표 필터 ---------- */
+  $$("table[data-filter]").forEach(function (tbl) {
+    var holder = tbl.closest(".tw") || tbl;
+    var bar = mk("div", "tbl-filter");
+    var inp = mk("input");
+    inp.type = "search";
+    inp.placeholder = tbl.getAttribute("data-filter");
+    inp.setAttribute("aria-label", inp.placeholder);
+    var cnt = mk("span", "tbl-count");
+    bar.appendChild(inp);
+    bar.appendChild(cnt);
+    holder.parentNode.insertBefore(bar, holder);
+    var rows = $$("tbody tr", tbl);
+    function run() {
+      var q = inp.value.trim().toLowerCase(), n = 0;
+      rows.forEach(function (r) {
+        var hit = !q || r.textContent.toLowerCase().indexOf(q) >= 0;
+        r.hidden = !hit;
+        if (hit) n++;
+      });
+      cnt.textContent = q ? n + "개 행이 일치" : rows.length + "개 행";
+    }
+    inp.addEventListener("input", run);
+    run();
+  });
+
+  /* ---------- 분류 칩 ---------- */
+  $$(".chips[data-for]").forEach(function (box) {
+    var tbl = document.getElementById(box.getAttribute("data-for"));
+    if (!tbl) return;
+    var rows = $$("tbody tr", tbl);
+    box.addEventListener("click", function (ev) {
+      var b = ev.target.closest("button[data-cat]");
+      if (!b) return;
+      $$("button", box).forEach(function (x) {
+        x.classList.toggle("on", x === b);
+        x.setAttribute("aria-pressed", x === b ? "true" : "false");
+      });
+      var c = b.getAttribute("data-cat");
+      rows.forEach(function (r) {
+        r.hidden = !(c === "all" || (" " + r.getAttribute("data-cat") + " ").indexOf(" " + c + " ") >= 0);
+      });
+    });
+  });
+
+  /* ---------- 퀴즈 ---------- */
+  var quizState = store.get("quiz", {});
+  var quizTotal = 0;
+  var KEYS = "ABCD";
+  $$(".quiz[data-quiz]").forEach(function (box) {
+    var key = box.getAttribute("data-quiz"), qs = TB.QUIZ[key];
+    if (!qs) return;
+    quizTotal += qs.length;
+    var head = mk("div", "quiz-head");
+    head.appendChild(mk("h3", "quiz-title", "확인 문제"));
+    var tools = mk("div", "quiz-tools");
+    var score = mk("span", "quiz-score");
+    var reset = mk("button", "quiz-reset", "다시 풀기");
+    reset.type = "button";
+    tools.appendChild(score);
+    tools.appendChild(reset);
+    head.appendChild(tools);
+    box.appendChild(head);
+    var paints = [];
+    qs.forEach(function (q, qi) {
+      var id = key + "." + qi;
+      var item = mk("div", "q");
+      item.appendChild(mk("p", "q-prompt", '<span class="q-no">' + (qi + 1) + "</span><span>" + q.q + "</span>"));
+      var opts = mk("div", "q-opts");
+      opts.setAttribute("role", "group");
+      q.o.forEach(function (o, oi) {
+        var b = mk("button", "q-opt", '<span class="q-key">' + KEYS.charAt(oi) + '</span><span class="q-txt">' + o + "</span>");
+        b.type = "button";
+        b.addEventListener("click", function () {
+          if (quizState[id] != null) return;
+          quizState[id] = oi;
+          store.set("quiz", quizState);
+          paint();
+          updateScore();
+          renderQuizSummary();
+        });
+        opts.appendChild(b);
+      });
+      var exp = mk("div", "q-exp");
+      exp.hidden = true;
+      exp.setAttribute("aria-live", "polite");
+      item.appendChild(opts);
+      item.appendChild(exp);
+      box.appendChild(item);
+      function paint() {
+        var st = quizState[id];
+        $$(".q-opt", opts).forEach(function (b, oi) {
+          b.classList.remove("correct", "wrong", "dim");
+          b.disabled = st != null;
+          if (st != null) b.classList.add(oi === q.a ? "correct" : oi === st ? "wrong" : "dim");
+        });
+        if (st != null) {
+          exp.hidden = false;
+          exp.className = "q-exp " + (st === q.a ? "is-right" : "is-wrong");
+          exp.innerHTML = "<strong>" + (st === q.a ? "정답입니다." : "정답은 " + KEYS.charAt(q.a) + "입니다.") + "</strong> " + q.e;
+        } else {
+          exp.hidden = true;
+          exp.innerHTML = "";
+        }
+      }
+      paints.push(paint);
+      paint();
+    });
+    function updateScore() {
+      var answered = 0, right = 0;
+      qs.forEach(function (q, qi) {
+        var st = quizState[key + "." + qi];
+        if (st != null) { answered++; if (st === q.a) right++; }
+      });
+      score.textContent = answered ? qs.length + "문항 중 " + right + "개 정답" : qs.length + "문항";
+      reset.hidden = !answered;
+    }
+    reset.addEventListener("click", function () {
+      qs.forEach(function (q, qi) { delete quizState[key + "." + qi]; });
+      store.set("quiz", quizState);
+      paints.forEach(function (p) { p(); });
+      updateScore();
+      renderQuizSummary();
+    });
+    updateScore();
+  });
+  function renderQuizSummary() {
+    var right = 0;
+    Object.keys(TB.QUIZ).forEach(function (k) {
+      TB.QUIZ[k].forEach(function (q, qi) { if (quizState[k + "." + qi] === q.a) right++; });
+    });
+    $("#quizText").textContent = "확인 문제 " + quizTotal + "개 중 " + right + "개 정답";
+  }
+
+  /* ---------- 쿼리 메서드 해석기 ---------- */
+  var dqIn = $("#dqInput");
+  if (dqIn) {
+    var dqEnt = $("#dqEntity");
+    var renderDq = function () {
+      var r = TB.parseDerivedQuery(dqIn.value, dqEnt.value);
+      var tok = $("#dqTokens"), out = $("#dqJpql"), params = $("#dqParams"), msgs = $("#dqMsgs");
+      tok.innerHTML = "";
+      msgs.innerHTML = "";
+      params.innerHTML = "";
+      if (!r.ok) {
+        out.hidden = true;
+        params.hidden = true;
+        tok.hidden = true;
+        r.errors.forEach(function (e) { msgs.appendChild(mk("li", "msg bad", TB.mdCode(e))); });
+        return;
+      }
+      tok.hidden = false;
+      out.hidden = false;
+      r.tokens.forEach(function (t) {
+        var c;
+        if (t.kind === "cond") {
+          c = mk("span", "dq-tok dq-cond", "<b>" + TB.esc(t.prop) + "</b><i>" + TB.esc(t.kw) + (t.ic ? " · IgnoreCase" : "") + "</i>");
+        } else {
+          c = mk("span", "dq-tok dq-" + t.kind, TB.esc(t.text));
+        }
+        tok.appendChild(c);
+      });
+      out.innerHTML = "<code>" + TB.highlightJpql(r.jpql) + "</code>";
+      if (r.params.length) {
+        params.hidden = false;
+        params.innerHTML = "<thead><tr><th>바인딩</th><th>속성</th><th>넘기는 값</th></tr></thead><tbody>" +
+          r.params.map(function (p) {
+            return "<tr><td><code>?" + p.i + "</code></td><td><code>" + TB.esc(p.prop) + "</code></td><td>" + TB.esc(p.bind) + "</td></tr>";
+          }).join("") + "</tbody>";
+      } else {
+        params.hidden = true;
+      }
+      r.warnings.forEach(function (w) { msgs.appendChild(mk("li", "msg warn", TB.mdCode(w))); });
+      r.notes.forEach(function (w) { msgs.appendChild(mk("li", "msg info", TB.mdCode(w))); });
+    };
+    dqIn.addEventListener("input", renderDq);
+    dqEnt.addEventListener("input", renderDq);
+    $$(".dq-ex").forEach(function (b) {
+      b.addEventListener("click", function () {
+        dqIn.value = b.textContent.trim();
+        renderDq();
+        dqIn.focus();
+      });
+    });
+    renderDq();
+  }
+
+  /* ---------- 삭제 경로 시뮬레이터 ---------- */
+  var simBox = $("#sim");
+  if (simBox) {
+    var renderSim = function () {
+      var ap = $("input[name=simA]:checked", simBox).value;
+      var pa = $("input[name=simP]:checked", simBox).value;
+      var r = TB.SIM.result(ap, pa);
+      if (!r) return;
+      function st(x) { return '<span class="st st-' + x[0] + '">' + TB.esc(x[1]) + "</span>"; }
+      $("#simOut").innerHTML =
+        '<div class="sim-sql"><p class="sim-lbl">실행되는 SQL</p><pre class="sim-code"><code>' + TB.esc(r.sql) + "</code></pre><p>" + TB.mdCode(r.sqlNote) + "</p></div>" +
+        '<dl class="sim-grid"><div><dt>soft delete</dt><dd>' + st(r.soft) + "</dd></div><div><dt>Envers 이력</dt><dd>" + st(r.envers) +
+        "</dd></div><div><dt>확신도</dt><dd>" + st(r.conf) + "</dd></div></dl>" +
+        (r.notes.length ? '<ul class="sim-notes">' + r.notes.map(function (n) { return "<li>" + TB.mdCode(n) + "</li>"; }).join("") + "</ul>" : "");
+    };
+    simBox.addEventListener("change", renderSim);
+    renderSim();
+  }
+
+  /* ---------- 스크롤 추적 ---------- */
+  var readBar = $("#readBar"), toTop = $("#toTop"), sidebar = $("#sidebar"), cursorEl = $(".tr-cursor");
+  var activeCh = null, activeSub = null, ticking = false;
+  function keepVisible(a) {
+    var r = a.getBoundingClientRect(), c = sidebar.getBoundingClientRect();
+    if (r.top < c.top + 96) sidebar.scrollTop -= c.top + 96 - r.top;
+    else if (r.bottom > c.bottom - 24) sidebar.scrollTop += r.bottom - c.bottom + 24;
+  }
+  function onScroll() {
+    ticking = false;
+    var docEl = document.documentElement;
+    var max = docEl.scrollHeight - window.innerHeight;
+    var y = window.pageYOffset || docEl.scrollTop;
+    readBar.style.transform = "scaleX(" + (max > 0 ? Math.min(1, y / max) : 0) + ")";
+    toTop.classList.toggle("show", y > 900);
+    var line = 140, ch = null, sub = null;
+    for (var i = 0; i < spy.length; i++) {
+      var t = spy[i];
+      if (t.getBoundingClientRect().top <= line) {
+        if (t.tagName === "SECTION") { ch = t; sub = null; } else sub = t;
+      } else break;
+    }
+    if (ch !== activeCh) {
+      if (activeCh) {
+        linkFor[activeCh.id].classList.remove("active");
+        linkFor[activeCh.id].parentNode.classList.remove("open");
+        if (traceRows[activeCh.id]) traceRows[activeCh.id].classList.remove("active");
+      }
+      if (ch) {
+        linkFor[ch.id].classList.add("active");
+        linkFor[ch.id].parentNode.classList.add("open");
+        if (traceRows[ch.id]) traceRows[ch.id].classList.add("active");
+        keepVisible(linkFor[ch.id]);
+      }
+      activeCh = ch;
+    }
+    if (sub !== activeSub) {
+      if (activeSub) linkFor[activeSub.id].classList.remove("active");
+      if (sub) linkFor[sub.id].classList.add("active");
+      activeSub = sub;
+    }
+    var p = 0;
+    if (ch) {
+      for (var k = 0; k < spans.length; k++) {
+        if (spans[k].ch === ch) {
+          var rect = ch.getBoundingClientRect();
+          var f = Math.min(1, Math.max(0, (line - rect.top) / Math.max(1, rect.height)));
+          p = (spans[k].start + f * spans[k].dur) / total;
+          break;
+        }
+      }
+    }
+    if (cursorEl) {
+      cursorEl.style.setProperty("--p", p.toFixed(4));
+      cursorEl.classList.toggle("idle", p <= 0);
+    }
+  }
+  window.addEventListener("scroll", function () {
+    if (!ticking) { ticking = true; requestAnimationFrame(onScroll); }
+  }, { passive: true });
+  window.addEventListener("resize", onScroll);
+
+  /* ---------- 검색 ---------- */
+  var qIn = $("#q"), qRes = $("#qResults"), index = null, qSel = -1, qItems = [];
+  function buildIndex() {
+    index = [];
+    chapters.forEach(function (ch) {
+      var label = chLabel(ch);
+      $$("h1, h2, h3, p, li, td, pre, dt, dd", ch).forEach(function (el) {
+        if (el.closest(".quiz, .widget, .ch-foot, .sources, .ch-meter")) return;
+        if (el.tagName !== "LI" && el.tagName !== "TD" && el.parentNode.closest("li, td, dd")) return;
+        var text;
+        if (el.tagName === "LI" && el.querySelector("ul, ol")) {
+          var c = el.cloneNode(true);
+          $$("ul, ol", c).forEach(function (x) { x.parentNode.removeChild(x); });
+          text = c.textContent;
+        } else {
+          text = el.textContent;
+        }
+        text = text.replace(/\s+/g, " ").trim();
+        if (text.length < 2) return;
+        index.push({ el: el, text: text, low: text.toLowerCase(), label: label });
+      });
+    });
+  }
+  function closeResults() {
+    qRes.hidden = true;
+    qRes.innerHTML = "";
+    qItems = [];
+    qSel = -1;
+    qIn.setAttribute("aria-expanded", "false");
+  }
+  function pick(it) {
+    closeResults();
+    qIn.blur();
+    closeNav();
+    var target = it.el.tagName === "TD" ? it.el.closest("tr") : it.el;
+    var tr = target.closest("tr");
+    if (tr && tr.hidden) tr.hidden = false;
+    flash(target);
+  }
+  function runSearch() {
+    var raw = qIn.value.trim(), q = raw.toLowerCase();
+    if (q.length < 2) { closeResults(); return; }
+    if (!index) buildIndex();
+    var hits = [];
+    for (var i = 0; i < index.length && hits.length < 60; i++) {
+      var pos = index[i].low.indexOf(q);
+      if (pos >= 0) hits.push({ it: index[i], pos: pos });
+    }
+    qRes.innerHTML = "";
+    qItems = [];
+    qSel = -1;
+    if (!hits.length) {
+      qRes.appendChild(mk("p", "q-empty", "‘" + TB.esc(raw) + "’와 일치하는 내용이 없습니다. 더 짧은 단어나 영문 API 이름으로 찾아보세요."));
+    } else {
+      qRes.appendChild(mk("p", "q-count", hits.length >= 60 ? "결과가 많아 앞의 60개만 보여 줍니다" : hits.length + "개 결과"));
+    }
+    hits.forEach(function (h) {
+      var t = h.it.text, s = Math.max(0, h.pos - 34), e = Math.min(t.length, h.pos + q.length + 70);
+      var snip = (s > 0 ? "…" : "") + TB.esc(t.slice(s, h.pos)) + "<mark>" + TB.esc(t.slice(h.pos, h.pos + q.length)) + "</mark>" +
+        TB.esc(t.slice(h.pos + q.length, e)) + (e < t.length ? "…" : "");
+      var b = mk("button", "q-item", '<span class="q-ch">' + TB.esc(h.it.label) + '</span><span class="q-snip">' + snip + "</span>");
+      b.type = "button";
+      b.setAttribute("role", "option");
+      b.addEventListener("click", function () { pick(h.it); });
+      qRes.appendChild(b);
+      qItems.push({ btn: b, it: h.it });
+    });
+    qRes.hidden = false;
+    qIn.setAttribute("aria-expanded", "true");
+  }
+  qIn.addEventListener("input", runSearch);
+  qIn.addEventListener("focus", function () { if (qIn.value.trim().length >= 2) runSearch(); });
+  qIn.addEventListener("keydown", function (ev) {
+    if (ev.key === "ArrowDown" || ev.key === "ArrowUp") {
+      if (!qItems.length) return;
+      ev.preventDefault();
+      if (qSel >= 0) qItems[qSel].btn.classList.remove("sel");
+      qSel = (qSel + (ev.key === "ArrowDown" ? 1 : -1) + qItems.length) % qItems.length;
+      qItems[qSel].btn.classList.add("sel");
+      qItems[qSel].btn.scrollIntoView({ block: "nearest" });
+    } else if (ev.key === "Enter") {
+      if (qItems.length) { ev.preventDefault(); pick(qItems[Math.max(qSel, 0)].it); }
+    } else if (ev.key === "Escape") {
+      closeResults();
+      qIn.blur();
+    }
+  });
+  document.addEventListener("click", function (ev) { if (!ev.target.closest(".search")) closeResults(); });
+
+  /* ---------- 모아보기 (Boot 4 변경점, 검증 필요) ---------- */
+  var modal = $("#modal"), modalBody = $("#modalBody"), modalTitle = $("#modalTitle"), lastFocus = null;
+  function collect(kind) {
+    var seen = [], items = [];
+    $$("section.chapter .tag." + kind).forEach(function (tag) {
+      var host = tag.closest("li, tr, .callout, p, h2, h3");
+      if (!host || seen.indexOf(host) >= 0) return;
+      seen.push(host);
+      items.push({ host: host, text: cleanText(host), label: chLabel(tag.closest("section.chapter")) });
+    });
+    return items;
+  }
+  var COLL = {
+    b4: {
+      title: "Boot 4 변경점",
+      intro: "Boot 3.x에서 올라올 때 코드나 설정을 바꿔야 하는 항목입니다. 항목을 누르면 본문의 해당 위치로 이동합니다."
+    },
+    verify: {
+      title: "검증 필요 항목",
+      intro: "공식 문서로 확정하지 못했거나 버전별로 확인해야 하는 항목입니다. 도입 전에 통합 테스트, javadoc, 소스로 확인하세요."
+    }
+  };
+  function openCollection(kind) {
+    var items = collect(kind);
+    modalTitle.textContent = COLL[kind].title + " (" + items.length + ")";
+    modalBody.innerHTML = "";
+    modalBody.appendChild(mk("p", "modal-intro", COLL[kind].intro));
+    var list = mk("ol", "coll-list");
+    items.forEach(function (it) {
+      var li = mk("li"), b = mk("button", "coll-item");
+      b.type = "button";
+      var t = it.text.length > 260 ? it.text.slice(0, 260) + "…" : it.text;
+      b.innerHTML = '<span class="q-ch">' + TB.esc(it.label) + '</span><span class="coll-text">' + TB.esc(t) + "</span>";
+      b.addEventListener("click", function () { closeModal(); closeNav(); flash(it.host); });
+      li.appendChild(b);
+      list.appendChild(li);
+    });
+    modalBody.appendChild(list);
+    lastFocus = document.activeElement;
+    modal.hidden = false;
+    document.body.classList.add("modal-open");
+    $("#modalClose").focus();
+  }
+  function closeModal() {
+    if (modal.hidden) return;
+    modal.hidden = true;
+    document.body.classList.remove("modal-open");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  $("#b4Count").textContent = collect("b4").length;
+  $("#verifyCount").textContent = collect("verify").length;
+  $("#b4Btn").addEventListener("click", function () { openCollection("b4"); });
+  $("#verifyBtn").addEventListener("click", function () { openCollection("verify"); });
+  $("#modalClose").addEventListener("click", closeModal);
+  modal.addEventListener("click", function (ev) { if (ev.target === modal) closeModal(); });
+
+  /* ---------- 모바일 목차 ---------- */
+  function closeNav() {
+    document.body.classList.remove("nav-open");
+    $("#menuBtn").setAttribute("aria-expanded", "false");
+  }
+  $("#menuBtn").addEventListener("click", function () {
+    var open = !document.body.classList.contains("nav-open");
+    document.body.classList.toggle("nav-open", open);
+    this.setAttribute("aria-expanded", open ? "true" : "false");
+  });
+  $("#scrim").addEventListener("click", closeNav);
+  toc.addEventListener("click", function (ev) { if (ev.target.closest("a")) closeNav(); });
+
+  /* ---------- 키보드 ---------- */
+  document.addEventListener("keydown", function (ev) {
+    var tag = (ev.target.tagName || "").toLowerCase();
+    var typing = tag === "input" || tag === "textarea" || tag === "select" || ev.target.isContentEditable;
+    if (ev.key === "/" && !typing && !ev.metaKey && !ev.ctrlKey && !ev.altKey) {
+      ev.preventDefault();
+      qIn.focus();
+      qIn.select();
+    } else if (ev.key === "Escape") {
+      closeModal();
+      closeNav();
+    }
+  });
+
+  /* ---------- 표지 버튼 ---------- */
+  $("#startBtn").addEventListener("click", function () { scrollToEl(chapters[0]); });
+  $("#resumeBtn").addEventListener("click", function () {
+    var t = chapters.filter(function (c) { return !done[c.id]; })[0];
+    if (t) scrollToEl(t);
+    else toast("모든 장을 완료로 표시했어요");
+  });
+  toTop.addEventListener("click", function () { window.scrollTo({ top: 0, behavior: reduceMotion ? "auto" : "smooth" }); });
+
+  renderProgress();
+  renderQuizSummary();
+  onScroll();
+})();
+</script>
+</body>
+</html>
