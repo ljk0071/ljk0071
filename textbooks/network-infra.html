@@ -56,7 +56,8 @@ nav.side li a.done .n{background:var(--green);color:#fff}
 .btn:hover{border-color:var(--accent)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.on{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);font-weight:700}
-main{padding:36px clamp(16px,4vw,56px) 120px;max-width:980px}
+main{padding:36px clamp(16px,4vw,56px) 120px;max-width:980px;min-width:0}
+.grid2>*{min-width:0}
 section.ch{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:28px clamp(16px,3vw,34px);margin-bottom:28px;box-shadow:var(--shadow);scroll-margin-top:20px}
 .eyebrow{color:var(--accent);font-weight:800;font-size:.8rem;letter-spacing:.08em;text-transform:uppercase}
 .lead{color:var(--muted);margin:0 0 18px}
@@ -116,6 +117,25 @@ details summary{cursor:pointer;font-weight:700}
 .cloudtoggle button{border:0;background:var(--panel);color:var(--text);padding:6px 14px;cursor:pointer;font:inherit;font-size:.88rem}
 .cloudtoggle button.on{background:var(--accent);color:#fff}
 .cloudtoggle button.on.grey{background:#888}
+.opts-row{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;margin:6px 0}
+.opts-row label{font-size:.9rem;display:inline-flex;align-items:center;gap:5px}
+.opts-row label{max-width:100%;flex-wrap:wrap}
+.opts-row select{width:auto;max-width:100%}
+textarea{font:inherit;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.85rem;padding:8px 10px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--text);width:100%;min-height:80px}
+.crumb{font-size:.82rem;color:var(--muted);margin-bottom:8px}
+.crumb b{color:var(--text)}
+.pkts{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:4px;margin:8px 0}
+.pkt{border:1px solid var(--line);border-radius:6px;padding:6px 2px;text-align:center;font-size:.78rem;cursor:pointer;background:var(--panel);color:var(--text);font-family:inherit}
+.pkt.ok{background:var(--green-soft);border-color:var(--green)}
+.pkt.lost{background:var(--red-soft);border-color:var(--red);text-decoration:line-through}
+.pkt.wait{background:var(--accent-soft);border-color:var(--accent)}
+.tokens{display:flex;gap:6px;margin:8px 0}
+.tokens i{width:22px;height:22px;border-radius:50%;background:var(--panel2);border:1px solid var(--line)}
+.tokens i.full{background:var(--accent);border-color:var(--accent)}
+.logbox{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:.8rem;max-height:140px;overflow-y:auto;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px 10px;margin-top:8px}
+.meter{height:12px;background:var(--panel2);border-radius:99px;overflow:hidden;margin:4px 0 10px}
+.meter i{display:block;height:100%;background:var(--green)}
+.hl{outline:2px solid var(--accent);outline-offset:1px;border-radius:4px}
 @media (max-width:860px){
   .layout{grid-template-columns:1fr}
   nav.side{position:fixed;inset:0 auto 0 0;width:280px;z-index:20;transform:translateX(-100%);transition:transform .25s;box-shadow:0 0 30px rgba(0,0,0,.2)}
@@ -160,6 +180,21 @@ details summary{cursor:pointer;font-weight:700}
     </div>
   </div>
 
+  <h3>요청은 결국 네 가지 질문을 통과해요</h3>
+  <div class="tablewrap"><table>
+    <tr><th>질문</th><th>담당</th><th>실패하면 보이는 것</th></tr>
+    <tr><td><b>어디로?</b></td><td>DNS</td><td><code>DNS_PROBE_FINISHED_NXDOMAIN</code>, dig 결과 없음</td></tr>
+    <tr><td><b>닿나?</b></td><td>IP · TCP · 방화벽</td><td>timeout, connection refused</td></tr>
+    <tr><td><b>믿을 수 있나?</b></td><td>TLS · 인증서</td><td><code>NET::ERR_CERT_*</code>, 525/526</td></tr>
+    <tr><td><b>들어가도 되나?</b></td><td>WAF · 인증 · 인가 · CORS</td><td>403, 401, 콘솔의 CORS 에러</td></tr>
+  </table></div>
+
+  <div class="widget">
+    <h4>고장 지점 찾기: 이 단계가 망가지면 무엇이 보일까?</h4>
+    <div class="chips" id="failChips"></div>
+    <div class="result" id="failOut"></div>
+  </div>
+
   <div class="callout"><b>이 교과서 사용법</b>각 챕터 끝에 퀴즈가 있어요. 다 읽었으면 "이 챕터 완료"를 눌러 진도를 기록하세요. 진도는 이 브라우저에만 저장돼요.</div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -191,6 +226,30 @@ details summary{cursor:pointer;font-weight:700}
   <h3>Public Suffix List (PSL)</h3>
   <p><code>pp.ua</code>, <code>co.kr</code>, <code>github.io</code>, <code>pages.dev</code>처럼 "이 아래 이름은 각자 다른 주인"이라고 정한 공개 목록이에요. 브라우저는 이 목록으로 <b>쿠키를 격리</b>하고, Cloudflare는 <code>ssobbs13.pp.ua</code>를 독립 도메인으로 인정해요.</p>
 
+  <h3>도메인의 일생: 만료되면 바로 사라질까?</h3>
+  <p>아니에요. 만료일이 지나도 며칠~수십 일 동안 <b>되찾을 기회</b>가 있어요. 대신 뒤로 갈수록 비싸지고, 마지막엔 아무도 못 막아요.</p>
+  <div class="widget">
+    <h4>만료 타임라인 (gTLD 기준, 단계를 눌러보세요)</h4>
+    <div class="flow" id="lifeFlow"></div>
+    <div class="row">
+      <button class="btn" id="lifePrev">← 이전</button>
+      <button class="btn primary" id="lifeNext">다음 →</button>
+      <span id="lifeInfo" style="color:var(--muted);font-size:.88rem"></span>
+    </div>
+    <p style="font-size:.85rem;color:var(--muted);margin:10px 0 0">.com 같은 gTLD 기준이에요. <code>.ua</code> 같은 국가 도메인(ccTLD)은 기간과 규칙이 레지스트리마다 달라요. 정확한 건 nic.ua 약관을 확인하세요.</p>
+  </div>
+
+  <h3>WHOIS와 RDAP: 도메인 등기부 등본</h3>
+  <pre><code>whois ssobbs13.pp.ua          # 레지스트라, 만료일, 네임서버, 상태 코드
+curl -s https://rdap.org/domain/example.com | jq   # WHOIS의 후속 표준 (JSON)</code></pre>
+  <div class="tablewrap"><table>
+    <tr><th>상태 코드 (EPP)</th><th>뜻</th></tr>
+    <tr><td><code>clientTransferProhibited</code></td><td>이전 잠금. 남이 몰래 다른 레지스트라로 옮기지 못하게. <b>켜두는 게 정상</b></td></tr>
+    <tr><td><code>clientHold</code> / <code>serverHold</code></td><td>DNS에서 빠짐. 만료, 미납, 신원 확인 미완료 때 걸려요. 사이트가 통째로 사라져요</td></tr>
+    <tr><td><code>redemptionPeriod</code></td><td>만료 후 복구 기간. 비싼 수수료를 내야 되찾을 수 있어요</td></tr>
+    <tr><td><code>pendingDelete</code></td><td>삭제 대기. 이 상태가 되면 누구도 못 되돌려요</td></tr>
+  </table></div>
+
   <div class="callout warn"><b>꼭 기억할 것</b>만료일 <b>2027-09-25</b>, 자동 갱신 <b>꺼짐</b>. 만료되면 사이트가 통째로 죽고 남이 가져갈 수 있어요. <b>Auth code</b>(EPP)는 도메인 이전용 비밀번호라 절대 공유하면 안 돼요.</div>
 
   <div class="quiz" data-answer="2">
@@ -201,6 +260,15 @@ details summary{cursor:pointer;font-weight:700}
       <button>DNS에 <code>admin</code> 레코드를 하나 추가한다</button>
     </div>
     <div class="ex">서브도메인은 DNS 레코드 한 줄이에요. 구매도, 서버도 필요 없어요. 터널을 쓰면 route 추가 시 레코드가 자동 생성돼요.</div>
+  </div>
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. 만료일을 3일 넘겨서 사이트가 안 뜬다. 가장 알맞은 설명은?</div>
+    <div class="opts">
+      <button>이미 삭제돼서 다른 사람이 가져갔다</button>
+      <button>DNS에서 빠진(Hold) 상태라 안 뜨지만, 유예 기간이라 갱신하면 되찾을 수 있다</button>
+      <button>Cloudflare가 zone을 지워서 그렇다</button>
+    </div>
+    <div class="ex">만료 직후는 보통 유예 기간(Grace)이에요. 레지스트라가 DNS를 멈추거나 주차 페이지로 바꾸지만, 갱신하면 그대로 돌아와요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -245,6 +313,31 @@ details summary{cursor:pointer;font-weight:700}
     <div class="result" id="ttlOut"></div>
   </div>
 
+  <h3>권한 네임서버는 어떻게 답할까: zone 조회 시뮬레이터</h3>
+  <p>아래는 <code>ssobbs13.pp.ua</code> zone의 예시 레코드예요. 이름과 타입을 넣으면 Cloudflare 네임서버가 어떻게 답하는지 보여줘요. 와일드카드, CNAME 따라가기, 주황 구름 숨김, NXDOMAIN과 NODATA의 차이를 직접 확인해보세요.</p>
+  <div class="widget">
+    <h4>zone 조회 시뮬레이터</h4>
+    <pre id="zoneFile" style="font-size:.8rem"></pre>
+    <div class="opts-row">
+      <label style="flex:1;min-width:220px"><input type="text" id="zqName" value="api.ssobbs13.pp.ua"></label>
+      <label><select id="zqType"><option>A</option><option>CNAME</option><option>MX</option><option>TXT</option></select></label>
+    </div>
+    <div class="chips" id="zqPresets"></div>
+    <div class="result" id="zqOut"></div>
+  </div>
+
+  <h3>캐시는 한 군데가 아니에요</h3>
+  <p>"레코드를 바꿨는데 나만 옛날 IP가 나와요"의 원인은 대부분 아래 캐시 중 하나예요. 위에서부터 차례로 확인해요.</p>
+  <div class="tablewrap"><table>
+    <tr><th>순서</th><th>캐시 위치</th><th>비우는 법</th></tr>
+    <tr><td>1</td><td><b>브라우저</b> DNS 캐시 (Chrome은 약 1분)</td><td><code>chrome://net-internals/#dns</code> → Clear host cache</td></tr>
+    <tr><td>2</td><td><b>OS</b> 캐시 + <code>/etc/hosts</code> (hosts 파일이 DNS보다 우선)</td><td>macOS <code>sudo dscacheutil -flushcache</code>, Windows <code>ipconfig /flushdns</code></td></tr>
+    <tr><td>3</td><td><b>공유기</b> DNS 프록시</td><td>재부팅하거나 리졸버를 1.1.1.1로 직접 지정</td></tr>
+    <tr><td>4</td><td><b>리졸버</b> (통신사, 8.8.8.8, 1.1.1.1)</td><td>못 비워요. TTL 만료를 기다리거나 <code>dig @1.1.1.1</code>로 다른 리졸버에 물어봐요. Cloudflare는 <a href="https://one.one.one.one/purge-cache/" target="_blank" rel="noopener">1.1.1.1 캐시 삭제 페이지</a>를 제공해요</td></tr>
+  </table></div>
+  <div class="callout"><b>없다는 답도 캐시돼요 (negative caching)</b>레코드를 만들기 전에 한 번 조회했다면, 리졸버는 "없음(NXDOMAIN)"이라는 답도 SOA 레코드에 적힌 시간만큼 캐시해요. 그래서 <b>레코드를 먼저 만들고 나서 조회</b>하는 습관이 좋아요.</div>
+  <div class="callout ok"><b>DoH / DoT</b>원래 DNS 질문은 평문 UDP 53번이라 통신사가 보고 바꿀 수도 있어요. DNS over HTTPS(443)와 DNS over TLS(853)는 이걸 암호화해요. 브라우저의 "보안 DNS" 설정이 DoH예요. 켜두면 OS나 공유기 캐시를 건너뛰기도 해서, 디버깅할 때 결과가 다르게 나올 수 있어요.</div>
+
   <div class="callout"><b>apex와 CNAME</b><code>@</code>(= <code>ssobbs13.pp.ua</code> 자체)는 원래 규칙상 CNAME을 못 가져요. Cloudflare는 <b>CNAME Flattening</b>으로 몰래 A 레코드처럼 바꿔줘서 가능하게 해줘요.</div>
 
   <div class="quiz" data-answer="1">
@@ -256,6 +349,15 @@ details summary{cursor:pointer;font-weight:700}
       <button>TXT</button>
     </div>
     <div class="ex">이름 → 다른 이름(별칭)은 CNAME. A는 이름 → IP 주소예요.</div>
+  </div>
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. 주황 구름인 <code>api</code> CNAME 레코드를 <code>dig +short api.ssobbs13.pp.ua</code>로 조회하면?</div>
+    <div class="opts">
+      <button><code>xxx.cfargotunnel.com</code>이 나온다</button>
+      <button>OCI 서버의 진짜 IP가 나온다</button>
+      <button>Cloudflare 엣지 IP(104.x / 172.67.x)가 나온다</button>
+    </div>
+    <div class="ex">Proxied 레코드는 밖에서 보면 CNAME이 숨겨지고 엣지 IP만 보여요. 그래서 오리진 정보가 노출되지 않아요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -285,6 +387,15 @@ details summary{cursor:pointer;font-weight:700}
     <tr><td>Workers Routes</td><td>이 도메인 경로에 Worker 연결</td></tr>
   </table></div>
 
+  <h3>네임서버를 옮길 때 가장 무서운 함정: DNSSEC</h3>
+  <p><b>DNSSEC</b>은 DNS 답에 전자서명을 붙여 위조를 막는 기술이에요. 상위 zone(레지스트리)에 <b>DS 레코드</b>("이 도메인은 이 키로 서명해요")가 등록돼 있으면, 검증하는 리졸버는 서명이 그 키와 맞는지 확인해요.</p>
+  <div class="widget">
+    <h4>NS 이전 순서 비교</h4>
+    <div class="cloudtoggle" id="dnssecToggle"><button class="on" data-v="bad">DS 지우지 않고 NS만 변경</button><button data-v="good">올바른 순서</button></div>
+    <div class="flow" id="dnssecFlow" style="margin-top:12px"></div>
+  </div>
+  <p>nic.ua 기본 설정에서 DNSSEC이 꺼져 있었다면 이번 이전에는 해당 없어요. 하지만 다른 도메인을 옮길 땐 <b>레지스트라에서 DNSSEC(DS) 상태를 먼저 확인</b>하세요. Active가 된 뒤 Cloudflare의 DNS → Settings에서 DNSSEC을 켜고, 알려주는 DS 값을 레지스트라에 등록하면 돼요.</p>
+
   <div class="quiz" data-answer="0">
     <div class="q">Q. 터널 route 화면의 도메인 목록에 <code>ssobbs13.pp.ua</code>가 안 보인다. 가장 유력한 이유는?</div>
     <div class="opts">
@@ -311,6 +422,26 @@ details summary{cursor:pointer;font-weight:700}
   </div>
   <div class="callout warn"><b>Docker에서 가장 헷갈리는 것</b>컨테이너 안의 <code>localhost</code>는 <b>그 컨테이너 자신</b>이에요. 호스트 서버가 아니에요. cloudflared 컨테이너가 <code>localhost:8080</code>으로 Spring에 닿으려면 같은 네트워크 네임스페이스를 공유하거나(<code>network_mode</code>), 서비스 이름(<code>http://be:8080</code>)을 써야 해요.</div>
 
+  <h3>CIDR: IP 범위를 한 줄로 쓰는 법</h3>
+  <p><code>10.0.0.0/24</code>에서 <code>/24</code>는 "앞의 24비트는 고정, 나머지 8비트는 자유"라는 뜻이에요. 방화벽 규칙, VCN 서브넷, Docker 네트워크가 전부 이 표기를 써요. <code>0.0.0.0/0</code>은 "모든 IP", <code>/32</code>는 "딱 이 IP 하나"예요.</p>
+  <div class="widget">
+    <h4>CIDR 계산기</h4>
+    <div class="grid2">
+      <label>CIDR<input type="text" id="cidrIn" value="10.0.0.0/24"></label>
+      <label>이 IP가 범위 안에 있나?<input type="text" id="cidrTest" value="10.0.0.37"></label>
+    </div>
+    <div class="chips" id="cidrPresets"></div>
+    <div class="result" id="cidrOut"></div>
+  </div>
+
+  <h3>NAT: 사설 IP가 인터넷에 나가는 방법</h3>
+  <p>집 공유기 안의 노트북(<code>192.168.0.10</code>)도, OCI VCN 안의 서버(<code>10.0.0.5</code>)도 사설 IP예요. 밖으로 나갈 때 공유기나 인터넷 게이트웨이가 출발 주소를 <b>공인 IP로 바꿔서</b> 내보내고, 돌아오는 응답을 기억해뒀다가 다시 안쪽으로 돌려줘요. 이게 <b>NAT</b>예요.</p>
+  <ul>
+    <li>그래서 밖에서 먼저 사설 IP로 연결을 걸 수는 없어요. 받으려면 <b>포트 포워딩</b>이 필요해요.</li>
+    <li>cloudflared가 NAT 뒤에서도 잘 되는 이유: 안에서 먼저 나가는 연결이라 NAT가 응답 경로를 기억해줘요.</li>
+    <li>OCI 인스턴스의 "공인 IP"도 실제로는 VCN의 인터넷 게이트웨이가 1:1 NAT로 붙여준 거예요. 서버 안에서 <code>ip addr</code>를 치면 사설 IP만 보여요.</li>
+  </ul>
+
   <h3>자주 쓰는 포트</h3>
   <div class="tablewrap"><table>
     <tr><th>포트</th><th>용도</th></tr>
@@ -333,6 +464,20 @@ details summary{cursor:pointer;font-weight:700}
          클라우드 콘솔에서 설정          서버 안에서 설정</pre>
   <p>"포트 열었는데 안 돼요"의 90%는 <b>OS 방화벽</b>을 안 열어서예요. 터널을 쓰는 지금은 <b>둘 다 닫아두는 게 정답</b>. SSH(22)만 열어두세요.</p>
 
+  <div class="callout"><b>상태 기반(stateful) 방화벽</b>OCI Security List의 기본 규칙은 stateful이에요. 안에서 나간 연결의 <b>응답</b>은 인바운드 규칙이 없어도 자동으로 들어와요. 그래서 cloudflared는 인바운드 규칙 하나 없이 엣지와 대화할 수 있어요.</div>
+
+  <div class="widget">
+    <h4>방화벽 규칙 시뮬레이터 (OCI 인바운드 규칙)</h4>
+    <p style="margin:0 0 8px;font-size:.9rem;color:var(--muted)">규칙을 켜고 끄고, 들어오는 패킷을 바꿔보세요. 허용 규칙 중 <b>하나라도 맞으면 통과</b>, 아무것도 안 맞으면 버려져요.</p>
+    <div id="fwRules"></div>
+    <div class="grid2" style="margin-top:10px">
+      <label>출발지 IP<input type="text" id="fwSrc" value="203.0.113.7"></label>
+      <label>목적지 포트<input type="text" id="fwPort" value="443"></label>
+    </div>
+    <div class="chips" id="fwPresets"></div>
+    <div class="result" id="fwOut"></div>
+  </div>
+
   <div class="quiz" data-answer="1">
     <div class="q">Q. 터널을 쓰면 OCI에서 443 포트를 열어야 할까?</div>
     <div class="opts">
@@ -340,6 +485,15 @@ details summary{cursor:pointer;font-weight:700}
       <button>안 열어도 된다. cloudflared가 아웃바운드로 연결하니까</button>
     </div>
     <div class="ex">터널은 서버가 먼저 바깥으로 연결을 열고, 요청은 그 연결을 타고 들어와요. 인바운드 포트는 필요 없어요.</div>
+  </div>
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. SSH를 집에서만 접속하게 하고 싶다. 집 공인 IP가 203.0.113.7이면 소스 CIDR은?</div>
+    <div class="opts">
+      <button><code>0.0.0.0/0</code></button>
+      <button><code>203.0.113.0/0</code></button>
+      <button><code>203.0.113.7/32</code></button>
+    </div>
+    <div class="ex">/32는 32비트 전부 고정, 즉 IP 딱 하나예요. 다만 가정용 IP는 바뀔 수 있으니, 바뀌면 콘솔에서 규칙을 고쳐야 해요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -354,6 +508,30 @@ details summary{cursor:pointer;font-weight:700}
     <li><b>인증서</b>: 믿을 수 있는 기관(<b>CA</b>)이 "이 서버는 이 도메인 주인 맞음"이라고 서명한 파일</li>
     <li><b>Let's Encrypt</b>: 무료 자동 CA. 90일마다 갱신 필요</li>
   </ul>
+
+  <h3>인증서 체인: 브라우저는 누구를 믿나</h3>
+  <p>브라우저와 OS에는 <b>루트 CA</b> 약 150개의 공개키가 미리 들어있어요(신뢰 저장소). 루트는 금고에 보관하고, 실제 발급은 <b>중간 CA</b>가 해요. 서버는 "내 인증서 + 중간 인증서"를 함께 보내고, 브라우저가 루트까지 서명을 거슬러 올라가며 확인해요.</p>
+  <div class="widget">
+    <h4>체인 검증 따라가기</h4>
+    <div class="flow" id="chainFlow"></div>
+    <div class="row">
+      <button class="btn primary" id="chainNext">다음 →</button>
+      <button class="btn" id="chainReset">처음부터</button>
+      <label style="font-size:.88rem;color:var(--muted)"><input type="checkbox" id="chainMissing"> 서버가 중간 인증서를 빼먹었다면?</label>
+    </div>
+  </div>
+
+  <h3>이 인증서로 이 도메인을 쓸 수 있나?</h3>
+  <p>인증서에는 쓸 수 있는 이름 목록(<b>SAN</b>, Subject Alternative Name)이 적혀 있어요. 와일드카드 <code>*</code>는 <b>딱 한 단계</b>만 대신해요. Cloudflare 무료 인증서(Universal SSL)는 <code>ssobbs13.pp.ua</code>와 <code>*.ssobbs13.pp.ua</code>만 담고 있어요.</p>
+  <div class="widget">
+    <h4>인증서 이름 매칭기</h4>
+    <div class="grid2">
+      <label>인증서 SAN 목록 (쉼표로 구분)<input type="text" id="sanIn" value="ssobbs13.pp.ua, *.ssobbs13.pp.ua"></label>
+      <label>접속할 호스트명<input type="text" id="sanHost" value="api.ssobbs13.pp.ua"></label>
+    </div>
+    <div class="chips" id="sanPresets"></div>
+    <div class="result" id="sanOut"></div>
+  </div>
 
   <h3>nginx로 직접 하면 해야 하는 일</h3>
   <div class="widget">
@@ -372,6 +550,14 @@ details summary{cursor:pointer;font-weight:700}
 
   <div class="callout ok"><b>터널을 쓰면</b>②구간이 터널 자체로 암호화돼요. <code>http://localhost:8080</code>처럼 평문으로 적어도 안전해요. 평문 구간은 서버 내부뿐이에요. <b>nginx도, certbot도, 인증서 파일도 필요 없어요.</b></div>
 
+  <h3>터널 없이 직접 오픈한다면: Origin CA 인증서</h3>
+  <p>Full (strict)를 쓰려면 오리진에도 믿을 만한 인증서가 있어야 해요. Let's Encrypt 대신 Cloudflare가 무료로 주는 <b>Origin CA 인증서</b>(최대 15년)를 쓸 수 있어요. 단, 이 인증서는 <b>Cloudflare 엣지만 믿어요</b>. 브라우저가 오리진에 직접 접속하면(회색 구름) 경고가 떠요.</p>
+
+  <h3>HSTS: "이 사이트는 앞으로 무조건 HTTPS"</h3>
+  <pre><code>Strict-Transport-Security: max-age=31536000; includeSubDomains</code></pre>
+  <p>이 헤더를 한 번 받은 브라우저는 <code>max-age</code> 동안 <code>http://</code>로 접속하려 해도 스스로 <code>https://</code>로 바꿔요. 처음 한 번의 평문 요청을 가로채는 공격(SSL stripping)을 막아요. Cloudflare의 SSL/TLS → Edge Certificates에서 켤 수 있어요.</p>
+  <div class="callout warn"><b>HSTS는 되돌리기 어려워요</b><code>includeSubDomains</code>를 켜면 모든 서브도메인이 HTTPS를 강제당해요. HTTPS가 안 되는 서브도메인이 하나라도 있으면 그곳은 max-age 동안 접속 불가예요. <code>max-age=300</code>처럼 짧게 시작해서 늘리세요. <code>preload</code>는 브라우저에 하드코딩되는 거라 빼는 데 몇 달 걸려요.</div>
+
   <div class="quiz" data-answer="2">
     <div class="q">Q. 브라우저엔 자물쇠가 뜨는데 Cloudflare→서버 구간이 평문인 위험한 모드는?</div>
     <div class="opts">
@@ -380,6 +566,15 @@ details summary{cursor:pointer;font-weight:700}
       <button>Flexible</button>
     </div>
     <div class="ex">Flexible은 뒤쪽이 HTTP예요. 리다이렉트 무한루프의 단골 원인이기도 해요.</div>
+  </div>
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. <code>v1.api.ssobbs13.pp.ua</code>를 만들었더니 인증서 오류가 난다. 이유는?</div>
+    <div class="opts">
+      <button>DNS 레코드가 회색 구름이라서</button>
+      <button><code>*.ssobbs13.pp.ua</code>는 한 단계만 덮어서 두 단계 서브도메인은 안 됨</button>
+      <button>TTL이 아직 안 지나서</button>
+    </div>
+    <div class="ex">와일드카드는 라벨 하나만 대신해요. 두 단계 이상은 Advanced Certificate(유료)로 <code>*.api.ssobbs13.pp.ua</code>를 따로 발급하거나, <code>v1-api</code>처럼 한 단계로 이름을 지어요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -411,6 +606,51 @@ details summary{cursor:pointer;font-weight:700}
   <h3>캐시</h3>
   <p>정적 파일(JS, CSS, 이미지)은 엣지 캐시로 빨라져요(Pages가 자동으로 해줘요). <b>API 응답은 기본적으로 캐시 안 돼요.</b> 캐시 규칙을 잘못 만들면 남의 일기가 보이는 사고가 날 수 있어요. Spring에서 <code>Cache-Control</code> 헤더로 제어하세요.</p>
 
+  <div class="widget">
+    <h4>엣지 캐시 시뮬레이터: 같은 요청을 두 번 보내면?</h4>
+    <div class="opts-row">
+      <label>요청 경로 <select id="cPath">
+        <option value="js">/assets/app.3f9a.js</option>
+        <option value="img">/images/logo.png</option>
+        <option value="html">/index.html</option>
+        <option value="api" selected>/diaries (API JSON)</option>
+      </select></label>
+      <label>오리진 Cache-Control <select id="cCC">
+        <option value="none">(없음)</option>
+        <option value="public">public, max-age=3600</option>
+        <option value="smax">public, s-maxage=60, max-age=0</option>
+        <option value="private">private</option>
+        <option value="nostore">no-store</option>
+      </select></label>
+    </div>
+    <div class="opts-row">
+      <label><input type="checkbox" id="cEverything"> Cache Rule: "Eligible for cache" (전부 캐시)</label>
+      <label><input type="checkbox" id="cCookie"> 응답에 <code>Set-Cookie</code> 있음</label>
+    </div>
+    <div class="result" id="cOut"></div>
+  </div>
+
+  <div class="tablewrap"><table>
+    <tr><th><code>CF-Cache-Status</code></th><th>뜻</th></tr>
+    <tr><td><b>HIT</b></td><td>엣지 캐시에서 바로 응답. 오리진은 몰라요</td></tr>
+    <tr><td><b>MISS</b></td><td>캐시에 없어서 오리진에 갔다 옴. 다음 요청부터 HIT</td></tr>
+    <tr><td><b>EXPIRED</b> / <b>REVALIDATED</b></td><td>캐시가 만료돼서 오리진에 다시 받음 / 오리진이 304로 "그대로 써"라고 함</td></tr>
+    <tr><td><b>BYPASS</b></td><td>캐시 대상이지만 오리진 헤더(private, no-store, Set-Cookie) 때문에 건너뜀</td></tr>
+    <tr><td><b>DYNAMIC</b></td><td>애초에 캐시 대상이 아님 (HTML, API 기본값). 가장 흔한 값</td></tr>
+  </table></div>
+  <p>브라우저 개발자 도구 → Network → 응답 헤더에서 바로 볼 수 있어요. <code>curl -sI https://…/app.js | grep -i cf-cache</code>로도 확인해요.</p>
+
+  <h3>리버스 프록시가 덧붙이는 헤더</h3>
+  <p>프록시를 거치면 오리진이 보는 "접속자"는 프록시 자신이에요. 그래서 프록시는 원래 정보를 헤더에 적어서 넘겨줘요.</p>
+  <div class="tablewrap"><table>
+    <tr><th>헤더</th><th>담긴 정보</th><th>Spring에서</th></tr>
+    <tr><td><code>X-Forwarded-For</code></td><td>원래 클라이언트 IP (프록시를 지날 때마다 뒤에 추가)</td><td><code>request.remoteAddr</code> (설정 후)</td></tr>
+    <tr><td><code>X-Forwarded-Proto</code></td><td>원래 스킴 (<code>https</code>)</td><td><code>request.isSecure</code>, 리다이렉트 URL</td></tr>
+    <tr><td><code>X-Forwarded-Host</code></td><td>원래 Host</td><td>절대 URL 생성</td></tr>
+    <tr><td><code>CF-Connecting-IP</code></td><td>Cloudflare가 확인한 사용자 IP 하나</td><td>직접 꺼내 쓰기 가장 쉬움</td></tr>
+  </table></div>
+  <div class="callout warn"><b>헤더는 위조할 수 있어요</b>누구나 <code>X-Forwarded-For: 1.2.3.4</code>를 붙여 보낼 수 있어요. 믿어도 되는 건 <b>내가 신뢰하는 프록시가 붙인 값</b>뿐이에요. 터널 구조에선 오리진에 들어오는 모든 요청이 Cloudflare를 거치니 안전하지만, 포트를 직접 열었다면 Cloudflare IP 대역에서 온 요청만 믿어야 해요.</div>
+
   <div class="quiz" data-answer="1">
     <div class="q">Q. 터널용 <code>api</code> CNAME 레코드의 구름 색은?</div>
     <div class="opts">
@@ -419,6 +659,15 @@ details summary{cursor:pointer;font-weight:700}
       <button>상관없다</button>
     </div>
     <div class="ex">터널은 Cloudflare 엣지를 거쳐야만 동작해요. 반드시 주황이에요(자동으로 그렇게 생성돼요).</div>
+  </div>
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. "전부 캐시" 규칙을 <code>/diaries</code>에 걸었다. 사용자 A의 일기 목록이 B에게 보이는 사고를 막으려면 Spring이 뭘 보내야 할까?</div>
+    <div class="opts">
+      <button><code>Cache-Control: private</code> 또는 <code>no-store</code></button>
+      <button><code>Content-Type: application/json</code></button>
+      <button><code>Access-Control-Allow-Origin</code></button>
+    </div>
+    <div class="ex">private/no-store면 공유 캐시(엣지)는 저장하지 않아요. 애초에 사용자별 API엔 캐시 규칙을 걸지 않는 게 가장 안전해요. Spring Security는 기본으로 <code>no-cache, no-store</code>를 붙여줘요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -452,6 +701,46 @@ Access-Control-Allow-Credentials: true</code></pre>
   <p><code>PUT</code>/<code>DELETE</code>, JSON 본문, <code>Authorization</code> 헤더를 쓰면 브라우저가 먼저 <b>OPTIONS 요청(preflight)</b>을 보내요. Spring Security가 OPTIONS를 막으면 CORS 에러가 나요.</p>
   <div class="callout bad"><b>CORS는 서버 보안이 아니다</b>브라우저만 지키는 규칙이에요. curl이나 Postman은 무시해요. 인증과 권한은 Spring Security가 따로 해야 해요.</div>
 
+  <div class="widget">
+    <h4>Preflight 시뮬레이터: 이 fetch는 OPTIONS를 먼저 보낼까?</h4>
+    <div class="opts-row">
+      <label>메서드 <select id="pfMethod"><option>GET</option><option selected>POST</option><option>PUT</option><option>PATCH</option><option>DELETE</option></select></label>
+      <label>Content-Type <select id="pfCT">
+        <option value="">(본문 없음)</option>
+        <option>text/plain</option>
+        <option>application/x-www-form-urlencoded</option>
+        <option>multipart/form-data</option>
+        <option selected>application/json</option>
+      </select></label>
+    </div>
+    <div class="opts-row">
+      <label><input type="checkbox" id="pfAuth"> <code>Authorization</code> 헤더</label>
+      <label><input type="checkbox" id="pfCustom"> <code>X-Request-Id</code> 헤더</label>
+      <label><input type="checkbox" id="pfCred" checked> <code>credentials: "include"</code></label>
+    </div>
+    <pre id="pfCode" style="font-size:.8rem"></pre>
+    <div class="result" id="pfOut"></div>
+  </div>
+
+  <h3>Spring Security에서 CORS 켜기 (Kotlin)</h3>
+<pre><code>@Bean
+fun corsConfigurationSource(): CorsConfigurationSource {
+    val config = CorsConfiguration().apply {
+        allowedOrigins = listOf("https://ssobbs13.pp.ua", "http://localhost:5173")
+        allowedMethods = listOf("GET", "POST", "PUT", "PATCH", "DELETE")
+        allowedHeaders = listOf("Authorization", "Content-Type")
+        allowCredentials = true      // 쿠키를 쓴다면
+        maxAge = 3600                // preflight 결과를 1시간 캐시
+    }
+    return UrlBasedCorsConfigurationSource().apply { registerCorsConfiguration("/**", config) }
+}
+
+@Bean
+fun filterChain(http: HttpSecurity): SecurityFilterChain = http
+    .cors { }                         // 위 Bean을 사용. 인증 필터보다 먼저 OPTIONS를 처리해요
+    .build()</code></pre>
+  <div class="callout warn"><b>자주 하는 실수</b>① <code>allowCredentials = true</code>인데 <code>allowedOrigins = listOf("*")</code> → Spring이 시작할 때 막아요. 와일드카드가 필요하면 <code>allowedOriginPatterns</code>. ② origin 끝에 <code>/</code>를 붙임(<code>https://ssobbs13.pp.ua/</code>) → 불일치. ③ <code>@CrossOrigin</code>만 붙이고 Security에 <code>.cors { }</code>를 안 켬 → preflight가 401로 막혀요.</div>
+
   <h3>쿠키 속성</h3>
   <div class="tablewrap"><table>
     <tr><th>속성</th><th>뜻</th></tr>
@@ -463,6 +752,15 @@ Access-Control-Allow-Credentials: true</code></pre>
   </table></div>
   <div class="callout ok"><b>그래서</b>FE를 <code>pages.dev</code>가 아니라 <code>ssobbs13.pp.ua</code> 커스텀 도메인에 두면, API와 같은 site가 되어 쿠키 인증이 훨씬 쉬워져요.</div>
 
+  <h3>CSRF: 쿠키가 자동으로 따라가서 생기는 문제</h3>
+  <p>쿠키는 요청을 <b>누가 시켰든</b> 브라우저가 알아서 붙여요. 악성 사이트가 <code>&lt;form action="https://api.ssobbs13.pp.ua/diaries/7" method="POST"&gt;</code>를 몰래 제출하면, 로그인된 사용자의 쿠키가 함께 가요. 이게 <b>CSRF</b>예요. CORS는 응답을 <i>읽는 것</i>만 막고 요청 <i>전송</i>은 막지 않아서 CSRF를 못 막아요.</p>
+  <div class="tablewrap"><table>
+    <tr><th>인증 방식</th><th>CSRF 위험</th><th>대책</th></tr>
+    <tr><td>쿠키 세션 / 쿠키에 JWT</td><td><span class="pill n">있음</span></td><td><code>SameSite=Lax</code>(cross-site POST에 쿠키 안 보냄) + Spring Security CSRF 토큰</td></tr>
+    <tr><td><code>Authorization: Bearer</code> 헤더</td><td><span class="pill y">없음</span></td><td>브라우저가 자동으로 붙이지 않아서 안전. 대신 토큰 보관 위치가 XSS에 노출돼요 (암호학 챕터 참고)</td></tr>
+  </table></div>
+  <p>주의: <code>api.ssobbs13.pp.ua</code>와 <code>evil.ssobbs13.pp.ua</code>는 <b>same-site</b>예요. SameSite는 같은 site 안의 다른 서브도메인은 막지 못해요. 서브도메인을 남에게 내주지 마세요.</p>
+
   <div class="quiz" data-answer="0">
     <div class="q">Q. <code>https://ssobbs13.pp.ua</code> 페이지에서 <code>https://api.ssobbs13.pp.ua</code>를 fetch하면?</div>
     <div class="opts">
@@ -471,6 +769,15 @@ Access-Control-Allow-Credentials: true</code></pre>
       <button>다른 site라 쿠키가 절대 안 감</button>
     </div>
     <div class="ex">호스트가 달라서 cross-origin이지만, 등록 도메인이 같아서 same-site예요.</div>
+  </div>
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. <code>fetch(url, {method:"POST", headers:{"Content-Type":"application/json"}, body})</code>. 콘솔에 CORS 에러가 났는데 Network 탭엔 <code>OPTIONS 401</code>이 보인다. 원인은?</div>
+    <div class="opts">
+      <button>JSON 형식이 잘못됐다</button>
+      <button>Spring Security가 preflight(OPTIONS)를 인증 요구로 막았다</button>
+      <button>DNS 문제다</button>
+    </div>
+    <div class="ex">preflight에는 쿠키도 Authorization도 안 붙어요. 인증 필터보다 CORS 처리가 먼저 돼야 해요. Security 설정에 <code>.cors { }</code>를 켜세요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -496,6 +803,36 @@ Access-Control-Allow-Credentials: true</code></pre>
     <li><b>SPOF</b>: 그게 죽으면 전체가 죽는 지점. 커넥터 2개가 같은 서버라면 서버가 SPOF, DB가 1개면 DB가 SPOF</li>
     <li><b>무상태(stateless)</b>: 레플리카가 여럿이면 세션을 메모리에 두면 안 돼요 → JWT 또는 Redis 세션</li>
   </ul>
+  <div class="callout warn"><b>터널 레플리카는 로드밸런서가 아니에요</b>cloudflared 레플리카는 하나가 죽어도 다른 하나가 받아주는 <b>고가용성</b>용이에요. 트래픽이 반반 나뉜다는 보장은 없어요(보통 가까운 연결로 몰려요). 위 시뮬레이터는 개념 설명용이에요. 균등 분배가 필요하면 Cloudflare Load Balancer나 서버 앞 LB를 써요.</div>
+
+  <h3>로드밸런싱 알고리즘</h3>
+  <div class="tablewrap"><table>
+    <tr><th>알고리즘</th><th>방식</th><th>잘 맞는 경우</th></tr>
+    <tr><td>라운드 로빈</td><td>차례대로 하나씩</td><td>요청 처리 시간이 비슷할 때 (기본값)</td></tr>
+    <tr><td>가중 라운드 로빈</td><td>성능 좋은 서버에 더 많이</td><td>서버 사양이 다를 때</td></tr>
+    <tr><td>최소 연결</td><td>지금 연결이 가장 적은 서버로</td><td>요청마다 처리 시간이 크게 다를 때 (파일 업로드, 긴 쿼리)</td></tr>
+    <tr><td>IP 해시 / 스티키 세션</td><td>같은 사용자는 같은 서버로</td><td>세션을 메모리에 둔 레거시. 새로 만든다면 stateless로 가세요</td></tr>
+  </table></div>
+
+  <h3>헬스체크 두 종류와 우아한 종료</h3>
+  <ul>
+    <li><b>Liveness</b> (<code>/actuator/health/liveness</code>): "프로세스가 살아있나?" 실패하면 <b>재시작</b></li>
+    <li><b>Readiness</b> (<code>/actuator/health/readiness</code>): "지금 요청 받을 준비됐나?" 실패하면 <b>트래픽에서 잠시 뺌</b> (기동 중, DB 연결 끊김)</li>
+    <li><b>Graceful shutdown</b>: 배포할 때 처리 중인 요청을 끝내고 종료. Spring Boot 3.4부터 <code>server.shutdown=graceful</code>이 기본값이에요. 레플리카를 <b>하나씩</b> 교체하면 무중단 배포가 돼요.</li>
+  </ul>
+
+  <h3>가용성은 곱셈이에요</h3>
+  <p>요청 경로에 있는 부품은 <b>전부</b> 살아있어야 해요(직렬: 가용성을 곱함). 같은 역할을 하는 부품을 둘 두면 <b>둘 다</b> 죽어야 멈춰요(병렬: 1 − 둘 다 죽을 확률). 어디를 이중화해야 효과가 큰지 직접 켜보세요.</p>
+  <div class="widget">
+    <h4>가용성 계산기</h4>
+    <div class="opts-row">
+      <label><input type="checkbox" id="avConn" checked> 커넥터 2개 (같은 서버)</label>
+      <label><input type="checkbox" id="avSrv"> 서버 2대로 분리</label>
+      <label><input type="checkbox" id="avDb"> DB 이중화 (자동 failover)</label>
+    </div>
+    <div id="avOut"></div>
+    <p style="font-size:.82rem;color:var(--muted);margin:6px 0 0">가정: 엣지 99.99%, 커넥터 99.9%, 서버(VM) 99.5%, Spring 99.5%, DB 99.9%. 장애는 서로 독립이라고 단순화했어요.</p>
+  </div>
 
   <div class="quiz" data-answer="1">
     <div class="q">Q. 레플리카 2개에서 로그인이 자꾸 풀린다. 원인으로 가장 유력한 건?</div>
@@ -505,6 +842,14 @@ Access-Control-Allow-Credentials: true</code></pre>
       <button>SSL 모드가 Full이라서</button>
     </div>
     <div class="ex">요청이 다른 레플리카로 가면 그 서버엔 세션이 없어요. JWT나 공유 세션 저장소(Redis)를 쓰세요.</div>
+  </div>
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. 커넥터 2개가 같은 OCI VM에 떠 있다. VM이 재부팅되면?</div>
+    <div class="opts">
+      <button>둘 다 죽는다. VM이 단일 장애점(SPOF)이다</button>
+      <button>하나는 살아남는다</button>
+    </div>
+    <div class="ex">같은 서버의 레플리카는 프로세스 장애만 막아요. 서버 장애까지 막으려면 다른 VM(가능하면 다른 가용 영역)에 두세요. 가용성 계산기에서 "서버 2대로 분리"를 켜보면 차이가 보여요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -528,6 +873,33 @@ Access-Control-Allow-Credentials: true</code></pre>
     <li><b>객체 단위 권한</b>: 이 일기가 네 거야? ← 가장 많이 놓치는 곳</li>
   </ul>
   <div class="callout bad"><b>IDOR 주의</b><code>GET /diaries/123</code>에서 123만 바꾸면 남의 일기가 보이는 취약점. 역할(RBAC)만으로는 못 막아요. 매 요청마다 "이 리소스 주인 == 현재 사용자"를 확인하세요.</div>
+<pre><code>// 나쁜 예: 인증만 확인
+fun get(id: Long) = diaryRepository.findById(id).orElseThrow()
+
+// 좋은 예: 조회 조건에 주인을 넣으면 남의 것은 "없음"(404)이 돼요
+fun get(id: Long, @LoginUser user: User) =
+    diaryRepository.findByIdAndOwnerId(id, user.id) ?: throw NotFoundException()</code></pre>
+
+  <h3>Rate Limiting: 토큰 버킷</h3>
+  <p>가장 흔한 요청 제한 방식이에요. 버킷에 토큰이 일정 속도로 차고, 요청 하나가 토큰 하나를 써요. 토큰이 없으면 <code>429 Too Many Requests</code>. 버킷 크기만큼은 <b>한꺼번에 몰려도</b> 허용해요(burst).</p>
+  <div class="widget">
+    <h4>토큰 버킷 체험 (용량 5, 초당 1개 충전)</h4>
+    <div class="tokens" id="tbTokens"></div>
+    <div class="row">
+      <button class="btn primary" id="tbOne">요청 1번</button>
+      <button class="btn" id="tbBurst">10연타</button>
+      <button class="btn" id="tbClear">기록 지우기</button>
+    </div>
+    <div class="logbox" id="tbLog"></div>
+  </div>
+
+  <h3>보안 헤더: 브라우저에게 시키는 방어</h3>
+  <div class="widget">
+    <h4>헤더를 눌러보세요</h4>
+    <div class="chips" id="secHdr"></div>
+    <div class="result" id="secHdrOut"></div>
+  </div>
+  <div class="callout"><b>터널 뒤의 Spring은 자기가 HTTP라고 생각해요</b>cloudflared → Spring 구간이 <code>http://</code>라서, 설정 없이는 <code>request.isSecure == false</code>예요. 그러면 Spring Security가 HSTS 헤더를 안 붙이고, 리다이렉트 URL이 <code>http://</code>로 만들어져요. <code>server.forward-headers-strategy=native</code>를 켜면 <code>X-Forwarded-Proto: https</code>를 믿고 제대로 동작해요.</div>
 
   <h3>Cloudflare Access는?</h3>
   <p>엣지에서 동작하는 <b>문지기</b>예요(터널과 별개 제품). BE에 Spring Security로 인증과 권한이 제대로 있으면 <b>필수가 아니라 추가 방어층</b>이에요. 이번 프로젝트는 제거 예정이에요.</p>
@@ -565,6 +937,18 @@ Access-Control-Allow-Credentials: true</code></pre>
     <tr><td>DDoS 방어</td><td>강함</td><td>기본</td><td>없음</td></tr>
     <tr><td>BE 코드 변경</td><td colspan="3" style="text-align:center"><b>셋 다 없음</b>. BE는 localhost:8080만 알면 됨</td></tr>
   </table></div>
+  <h3>터널 ingress 규칙: 위에서부터 첫 번째로 맞는 것</h3>
+  <p>cloudflared는 들어온 요청의 <b>호스트명</b>과 <b>경로</b>를 규칙 목록과 위에서부터 비교해서, <b>처음 맞는 규칙</b>의 서비스로 보내요. 마지막엔 반드시 아무것에나 맞는 catch-all 규칙이 있어야 해요. 대시보드의 "Published application routes"도 같은 규칙이에요.</p>
+  <div class="widget">
+    <h4>ingress 매칭기 (규칙을 고쳐봐도 돼요)</h4>
+    <textarea id="ingRules" rows="9"></textarea>
+    <label style="display:block;margin-top:8px">요청 URL<input type="text" id="ingUrl" value="https://api.ssobbs13.pp.ua/diaries/7"></label>
+    <div class="chips" id="ingPresets"></div>
+    <div class="result" id="ingOut"></div>
+    <p style="font-size:.82rem;color:var(--muted);margin:6px 0 0">형식: 한 줄에 <code>호스트명 | 경로정규식 | 서비스</code>. 비워두면 "아무거나". 경로는 정규식이라 <code>^/actuator</code>처럼 써요.</p>
+  </div>
+  <div class="callout warn"><b>actuator는 밖에 내보내지 마세요</b><code>/actuator/env</code>, <code>/actuator/heapdump</code>는 설정값과 메모리 속 비밀을 그대로 보여줄 수 있어요. 위 예시처럼 ingress에서 <code>http_status:404</code>로 막거나, <code>management.server.port</code>를 따로 두고 터널에 연결하지 마세요.</div>
+
   <div class="callout"><b>핵심 원리</b>인터넷에서 접속하려면 어딘가에는 반드시 인바운드가 열린 공인 서버가 있어야 해요. 터널은 인바운드를 없애는 게 아니라 <b>남의 엣지가 대신 열어주는 것</b>이에요.</div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -588,6 +972,39 @@ Access-Control-Allow-Credentials: true</code></pre>
 
   <h3>전환 작업 체크리스트</h3>
   <div id="todoList"></div>
+
+  <h3>최종 구조의 서버 구성 (예시)</h3>
+<pre><code># docker-compose.yml (OCI 서버)
+services:
+  be:
+    image: diary-be:latest
+    environment:
+      SERVER_FORWARD_HEADERS_STRATEGY: native   # X-Forwarded-* 신뢰
+    # ports 없음! 밖으로 포트를 공개하지 않아요
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 10s
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    command: tunnel --no-autoupdate run
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN}              # .env 파일, 깃에 올리지 않기
+    network_mode: "service:be"                   # be와 네트워크 공유 → localhost:8080으로 닿음
+    depends_on:
+      be:
+        condition: service_healthy
+    restart: unless-stopped</code></pre>
+  <p>왜 <code>network_mode</code>를 쓰는지, <code>ports:</code>를 왜 빼는지는 "Docker 네트워크" 챕터에서 자세히 다뤄요.</p>
+
+  <div class="widget">
+    <h4>요청 비용 비교: 전환 전 vs 최종</h4>
+    <div class="grid2">
+      <label>하루 API 요청 수<input type="text" id="costReq" value="30000"></label>
+      <label>Workers 무료 한도 (하루)<input type="text" id="costFree" value="100000"></label>
+    </div>
+    <div id="costOut" style="margin-top:10px"></div>
+  </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
 
@@ -601,11 +1018,44 @@ Access-Control-Allow-Credentials: true</code></pre>
   <details><summary><code>dig +short NS ssobbs13.pp.ua</code></summary>네임서버가 누구인지 봐요. <code>cash / virginia.ns.cloudflare.com</code>이 나와야 해요.</details>
   <details><summary><code>curl -v https://api.ssobbs13.pp.ua/actuator/health</code></summary>연결, TLS, 헤더, 상태 코드를 한 번에 볼 수 있어요. 가장 많이 쓰는 도구예요.</details>
   <details><summary><code>curl -I -X OPTIONS https://api.ssobbs13.pp.ua/diaries -H "Origin: https://ssobbs13.pp.ua" -H "Access-Control-Request-Method: POST"</code></summary>CORS preflight 응답에 <code>Access-Control-Allow-Origin</code>이 있는지 확인해요.</details>
+  <details><summary><code>dig @1.1.1.1 api.ssobbs13.pp.ua</code> vs <code>dig @cash.ns.cloudflare.com api.ssobbs13.pp.ua</code></summary>리졸버 답(캐시일 수 있음)과 권한 네임서버의 원본 답을 비교해요. 다르면 아직 캐시가 안 풀린 거예요. <code>+trace</code>를 붙이면 루트부터 따라가는 과정이 다 보여요.</details>
+  <details><summary><code>openssl s_client -connect api.ssobbs13.pp.ua:443 -servername api.ssobbs13.pp.ua &lt;/dev/null | openssl x509 -noout -subject -issuer -dates -ext subjectAltName</code></summary>실제로 받은 인증서의 이름(SAN), 발급자, 만료일을 봐요. <code>-servername</code>(SNI)을 빼면 다른 인증서가 올 수 있어요.</details>
+  <details><summary><code>curl -w "dns:%{time_namelookup} tcp:%{time_connect} tls:%{time_appconnect} ttfb:%{time_starttransfer} total:%{time_total}\n" -o /dev/null -s https://api.ssobbs13.pp.ua/actuator/health</code></summary>느린 게 DNS인지, 연결인지, TLS인지, 서버 처리(TTFB)인지 구간별로 쪼개서 봐요. 각 값은 시작부터 누적된 초예요.</details>
+  <details><summary><code>ss -ltnp</code> (서버에서)</summary>어떤 프로세스가 어떤 포트를 듣고 있는지. <code>127.0.0.1:8080</code>이면 서버 안에서만, <code>0.0.0.0:8080</code>이면 모든 인터페이스에서 받아요.</details>
+  <details><summary><code>docker compose logs -f cloudflared</code> / <code>docker compose ps</code></summary>터널이 엣지에 붙었는지(<code>Registered tunnel connection</code>), 컨테이너가 healthy인지 확인해요.</details>
+  <details><summary>브라우저 개발자 도구 → Network</summary>실패한 요청을 누르면 상태 코드, 응답 헤더(<code>cf-ray</code>, <code>cf-cache-status</code>), preflight 여부가 보여요. <b>CORS 에러는 콘솔에만 이유가 나와요.</b> 요청을 우클릭하면 "Copy as cURL"로 터미널에서 그대로 재현할 수 있어요.</details>
+
+  <h3>진단 흐름도: 질문에 답하면서 원인 좁히기</h3>
+  <div class="widget">
+    <h4>무엇이 문제일까?</h4>
+    <div class="crumb" id="treeCrumb"></div>
+    <div class="result" id="treeQ" style="margin-top:0"></div>
+    <div class="chips" id="treeOpts"></div>
+    <div class="row"><button class="btn" id="treeBack">← 한 단계 뒤로</button><button class="btn" id="treeReset">처음부터</button></div>
+  </div>
 
   <div class="widget">
     <h4>Cloudflare 에러 코드 검색</h4>
     <input type="text" id="errIn" placeholder="코드나 증상 입력 (예: 502, 524, 느림, 방화벽)">
     <div id="errOut" style="margin-top:10px"></div>
+  </div>
+  <div class="quiz" data-answer="2">
+    <div class="q">Q. <code>curl</code>로 API를 부르면 200이 잘 오는데, 브라우저 화면에서만 실패한다. 가장 먼저 볼 곳은?</div>
+    <div class="opts">
+      <button>DNS 레코드</button>
+      <button>OCI 방화벽</button>
+      <button>브라우저 콘솔의 CORS / 쿠키 / Mixed Content 메시지</button>
+    </div>
+    <div class="ex">curl이 된다는 건 DNS·연결·TLS·서버가 정상이라는 뜻이에요. 남는 건 브라우저만 지키는 규칙이에요.</div>
+  </div>
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. 엑셀 내보내기 API가 딱 100초쯤에 Cloudflare 524 에러를 낸다. 올바른 해결은?</div>
+    <div class="opts">
+      <button>작업을 비동기로 바꿔 바로 202를 주고, 상태 조회 API나 완료 알림으로 결과를 받는다</button>
+      <button>Spring의 read timeout을 늘린다</button>
+      <button>SSL 모드를 Flexible로 바꾼다</button>
+    </div>
+    <div class="ex">100초는 Cloudflare 엣지가 오리진 응답을 기다리는 한도예요(무료 플랜은 못 바꿔요). 오래 걸리는 작업은 요청-응답 한 번에 끝내지 말고 작업 ID를 돌려주는 구조로 바꿔요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -713,8 +1163,31 @@ L7 장비가 보는 것:  GET /diaries/123  Host: api.ssobbs13.pp.ua  Authorizat
     <tr><td>HTTP/2</td><td>TCP</td><td>한 연결에 여러 요청 동시 전송(멀티플렉싱), 헤더 압축. 하지만 TCP 패킷 하나가 유실되면 전부 대기</td></tr>
     <tr><td>HTTP/3</td><td><b>QUIC (UDP)</b></td><td>TCP의 HOL 문제 해결, 핸드셰이크와 TLS를 합쳐 더 빠름. 모바일 네트워크 전환에도 강함</td></tr>
   </table></div>
+  <div class="widget">
+    <h4>HOL blocking 체험: 패킷을 눌러 유실시켜 보세요</h4>
+    <div class="cloudtoggle" id="holToggle"><button class="on" data-v="h2">HTTP/2 (TCP)</button><button data-v="h3">HTTP/3 (QUIC)</button></div>
+    <p style="margin:10px 0 0;font-size:.88rem;color:var(--muted)">요청 세 개(A: 일기 목록, B: 프로필, C: 이미지)가 한 연결에서 패킷 3개씩 번갈아 도착해요.</p>
+    <div class="pkts" id="holPkts"></div>
+    <div class="result" id="holOut"></div>
+  </div>
+
   <div class="callout"><b>우리 구조에서</b>브라우저 ↔ Cloudflare는 HTTP/2나 HTTP/3(자동), cloudflared ↔ Cloudflare는 QUIC(UDP 7844)이에요. 서버 방화벽이 아웃바운드 UDP를 막으면 cloudflared는 HTTP/2(TCP 7844)로 자동 전환해요. cloudflared → Spring은 평범한 HTTP/1.1이에요.</div>
 
+  <h3>연결 재사용과 타임아웃 (백엔드 입장)</h3>
+  <p>핸드셰이크가 비싸니까 연결은 <b>재사용</b>하는 게 기본이에요. Spring이 다른 API나 DB를 부를 때도 같아요. DB는 HikariCP가 연결을 풀(pool)로 들고 있고, HTTP 클라이언트도 커넥션 풀을 써요.</p>
+  <div class="tablewrap"><table>
+    <tr><th>타임아웃</th><th>무엇을 기다리나</th><th>안 걸면 생기는 일</th></tr>
+    <tr><td><b>connect timeout</b></td><td>TCP(+TLS) 연결이 맺어지기까지</td><td>상대 서버가 방화벽에 막혀 조용하면 OS 기본값(수십 초~2분)만큼 멈춤</td></tr>
+    <tr><td><b>read (socket) timeout</b></td><td>연결 후 응답 바이트가 오기까지</td><td>상대가 느리면 스레드가 무한정 묶임 → 스레드 풀 고갈 → 내 서버도 죽음</td></tr>
+    <tr><td><b>pool acquire timeout</b></td><td>풀에서 빈 연결을 받기까지 (Hikari <code>connectionTimeout</code>, 기본 30초)</td><td>느린 쿼리가 연결을 다 잡고 있으면 모든 요청이 줄 서서 대기</td></tr>
+  </table></div>
+  <div class="callout warn"><b>타임아웃은 바깥이 안쪽보다 길어야 해요</b>브라우저 → Cloudflare(100초) → Spring → 외부 API. Spring의 외부 API read timeout이 120초면, Cloudflare는 이미 524를 줬는데 Spring은 계속 일하고 있어요. <b>안쪽으로 갈수록 짧게</b> 두세요.</div>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. HTTP/2에서 요청 A의 패킷 하나가 유실됐다. 요청 B와 C는?</div>
+    <div class="opts"><button>영향 없다</button><button>TCP가 순서를 맞출 때까지 같이 기다린다</button></div>
+    <div class="ex">HTTP/2는 요청을 나눠 보내지만, 그 아래 TCP는 하나의 바이트 줄이에요. 앞 바이트가 없으면 뒤 바이트를 앱에 못 넘겨요. QUIC은 스트림별로 순서를 관리해서 B, C는 계속 진행돼요.</div>
+  </div>
   <div class="quiz" data-answer="2">
     <div class="q">Q. HTTP/3가 사용하는 전송 계층 프로토콜은?</div>
     <div class="opts"><button>TCP</button><button>ICMP</button><button>UDP (QUIC)</button></div>
@@ -760,6 +1233,43 @@ L7 장비가 보는 것:  GET /diaries/123  Host: api.ssobbs13.pp.ua  Authorizat
     <tr><td><code>CF-Connecting-IP</code> / <code>X-Forwarded-For</code></td><td>요청</td><td>프록시 뒤에서 진짜 사용자 IP</td></tr>
     <tr><td><code>CF-Ray</code></td><td>응답</td><td>Cloudflare 요청 추적 ID. 문제 신고와 로그 검색에 사용</td></tr>
   </table></div>
+
+  <h3>HTTP 요청은 그냥 텍스트예요</h3>
+  <p>HTTP/1.1 요청은 사람이 읽을 수 있는 텍스트예요(HTTP/2, 3는 같은 내용을 바이너리로 압축할 뿐 의미는 같아요). 옵션을 바꾸면서 실제로 어떤 텍스트가 전송되는지 보세요.</p>
+  <div class="widget">
+    <h4>요청 원문 빌더</h4>
+    <div class="opts-row">
+      <label>메서드 <select id="rbMethod"><option>GET</option><option selected>POST</option><option>PUT</option><option>DELETE</option></select></label>
+      <label style="flex:1;min-width:160px">경로 <input type="text" id="rbPath" value="/diaries"></label>
+    </div>
+    <div class="opts-row">
+      <label><input type="checkbox" id="rbAuth" checked> Authorization</label>
+      <label><input type="checkbox" id="rbOrigin" checked> Origin (브라우저에서 보냄)</label>
+      <label><input type="checkbox" id="rbIdem"> Idempotency-Key</label>
+      <label><input type="checkbox" id="rbEtag"> If-None-Match (조건부 요청)</label>
+    </div>
+    <div class="grid2">
+      <div><b style="font-size:.85rem">전송되는 원문</b><pre id="rbRaw" style="font-size:.78rem"></pre></div>
+      <div><b style="font-size:.85rem">같은 요청을 curl로</b><pre id="rbCurl" style="font-size:.78rem;white-space:pre-wrap;word-break:break-all"></pre></div>
+    </div>
+    <div class="result" id="rbNote"></div>
+  </div>
+
+  <h3>조건부 요청: ETag와 304</h3>
+  <div class="widget">
+    <h4>ETag 흐름 따라가기</h4>
+    <div class="flow" id="etagFlow"></div>
+    <div class="row"><button class="btn primary" id="etagNext">다음 →</button><button class="btn" id="etagReset">처음부터</button></div>
+  </div>
+  <div class="tablewrap"><table>
+    <tr><th>Cache-Control 값</th><th>뜻</th><th>어디에 쓰나</th></tr>
+    <tr><td><code>no-store</code></td><td>어디에도 저장하지 마</td><td>개인정보, 일기 본문</td></tr>
+    <tr><td><code>no-cache</code></td><td>저장은 해도 되지만 쓸 때마다 서버에 확인(ETag)</td><td>자주 바뀌는 공개 데이터, <code>index.html</code></td></tr>
+    <tr><td><code>private</code></td><td>브라우저만 저장, 엣지·프록시는 금지</td><td>로그인 사용자별 응답</td></tr>
+    <tr><td><code>public, max-age=31536000, immutable</code></td><td>1년간 확인 없이 사용</td><td>파일명에 해시가 붙은 JS/CSS (<code>app.3f9a.js</code>)</td></tr>
+    <tr><td><code>s-maxage=60</code></td><td>공유 캐시(엣지)용 max-age</td><td>엣지에서만 잠깐 캐시하고 싶을 때</td></tr>
+  </table></div>
+  <div class="callout"><b>no-cache ≠ 캐시 안 함</b>이름이 헷갈리지만 no-cache는 "매번 확인하고 써"예요. 진짜 저장 금지는 <code>no-store</code>예요.</div>
 
   <h3>HTTP는 무상태(stateless)</h3>
   <p>HTTP 요청은 서로를 기억하지 못해요. 로그인 상태를 유지하려면 매 요청마다 <b>쿠키(세션 ID)</b>나 <b>토큰(JWT)</b>을 들고 와야 해요. 이게 8장의 레플리카와 세션 문제, 7장의 쿠키 이야기로 이어져요.</p>
@@ -811,10 +1321,98 @@ L7 장비가 보는 것:  GET /diaries/123  Host: api.ssobbs13.pp.ua  Authorizat
   </div>
   <div class="callout warn"><b>JWT 규칙</b>① 페이로드에 비밀번호·개인정보를 넣지 마세요(누구나 읽음). ② 서명 키는 서버에만. ③ <code>exp</code>(만료)를 짧게. ④ 실제 JWT를 온라인 디코더 사이트에 붙여넣지 마세요.</div>
 
+  <h3>토큰은 어디에 보관할까</h3>
+  <div class="widget">
+    <h4>보관 위치 비교</h4>
+    <div class="chips" id="tokStore"></div>
+    <div class="result" id="tokStoreOut"></div>
+  </div>
+
+  <h3>Access Token + Refresh Token</h3>
+  <p>JWT는 서버가 기억하지 않아서 <b>중간에 취소하기 어려워요</b>. 그래서 수명을 짧게(5~15분) 하고, 새 토큰을 받는 데 쓰는 긴 수명의 <b>Refresh Token</b>을 따로 둬요. Refresh Token은 서버 DB에 저장해서 취소할 수 있게 해요.</p>
+  <div class="widget">
+    <h4>Refresh Token 회전(rotation) 따라가기</h4>
+    <div class="flow" id="rtFlow"></div>
+    <div class="row">
+      <button class="btn primary" id="rtNext">다음 →</button>
+      <button class="btn" id="rtReset">처음부터</button>
+      <label style="font-size:.88rem;color:var(--muted)"><input type="checkbox" id="rtStolen"> 공격자가 옛 refresh token을 훔쳤다면?</label>
+    </div>
+  </div>
+
   <div class="quiz" data-answer="0">
     <div class="q">Q. JWT 페이로드에 <code>"role":"USER"</code>가 있다. 사용자가 이걸 <code>"ADMIN"</code>으로 바꿔서 보내면?</div>
     <div class="opts"><button>서명 검증이 실패해서 서버가 거부한다</button><button>Base64라 수정이 불가능하다</button><button>관리자가 된다</button></div>
     <div class="ex">내용은 누구나 바꿀 수 있지만, 서명 키가 없으니 올바른 서명을 만들 수 없어요. 서버가 서명을 검증하면 거부돼요. 그래서 서명 검증은 절대 생략하면 안 돼요.</div>
+  </div>
+  <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
+</section>
+
+<!-- Docker -->
+<section class="ch" id="cDocker" data-title="Docker 네트워크">
+  <div class="eyebrow">Chapter</div>
+  <h2>Docker 네트워크: 컨테이너 안의 localhost</h2>
+  <p class="lead">"로컬에선 되는데 컨테이너에 넣으니 안 돼요"의 대부분이 이 챕터 내용이에요.</p>
+
+  <div class="callout"><b>컨테이너 = 작은 가상 컴퓨터 한 대</b>컨테이너마다 자기만의 네트워크(IP, 포트 목록, <code>localhost</code>)를 가져요. 그래서 컨테이너 A의 <code>localhost:8080</code>은 컨테이너 B의 8080과 전혀 상관없어요. 호스트 서버의 8080과도 상관없어요.</div>
+
+  <h3>네트워크 모드</h3>
+  <div class="tablewrap"><table>
+    <tr><th>모드</th><th>동작</th><th>다른 컨테이너 부르기</th></tr>
+    <tr><td><b>기본 bridge</b> (<code>docker run</code>)</td><td>컨테이너마다 사설 IP(172.17.x.x)</td><td>IP로만 가능. 이름으로는 안 됨</td></tr>
+    <tr><td><b>사용자 정의 bridge</b> (compose 기본)</td><td>compose 프로젝트마다 네트워크 하나를 자동 생성</td><td><b>서비스 이름이 DNS 이름</b>: <code>http://be:8080</code></td></tr>
+    <tr><td><b>host</b></td><td>호스트의 네트워크를 그대로 사용 (격리 없음)</td><td><code>localhost:8080</code>이 호스트의 8080</td></tr>
+    <tr><td><b><code>service:be</code></b></td><td>다른 컨테이너의 네트워크를 공유 (같은 localhost)</td><td><code>localhost:8080</code>이 be의 8080</td></tr>
+    <tr><td><b>none</b></td><td>네트워크 없음</td><td>불가</td></tr>
+  </table></div>
+
+  <div class="widget">
+    <h4>cloudflared가 Spring을 찾는 세 가지 방법</h4>
+    <div class="cloudtoggle" id="dkToggle">
+      <button class="on" data-v="name">서비스 이름</button>
+      <button data-v="shared">네트워크 공유</button>
+      <button data-v="host">host 모드</button>
+    </div>
+    <pre id="dkYaml" style="font-size:.8rem;margin-top:12px"></pre>
+    <div class="result" id="dkOut"></div>
+  </div>
+
+  <h3>포트 공개(<code>ports:</code>)는 누구에게 열리나</h3>
+  <p><code>ports: "8080:8080"</code>은 "호스트의 8080으로 들어온 걸 컨테이너 8080으로 넘겨"라는 뜻이에요. 앞의 호스트 쪽에 IP를 안 쓰면 <b>0.0.0.0, 즉 모든 네트워크 인터페이스</b>에 열려요.</p>
+  <div class="widget">
+    <h4>포트 설정을 골라보세요</h4>
+    <div class="chips" id="portChips"></div>
+    <div class="tablewrap" id="portTable"></div>
+    <div class="result" id="portOut"></div>
+  </div>
+  <div class="callout bad"><b>Docker는 ufw를 무시해요</b>Docker는 포트를 공개할 때 iptables에 자기 규칙을 <b>ufw보다 먼저</b> 끼워 넣어요. 그래서 <code>ufw deny 8080</code>을 해도 <code>ports: "8080:8080"</code>이면 밖에서 접속돼요. 마지막 방어선은 OCI Security List뿐이에요. 터널 구조에서는 <b>ports를 아예 쓰지 않는 게</b> 정답이에요.</div>
+
+  <h3>자주 겪는 증상</h3>
+  <div class="tablewrap"><table>
+    <tr><th>증상</th><th>원인</th><th>해결</th></tr>
+    <tr><td>Spring이 <code>localhost:5432</code>로 DB에 연결 실패</td><td>DB가 다른 컨테이너</td><td><code>jdbc:postgresql://db:5432/diary</code> (서비스 이름)</td></tr>
+    <tr><td>컨테이너에서 호스트의 서비스에 닿아야 함</td><td>컨테이너 localhost ≠ 호스트</td><td><code>host.docker.internal</code> (Linux는 <code>extra_hosts: ["host.docker.internal:host-gateway"]</code>)</td></tr>
+    <tr><td>앱이 떴는데 포트 매핑으로도 접속 안 됨</td><td>앱이 컨테이너 안에서 <code>127.0.0.1</code>에만 바인딩</td><td>앱을 <code>0.0.0.0</code>에 바인딩 (Spring은 기본이 0.0.0.0)</td></tr>
+    <tr><td>cloudflared 로그에 <code>connection refused</code></td><td>Spring이 아직 기동 중이거나 주소가 틀림</td><td><code>depends_on: condition: service_healthy</code>, 주소 재확인</td></tr>
+  </table></div>
+
+  <div class="quiz" data-answer="1">
+    <div class="q">Q. compose에 <code>be</code>와 <code>db</code> 서비스가 있다. be의 DB URL로 알맞은 것은?</div>
+    <div class="opts">
+      <button><code>jdbc:postgresql://localhost:5432/diary</code></button>
+      <button><code>jdbc:postgresql://db:5432/diary</code></button>
+      <button><code>jdbc:postgresql://168.107.55.205:5432/diary</code></button>
+    </div>
+    <div class="ex">같은 compose 네트워크에서는 서비스 이름이 DNS 이름이에요. localhost는 be 컨테이너 자신이고, 공인 IP를 쓰면 DB 포트를 밖에 열어야 해서 위험해요.</div>
+  </div>
+  <div class="quiz" data-answer="0">
+    <div class="q">Q. 터널 구조에서 Spring 컨테이너의 <code>ports:</code> 설정은?</div>
+    <div class="opts">
+      <button>없앤다. cloudflared가 Docker 네트워크 안에서 직접 닿으니까</button>
+      <button><code>"8080:8080"</code>으로 연다</button>
+      <button><code>"443:8080"</code>으로 연다</button>
+    </div>
+    <div class="ex">포트 공개는 호스트 바깥에서 들어올 때만 필요해요. cloudflared가 같은 네트워크에 있으면 필요 없고, 없애면 실수로 노출될 일도 없어요. 서버에서 직접 curl로 확인하고 싶다면 <code>"127.0.0.1:8080:8080"</code>까지만 허용하세요.</div>
   </div>
   <div class="donebox"><button class="btn done-btn">✓ 이 챕터 완료</button></div>
 </section>
@@ -1155,6 +1753,390 @@ function jwtR(){const p=$('#jwtIn').value.trim().split('.');if(p.length!==3){$('
  let expInfo='';try{const pl=JSON.parse(dec(p[1]));if(pl.exp){const d=new Date(pl.exp*1000);expInfo=`<div style="margin-top:6px">만료(exp): <b>${d.toLocaleString()}</b> ${pl.exp<Date.now()/1000?'<span class="pill n">만료됨</span>':'<span class="pill y">유효 기간 내</span>'}</div>`}}catch(e){}
  $('#jwtOut').innerHTML=`<div class="grid2"><div><b style="color:#f38020">헤더</b><pre>${esc(dec(p[0]))}</pre></div><div><b style="color:#2b6cb0">페이로드 (누구나 읽을 수 있음!)</b><pre>${esc(dec(p[1]))}</pre></div></div><div><b style="color:#2f855a">서명</b> <code>${esc(p[2].slice(0,40))}${p[2].length>40?'…':''}</code> <small style="color:var(--muted)">서버의 비밀 키로만 만들고 검증할 수 있어요. 여기선 검증하지 않아요.</small></div>${expInfo}`}
 $('#jwtIn').oninput=jwtR;jwtR();
+</script>
+<script>
+/* ====== 확장 위젯 (위 스크립트의 $, $$, store, stepper, chipGroup, toggleGroup, diagram, GL, gl 재사용) ====== */
+const escH=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function walker(sel,steps,{next,prev,reset,info}={}){let i=0;const r=()=>{stepper($(sel),typeof steps==='function'?steps():steps,i);if(info)$(info).textContent=`${i+1} / ${(typeof steps==='function'?steps():steps).length}`};
+ const len=()=>(typeof steps==='function'?steps():steps).length;
+ if(next)$(next).onclick=()=>{i=Math.min(len()-1,i+1);r()};if(prev)$(prev).onclick=()=>{i=Math.max(0,i-1);r()};if(reset)$(reset).onclick=()=>{i=0;r()};r();return{reset(){i=0;r()}}}
+
+/* ---------- ch0 고장 지점 ---------- */
+chipGroup($('#failChips'),[
+ {label:'① DNS',s:'<code>DNS_PROBE_FINISHED_NXDOMAIN</code> 또는 "사이트에 연결할 수 없음"',c:'레코드 없음, zone Pending, 오타, 도메인 만료(Hold)',t:'dig +short api.ssobbs13.pp.ua'},
+ {label:'② TCP 연결',s:'한참 돌다가 <code>ERR_CONNECTION_TIMED_OUT</code>, 또는 즉시 <code>ERR_CONNECTION_REFUSED</code>',c:'방화벽이 조용히 버림(timeout) / 그 포트에 듣는 프로그램 없음(refused). 주황 구름이면 엣지까지는 거의 항상 성공해요',t:'curl -v --connect-timeout 5 https://…'},
+ {label:'③ TLS',s:'<code>NET::ERR_CERT_COMMON_NAME_INVALID</code>, <code>ERR_CERT_DATE_INVALID</code>, Cloudflare 525/526',c:'인증서 이름(SAN) 불일치, 만료, SSL 모드와 오리진 인증서 불일치',t:'openssl s_client -connect api.ssobbs13.pp.ua:443 -servername api.ssobbs13.pp.ua'},
+ {label:'④ HTTP 요청',s:'요청은 갔지만 400, 405, 415',c:'메서드/경로/Content-Type 오류. 서버까지는 정상 도달',t:'curl -i -X POST -H "Content-Type: application/json" -d \'{}\' …'},
+ {label:'⑤ 엣지',s:'Cloudflare 차단 페이지 (403, 1020 Access denied, 429)',c:'WAF 규칙, Rate limit, Access 정책',t:'대시보드 Security → Events에서 Ray ID 검색'},
+ {label:'⑥ 터널',s:'Cloudflare 에러 페이지 <b>1033</b> 또는 <b>502</b>',c:'cloudflared 꺼짐(1033) / cloudflared → localhost:8080 실패(502)',t:'docker compose logs -f cloudflared'},
+ {label:'⑦ 오리진',s:'JSON 에러 응답 401 / 403 / 404 / 500',c:'Spring까지 정상 도달. 인증·권한·코드 예외 문제',t:'docker compose logs -f be'},
+ {label:'⑧ 돌아가기',s:'Network 탭엔 <b>200</b>인데 콘솔에 CORS 에러, JS에선 <code>TypeError: Failed to fetch</code>',c:'서버는 응답했지만 CORS 헤더가 없어서 브라우저가 JS에 안 넘김',t:'curl -I -X OPTIONS … -H "Origin: https://ssobbs13.pp.ua"'}
+],it=>$('#failOut').innerHTML=`<div><b>증상</b>: ${it.s}</div><div style="margin-top:4px"><b>흔한 원인</b>: ${it.c}</div><pre style="margin:8px 0 0">${escH(it.t)}</pre>`);
+
+/* ---------- ch1 도메인 생애 ---------- */
+walker('#lifeFlow',[
+ ['등록 · Active','정상 상태. 1~10년 단위로 등록. 자동 갱신을 켜두는 게 가장 안전해요.'],
+ ['만료 30일 전','레지스트라가 갱신 안내 메일을 보내요. 등록 이메일이 살아있어야 받아요.'],
+ ['만료일 (Expired)','레지스트라가 네임서버를 주차 페이지로 바꾸거나 DNS에서 빼요(Hold). 사이트와 메일이 멈춰요.'],
+ ['유예 기간 (Grace, 보통 0~45일)','원래 가격으로 갱신하면 전부 그대로 돌아와요. 이때 발견하면 다행이에요.'],
+ ['복구 기간 (Redemption, 약 30일)','레지스트리로 넘어간 상태. 비싼 복구 수수료(수만~수십만 원)를 내야 되찾을 수 있어요.'],
+ ['삭제 대기 (Pending Delete, 약 5일)','아무도 되돌릴 수 없어요. 드롭캐처(만료 도메인 자동 선점 서비스)들이 대기해요.'],
+ ['공개 (Available)','누구나 등록 가능. 이전 주인의 도메인으로 온 메일, 비밀번호 재설정 링크가 새 주인에게 가요.']
+],{next:'#lifeNext',prev:'#lifePrev',info:'#lifeInfo'});
+
+/* ---------- ch2 zone 조회 ---------- */
+const ZONE='ssobbs13.pp.ua';
+const ZR=[
+ {n:'@',t:'A',v:'104.21.5.9',p:1,note:'apex. 실제론 Pages를 가리키는 CNAME을 flattening한 결과'},
+ {n:'www',t:'CNAME',v:'ssobbs13.pp.ua.',p:1},
+ {n:'api',t:'CNAME',v:'913c2edc-….cfargotunnel.com.',p:1},
+ {n:'*.preview',t:'CNAME',v:'diary-6c6.pages.dev.',p:0},
+ {n:'@',t:'MX',v:'10 route1.mx.cloudflare.net.',p:0},
+ {n:'@',t:'TXT',v:'"v=spf1 include:_spf.mx.cloudflare.net ~all"',p:0}];
+const fq=n=>n==='@'?ZONE:n+'.'+ZONE;
+$('#zoneFile').textContent='; zone: '+ZONE+'\n'+ZR.map(r=>`${fq(r.n).padEnd(28)} ${r.t.padEnd(6)} ${r.v}${r.p?'   ; 🟠 proxied':'   ; ⚪ DNS only'}`).join('\n');
+function zq(){let name=$('#zqName').value.trim().toLowerCase().replace(/\.$/,'');const type=$('#zqType').value;const out=[];
+ if(!name){$('#zqOut').textContent='이름을 입력하세요.';return}
+ if(name!==ZONE&&!name.endsWith('.'+ZONE)){$('#zqOut').innerHTML=`<span class="pill n">권한 없음</span> <code>${escH(name)}</code>은 이 zone(<code>${ZONE}</code>) 밖의 이름이에요. 이 네임서버는 답하지 않고, 리졸버가 그 이름의 주인 네임서버를 따로 찾아가요.`;return}
+ const recs=h=>ZR.filter(r=>fq(r.n)===h);
+ let hops=0;
+ while(hops++<5){
+  let rs=recs(name),wild=false;
+  if(!rs.length){const w='*.'+name.split('.').slice(1).join('.');rs=ZR.filter(r=>fq(r.n)===w);if(rs.length)wild=true}
+  if(!rs.length){
+   const ent=ZR.some(r=>fq(r.n).endsWith('.'+name));
+   out.push(ent?`<span class="pill i">NOERROR · NODATA</span> <code>${escH(name)}</code>이라는 이름 자체는 존재해요(아래에 <code>*.preview</code> 같은 레코드가 있어서). 하지만 ${type} 레코드는 없어요.`:
+    `<span class="pill n">NXDOMAIN</span> <code>${escH(name)}</code>은 존재하지 않는 이름이에요. 브라우저엔 <code>DNS_PROBE_FINISHED_NXDOMAIN</code>. 이 "없음"도 리졸버가 일정 시간 캐시해요.`);break}
+  const wl=wild?' <span class="pill i">와일드카드 매칭</span>':'';
+  const px=rs.find(r=>r.p);
+  if(px){
+   if(type==='A'){out.push(`<span class="pill y">응답</span>${wl} <code>${escH(name)}. A 104.21.5.9</code>, <code>A 172.67.10.20</code><br>🟠 주황 구름이라 원래 값(<code>${escH(px.t+' '+px.v)}</code>)은 숨기고 <b>Cloudflare 엣지 IP</b>로 답해요. 오리진이 어디 있는지 밖에선 알 수 없어요.`);break}
+   if(type==='CNAME'){out.push(`<span class="pill i">NODATA</span>${wl} 주황 구름 레코드는 밖에서 CNAME으로 보이지 않아요. A/AAAA(엣지 IP)로만 답해요.`);break}
+  }
+  const hit=rs.filter(r=>r.t===type);
+  if(hit.length){out.push(`<span class="pill y">응답</span>${wl} `+hit.map(r=>`<code>${escH(name)}. ${r.t} ${escH(r.v)}</code>`).join('<br>'));break}
+  const cn=rs.find(r=>r.t==='CNAME');
+  if(cn){out.push(`<span class="pill i">CNAME 따라가기</span>${wl} <code>${escH(name)}</code> → <code>${escH(cn.v)}</code>`);
+   const tgt=cn.v.replace(/\.$/,'');
+   if(tgt===ZONE||tgt.endsWith('.'+ZONE)){name=tgt;continue}
+   out.push(`<span class="pill i">zone 밖</span> <code>${escH(tgt)}</code>은 다른 도메인이라, 리졸버가 그 도메인의 네임서버에 <b>${type}</b>를 다시 물어봐요. 상대 IP가 바뀌어도 내 레코드는 고칠 필요가 없는 이유예요.`);break}
+  out.push(`<span class="pill i">NOERROR · NODATA</span> <code>${escH(name)}</code>은 있지만 ${type} 레코드는 없어요. (있는 타입: ${[...new Set(rs.map(r=>r.t))].join(', ')})`);break}
+ $('#zqOut').innerHTML=out.map(x=>`<div style="margin:4px 0">${x}</div>`).join('')}
+$('#zqName').oninput=zq;$('#zqType').onchange=zq;
+chipGroup($('#zqPresets'),[
+ {label:'api (A)',n:'api.ssobbs13.pp.ua',t:'A'},{label:'api (CNAME)',n:'api.ssobbs13.pp.ua',t:'CNAME'},
+ {label:'feat-1.preview (A)',n:'feat-1.preview.ssobbs13.pp.ua',t:'A'},{label:'preview (A)',n:'preview.ssobbs13.pp.ua',t:'A'},
+ {label:'admin (A)',n:'admin.ssobbs13.pp.ua',t:'A'},{label:'apex (MX)',n:'ssobbs13.pp.ua',t:'MX'},{label:'www (TXT)',n:'www.ssobbs13.pp.ua',t:'TXT'},
+ {label:'google.com',n:'google.com',t:'A'}
+],it=>{$('#zqName').value=it.n;$('#zqType').value=it.t;zq()});
+
+/* ---------- ch3 DNSSEC ---------- */
+toggleGroup($('#dnssecToggle'),v=>stepper($('#dnssecFlow'),v==='bad'?[
+ ['nic.ua에서 NS만 Cloudflare로 변경','레지스트리에는 옛 DNS 업체 키를 가리키는 DS 레코드가 남아 있어요.'],
+ ['리졸버가 Cloudflare에 질문','Cloudflare는 아직 서명을 안 하거나 다른 키로 서명해요.'],
+ ['리졸버: "DS랑 서명이 안 맞아. 위조다!"','검증하는 리졸버(1.1.1.1, 8.8.8.8 등)는 답을 버리고 SERVFAIL을 돌려줘요.'],
+ ['🛑 사이트 접속 불가','사용자 절반 이상이 접속 못 해요. 검증 안 하는 리졸버를 쓰는 사람만 되니까 "나는 되는데?" 상황이 생겨요.']
+]:[
+ ['① 옛 DNS 업체 / 레지스트라에서 DNSSEC 끄기 (DS 삭제)','DS 레코드가 사라지고 TTL(보통 하루 이상)이 지나길 기다려요.'],
+ ['② NS를 Cloudflare로 변경','이제 서명 검증을 안 하니 문제없이 넘어가요.'],
+ ['③ Zone Active 확인',''],
+ ['④ Cloudflare에서 DNSSEC 켜고 DS 값을 레지스트라에 등록','새 키 기준으로 다시 보호돼요. ✅']
+],99));
+
+/* ---------- ch4 CIDR ---------- */
+const ip2n=s=>{const m=String(s).trim().match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);if(!m||m.slice(1).some(x=>+x>255))return null;return((+m[1]<<24)>>>0)+(+m[2]<<16)+(+m[3]<<8)+(+m[4])};
+const n2ip=n=>[n>>>24,(n>>>16)&255,(n>>>8)&255,n&255].join('.');
+function parseCidr(s){const m=String(s).trim().match(/^([\d.]+)\/(\d{1,2})$/);if(!m)return null;const ip=ip2n(m[1]),p=+m[2];if(ip===null||p>32)return null;const mask=p===0?0:(0xFFFFFFFF<<(32-p))>>>0;const net=(ip&mask)>>>0;const bc=(net|(~mask>>>0))>>>0;return{ip,p,mask,net,bc,size:2**(32-p)}}
+const inCidr=(ip,c)=>((ip&c.mask)>>>0)===c.net;
+function cidrR(){const c=parseCidr($('#cidrIn').value);if(!c){$('#cidrOut').textContent='예: 10.0.0.0/24 형식으로 입력하세요.';return}
+ const t=ip2n($('#cidrTest').value);const bits=n2ip(c.mask).split('.').map(x=>(+x).toString(2).padStart(8,'0')).join('.');
+ const oci=c.p<=30?`${n2ip(c.net+2)} ~ ${n2ip(c.bc-1)} (${(c.size-3).toLocaleString()}개)`:'-';
+ $('#cidrOut').innerHTML=`<div class="tablewrap"><table>
+ <tr><td>네트워크 주소</td><td><code>${n2ip(c.net)}</code>${c.net!==c.ip?` <small style="color:var(--muted)">(입력한 ${n2ip(c.ip)}은 이 범위의 시작이 아니라서 자동 보정됨)</small>`:''}</td></tr>
+ <tr><td>서브넷 마스크</td><td><code>${n2ip(c.mask)}</code><br><small class="mono" style="color:var(--muted)">${bits}</small></td></tr>
+ <tr><td>범위</td><td><code>${n2ip(c.net)}</code> ~ <code>${n2ip(c.bc)}</code></td></tr>
+ <tr><td>주소 개수</td><td><b>${c.size.toLocaleString()}</b>개 (2<sup>${32-c.p}</sup>)</td></tr>
+ <tr><td>OCI 서브넷에서 쓸 수 있는 IP</td><td>${oci} <small style="color:var(--muted)">OCI는 앞 2개와 마지막 1개를 예약</small></td></tr>
+ </table></div>${t===null?'<span class="pill i">확인할 IP를 입력하세요</span>':inCidr(t,c)?`<span class="pill y">포함</span> ${escH($('#cidrTest').value)}은 이 범위 안이에요.`:`<span class="pill n">미포함</span> ${escH($('#cidrTest').value)}은 이 범위 밖이에요.`}`}
+$('#cidrIn').oninput=cidrR;$('#cidrTest').oninput=cidrR;
+chipGroup($('#cidrPresets'),[
+ {label:'/24 서브넷',c:'10.0.0.0/24',t:'10.0.0.37'},{label:'/16 VCN',c:'10.0.0.0/16',t:'10.0.200.1'},{label:'/32 내 IP 하나',c:'203.0.113.7/32',t:'203.0.113.8'},
+ {label:'0.0.0.0/0 전부',c:'0.0.0.0/0',t:'8.8.8.8'},{label:'Docker 기본',c:'172.17.0.0/16',t:'172.17.0.2'},{label:'Cloudflare 대역 예시',c:'104.16.0.0/13',t:'104.21.5.9'}
+],it=>{$('#cidrIn').value=it.c;$('#cidrTest').value=it.t;cidrR()});
+
+const FW=[
+ {src:'203.0.113.7/32',port:'22',on:true,d:'SSH: 내 집 IP만'},
+ {src:'10.0.0.0/16',port:'all',on:true,d:'VCN 내부끼리 전부'},
+ {src:'0.0.0.0/0',port:'22',on:false,d:'SSH: 전 세계 (봇이 하루 수천 번 두드려요)'},
+ {src:'0.0.0.0/0',port:'443',on:false,d:'HTTPS: 전 세계 (직접 오픈 방식에서만 필요)'},
+ {src:'0.0.0.0/0',port:'8080',on:false,d:'Spring 직접 노출 (하면 안 되는 설정)'}];
+function fwR(){$('#fwRules').innerHTML=FW.map((r,i)=>`<label style="display:flex;gap:8px;align-items:baseline;padding:3px 0;font-size:.9rem"><input type="checkbox" data-i="${i}" ${r.on?'checked':''}><code>${r.src}</code> → TCP <code>${r.port}</code> <span style="color:var(--muted)">${r.d}</span></label>`).join('');
+ $$('#fwRules input').forEach(c=>c.onchange=()=>{FW[+c.dataset.i].on=c.checked;fwEval()});fwEval()}
+function fwEval(){const ip=ip2n($('#fwSrc').value),port=$('#fwPort').value.trim();if(ip===null||!/^\d+$/.test(port)){$('#fwOut').textContent='출발지 IP와 포트 번호를 입력하세요.';return}
+ const hits=FW.filter(r=>r.on&&inCidr(ip,parseCidr(r.src))&&(r.port==='all'||r.port===port));
+ $$('#fwRules label').forEach((l,i)=>l.classList.toggle('hl',hits.includes(FW[i])));
+ $('#fwOut').innerHTML=hits.length?`<span class="pill y">통과</span> 맞는 규칙: ${hits.map(h=>`<code>${h.src} → ${h.port}</code>`).join(', ')}${port==='8080'&&hits.some(h=>h.src==='0.0.0.0/0')?'<br><span class="pill n">위험</span> Spring이 Cloudflare를 거치지 않고 직접 노출돼요. WAF, DDoS 방어, 터널 전부 우회돼요.':''}<br><small style="color:var(--muted)">다음 관문은 서버 OS 방화벽(iptables)이에요.</small>`
+  :`<span class="pill n">차단 (조용히 버림)</span> 맞는 규칙이 없어요. 상대는 거절 응답도 못 받고 <b>timeout</b>을 겪어요.`}
+$('#fwSrc').oninput=fwEval;$('#fwPort').oninput=fwEval;
+chipGroup($('#fwPresets'),[
+ {label:'집에서 SSH',s:'203.0.113.7',p:'22'},{label:'카페에서 SSH',s:'198.51.100.23',p:'22'},{label:'외부에서 HTTPS',s:'8.8.4.4',p:'443'},
+ {label:'VCN 안 다른 서버 → DB',s:'10.0.1.20',p:'5432'},{label:'스캐너가 8080 시도',s:'45.33.32.156',p:'8080'}
+],it=>{$('#fwSrc').value=it.s;$('#fwPort').value=it.p;fwEval()},null);
+fwR();cidrR();
+
+/* ---------- ch5 인증서 체인 · SAN ---------- */
+walker('#chainFlow',()=>$('#chainMissing').checked?[
+ ['서버가 보낸 것: 리프 인증서만','"*.ssobbs13.pp.ua, 발급자: WE1"'],
+ ['브라우저: "WE1이 누구지?"','신뢰 저장소엔 루트만 있고 중간 CA는 없어요.'],
+ ['Chrome/Edge 데스크톱','중간 인증서를 예전에 캐시했거나 인터넷에서 받아와서(AIA) 운 좋게 성공할 수 있어요.'],
+ ['🛑 curl, Java, Android, 다른 서버','"unable to get local issuer certificate". 내 브라우저에선 되는데 다른 곳에서만 실패하는 전형적인 증상이에요. 해결: <code>cert.pem</code> 말고 <code>fullchain.pem</code>을 설정하세요.']
+]:[
+ ['리프 인증서','<code>*.ssobbs13.pp.ua</code>. 서버의 공개키가 들어있고, 중간 CA가 서명했어요.'],
+ ['중간 인증서 (서버가 같이 보냄)','예: Google Trust Services <code>WE1</code>, Let\'s Encrypt <code>E5</code>. 루트 CA가 서명했어요.'],
+ ['루트 인증서 (내 OS/브라우저에 이미 있음)','예: <code>GTS Root R4</code>, <code>ISRG Root X1</code>. 자기 자신이 서명했고, 믿을지 말지는 OS·브라우저 업체가 정해요.'],
+ ['검증 성공 ✅','서명이 끊김 없이 이어지고, 이름(SAN)이 맞고, 기간이 유효하고, 폐기되지 않았어요.']
+],{next:'#chainNext',reset:'#chainReset'});
+$('#chainMissing').onchange=()=>$('#chainReset').click();
+
+function sanMatch(pat,host){pat=pat.trim().toLowerCase();host=host.trim().toLowerCase();if(!pat)return false;
+ if(pat.startsWith('*.')){const suf=pat.slice(1);if(!host.endsWith(suf))return false;const head=host.slice(0,-suf.length);return head.length>0&&!head.includes('.')}
+ return pat===host}
+function sanR(){const list=$('#sanIn').value.split(',').map(s=>s.trim()).filter(Boolean),h=$('#sanHost').value.trim().toLowerCase();
+ if(!h){$('#sanOut').textContent='호스트명을 입력하세요.';return}
+ const ok=list.filter(p=>sanMatch(p,h));
+ $('#sanOut').innerHTML=list.map(p=>`<div>${sanMatch(p,h)?'✅':'❌'} <code>${escH(p)}</code></div>`).join('')+
+  `<div style="margin-top:8px">${ok.length?`<span class="pill y">사용 가능</span> <code>${escH(ok[0])}</code>이 <code>${escH(h)}</code>을 덮어요.`:
+  `<span class="pill n">NET::ERR_CERT_COMMON_NAME_INVALID</span> 맞는 이름이 없어요.${list.some(p=>p.startsWith('*.')&&h.endsWith(p.slice(1)))?' 와일드카드는 <b>한 단계</b>만 덮어요.':''}${list.some(p=>p==='*.'+h)?' <code>*.x</code>는 <code>x</code> 자체(apex)를 덮지 않아요.':''}`}</div>`}
+$('#sanIn').oninput=sanR;$('#sanHost').oninput=sanR;
+chipGroup($('#sanPresets'),[
+ {label:'api (1단계)',h:'api.ssobbs13.pp.ua'},{label:'apex',h:'ssobbs13.pp.ua'},{label:'v1.api (2단계)',h:'v1.api.ssobbs13.pp.ua'},{label:'다른 도메인',h:'ssobbs13.pp.ua.evil.com'}
+],it=>{$('#sanIn').value='ssobbs13.pp.ua, *.ssobbs13.pp.ua';$('#sanHost').value=it.h;sanR()});
+
+/* ---------- ch6 캐시 시뮬레이터 ---------- */
+function cacheR(){const path=$('#cPath').value,cc=$('#cCC').value,every=$('#cEverything').checked,ck=$('#cCookie').checked;
+ const defExt=path==='js'||path==='img';let r1,r2,why,warn='';
+ if(!defExt&&!every){r1=r2='DYNAMIC';why='기본적으로 Cloudflare는 확장자(js, css, png, woff2…)로 캐시 대상을 정해요. HTML과 API는 대상이 아니라서 매번 오리진으로 가요.'}
+ else if(cc==='nostore'||cc==='private'){r1=r2='BYPASS';why=`오리진이 <code>${cc==='private'?'private':'no-store'}</code>라고 했으니 공유 캐시(엣지)는 저장하지 않아요. 캐시 규칙이 있어도 오리진 헤더를 존중해요(기본 설정).`}
+ else if(ck){r1=r2='BYPASS';why='응답에 <code>Set-Cookie</code>가 있으면 기본적으로 캐시하지 않아요. 한 사용자의 세션 쿠키가 다른 사람에게 퍼지는 걸 막기 위해서예요.'}
+ else if(cc==='smax'){r1='MISS';r2='HIT';why='엣지는 <code>s-maxage=60</code>에 따라 60초 동안 보관하고, 브라우저는 <code>max-age=0</code>이라 매번 엣지에 확인해요. 60초 뒤 첫 요청은 <b>EXPIRED</b>가 돼요.'}
+ else if(cc==='public'){r1='MISS';r2='HIT';why='1시간 동안 엣지가 보관해요. 두 번째 요청부터는 오리진이 아예 몰라요.'}
+ else{r1='MISS';r2='HIT';why='오리진이 아무 말도 안 하면 Cloudflare 기본 Edge TTL을 적용해 보관해요(응답 코드별 기본값, 200은 보통 2시간).'}
+ if(path==='api'&&every&&r2==='HIT')warn='<div class="callout bad" style="margin:10px 0 0"><b>사고 위험</b>사용자별 응답인 <code>/diaries</code>가 엣지에 저장됐어요. 캐시 키엔 기본적으로 쿠키나 Authorization이 포함되지 않아서, A의 일기 목록이 B에게 그대로 나갈 수 있어요.</div>';
+ const pill=s=>`<span class="pill ${s==='HIT'?'y':s==='MISS'?'i':s==='BYPASS'?'n':'i'}">${s}</span>`;
+ $('#cOut').innerHTML=`<div>1번째 요청: ${pill(r1)} ${r1==='MISS'?'→ 오리진까지 감':r1==='HIT'?'':'→ 오리진까지 감'}</div><div>2번째 요청: ${pill(r2)} ${r2==='HIT'?'→ <b>엣지에서 바로 응답</b>':'→ 또 오리진까지 감'}</div><p style="margin:8px 0 0">${why}</p>${warn}`}
+['#cPath','#cCC','#cEverything','#cCookie'].forEach(s=>$(s).onchange=cacheR);cacheR();
+
+/* ---------- ch7 preflight ---------- */
+function pfR(){const m=$('#pfMethod').value,ct=$('#pfCT').value,auth=$('#pfAuth').checked,cus=$('#pfCustom').checked,cred=$('#pfCred').checked;
+ const hasBody=ct!==''&&m!=='GET';
+ const simpleCT=['','text/plain','application/x-www-form-urlencoded','multipart/form-data'].includes(ct);
+ const reasons=[];if(!['GET','HEAD','POST'].includes(m))reasons.push(`메서드 <code>${m}</code>`);if(hasBody&&!simpleCT)reasons.push(`Content-Type <code>${ct}</code>`);if(auth)reasons.push('<code>Authorization</code> 헤더');if(cus)reasons.push('<code>X-Request-Id</code> 헤더');
+ const reqH=[];if(hasBody&&!simpleCT)reqH.push('content-type');if(auth)reqH.push('authorization');if(cus)reqH.push('x-request-id');
+ const hdrs=[];if(hasBody)hdrs.push(`"Content-Type": "${ct}"`);if(auth)hdrs.push('"Authorization": "Bearer eyJ…"');if(cus)hdrs.push('"X-Request-Id": "abc-123"');
+ $('#pfCode').textContent=`fetch("https://api.ssobbs13.pp.ua/diaries", {\n  method: "${m}",${hdrs.length?`\n  headers: { ${hdrs.join(', ')} },`:''}${hasBody?'\n  body: …,':''}${cred?'\n  credentials: "include",':''}\n})`;
+ const pre=reasons.length>0;
+ const resp=[`Access-Control-Allow-Origin: https://ssobbs13.pp.ua`];if(cred)resp.push('Access-Control-Allow-Credentials: true');
+ const presp=[...resp];if(pre){presp.push(`Access-Control-Allow-Methods: ${m}`);if(reqH.length)presp.push(`Access-Control-Allow-Headers: ${reqH.join(', ')}`);presp.push('Access-Control-Max-Age: 3600')}
+ $('#pfOut').innerHTML=(pre?`<span class="pill n">Preflight 발생</span> 이유: ${reasons.join(', ')}
+ <pre style="margin:8px 0">① OPTIONS /diaries
+   Origin: https://ssobbs13.pp.ua
+   Access-Control-Request-Method: ${m}${reqH.length?`\n   Access-Control-Request-Headers: ${reqH.join(',')}`:''}
+
+   서버 응답 (2xx) 에 필요한 헤더:
+   ${presp.join('\n   ')}
+
+② 통과하면 진짜 ${m} 요청 → 응답에 필요한 헤더:
+   ${resp.join('\n   ')}</pre>왕복이 하나 늘어요. <code>Max-Age</code> 동안은 브라우저가 preflight 결과를 재사용해요(Chrome은 최대 2시간).`
+ :`<span class="pill y">Simple request</span> preflight 없이 바로 보내요. 응답에 필요한 헤더:<pre style="margin:8px 0">${resp.join('\n')}</pre><b>주의</b>: preflight가 없다는 건 요청이 서버에 <b>일단 도착해서 실행된다</b>는 뜻이에요. CORS는 응답을 JS가 읽는 것만 막아요. 그래서 상태를 바꾸는 요청은 CSRF 대책이 필요해요.`)
+ +(cred?'<div style="margin-top:6px"><span class="pill i">credentials</span> <code>Allow-Origin</code>에 <code>*</code>를 쓸 수 없고, 정확한 origin이어야 해요. origin마다 응답이 달라지니 <code>Vary: Origin</code>도 붙여요(Spring이 자동으로 해줘요).</div>':'')}
+['#pfMethod','#pfCT','#pfAuth','#pfCustom','#pfCred'].forEach(s=>$(s).onchange=pfR);pfR();
+
+/* ---------- ch8 가용성 ---------- */
+const par=(a,n)=>1-Math.pow(1-a,n);
+function avR(){const E=.9999,C=.999,S=.995,A=.995,D=.999;const c2=$('#avConn').checked,s2=$('#avSrv').checked,d2=$('#avDb').checked;
+ let front,frontLbl;
+ if(s2){front=par(C*S*A,2);frontLbl='서버 2대 (각각 커넥터+VM+Spring), 병렬'}else{front=(c2?par(C,2):C)*S*A;frontLbl=`${c2?'커넥터 2개(병렬)':'커넥터 1개'} × VM × Spring`}
+ const db=d2?par(D,2):D;const tot=E*front*db;
+ const dt=a=>{const h=(1-a)*365*24;return h>=1?`${h.toFixed(1)}시간/년`:`${(h*60).toFixed(0)}분/년`};
+ const row=(l,a)=>`<div style="display:flex;justify-content:space-between;font-size:.88rem"><span>${l}</span><b>${(a*100).toFixed(3)}%</b></div><div class="meter"><i style="width:${Math.max(2,(a-.98)/.02*100)}%;background:${a>=.999?'var(--green)':a>=.99?'var(--accent)':'var(--red)'}"></i></div>`;
+ $('#avOut').innerHTML=row('Cloudflare 엣지',E)+row(frontLbl,front)+row(d2?'DB 2대 (failover)':'DB 1대',db)+
+  `<div class="result"><b>전체 가용성 ${(tot*100).toFixed(3)}%</b> → 1년에 약 <b>${dt(tot)}</b> 멈춤 (한 달 약 ${((1-tot)*30*24*60).toFixed(0)}분)
+  <br><small style="color:var(--muted)">${!s2&&c2?'커넥터를 2개로 늘려도 VM(99.5%)과 Spring(99.5%)이 그대로라 효과가 작아요. 가장 약한 고리를 먼저 이중화하세요.':s2&&!d2?'이제 DB가 가장 약한 고리예요.':s2&&d2?'여기서 더 올리려면 배포 중단 시간, 사람 실수(설정 오류) 같은 비(非)하드웨어 장애를 줄여야 해요.':'직렬 부품이 많을수록 전체는 가장 약한 부품보다도 낮아져요.'}</small></div>`}
+['#avConn','#avSrv','#avDb'].forEach(s=>$(s).onchange=avR);avR();
+
+/* ---------- ch9 토큰 버킷 · 보안 헤더 ---------- */
+const TB={cap:5,tok:5};let tbN=0;
+function tbDraw(){$('#tbTokens').innerHTML=Array.from({length:TB.cap},(_,i)=>`<i class="${i<TB.tok?'full':''}"></i>`).join('')+`<span style="font-size:.85rem;color:var(--muted);align-self:center;margin-left:6px">토큰 ${TB.tok} / ${TB.cap}</span>`}
+function tbLog(t){const b=$('#tbLog');b.insertAdjacentHTML('afterbegin',`<div>${t}</div>`)}
+function tbReq(){tbN++;if(TB.tok>0){TB.tok--;tbLog(`#${tbN} <span style="color:var(--green)">200 OK</span> (남은 토큰 ${TB.tok})`)}else tbLog(`#${tbN} <span style="color:var(--red)">429 Too Many Requests</span>  Retry-After: 1`);tbDraw()}
+$('#tbOne').onclick=tbReq;$('#tbBurst').onclick=()=>{for(let i=0;i<10;i++)tbReq()};$('#tbClear').onclick=()=>{$('#tbLog').innerHTML='';tbN=0};
+setInterval(()=>{if(TB.tok<TB.cap){TB.tok++;tbDraw()}},1000);tbDraw();
+
+chipGroup($('#secHdr'),[
+ {label:'Strict-Transport-Security',v:'max-age=31536000; includeSubDomains',b:'SSL stripping (첫 HTTP 요청 가로채기)',s:'Spring Security가 HTTPS 요청에 자동으로 붙임. 터널 뒤라면 forward-headers 설정 필요. Cloudflare에서도 켤 수 있어요.'},
+ {label:'Content-Security-Policy',v:"default-src 'self'; connect-src 'self' https://api.ssobbs13.pp.ua",b:'XSS. 허락한 출처의 스크립트만 실행, 허락한 곳으로만 fetch',s:'FE(Pages)의 <code>_headers</code> 파일에서 설정. 가장 강력하지만 설정이 까다로워요. <code>Content-Security-Policy-Report-Only</code>로 먼저 시험해보세요.'},
+ {label:'X-Content-Type-Options',v:'nosniff',b:'MIME 스니핑. 이미지로 올린 파일을 브라우저가 스크립트로 실행하는 것',s:'Spring Security 기본 포함.'},
+ {label:'X-Frame-Options / frame-ancestors',v:"DENY  /  CSP: frame-ancestors 'none'",b:'클릭재킹. 내 사이트를 투명 iframe으로 덮어 클릭 유도',s:'Spring Security 기본 DENY. 최신 방식은 CSP의 frame-ancestors.'},
+ {label:'Referrer-Policy',v:'strict-origin-when-cross-origin',b:'URL에 든 토큰·ID가 외부 사이트로 새는 것',s:'브라우저 기본값도 이 값이지만 명시하는 걸 권장.'},
+ {label:'Cache-Control',v:'no-cache, no-store, max-age=0, must-revalidate',b:'개인 데이터가 공유 캐시·뒤로 가기 캐시에 남는 것',s:'Spring Security 기본 포함. 정적 리소스는 별도로 길게 설정.'}
+],it=>$('#secHdrOut').innerHTML=`<pre style="margin:0 0 8px">${escH(it.label.split(' /')[0])}: ${escH(it.v)}</pre><div><b>막는 것</b>: ${it.b}</div><div><b>설정</b>: ${it.s}</div>`);
+
+/* ---------- ch10 ingress ---------- */
+$('#ingRules').value=`api.ssobbs13.pp.ua | ^/actuator | http_status:404
+api.ssobbs13.pp.ua |  | http://localhost:8080
+admin.ssobbs13.pp.ua |  | http://localhost:9000
+*.preview.ssobbs13.pp.ua |  | http://localhost:5173
+ |  | http_status:404`;
+function ingR(){let u;try{u=new URL($('#ingUrl').value)}catch(e){$('#ingOut').textContent='https://로 시작하는 URL을 입력하세요.';return}
+ const rules=$('#ingRules').value.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const [h,p,s]=l.split('|').map(x=>(x||'').trim());return{h,p,s}});
+ const hostOk=(h,host)=>!h||h===host||(h.startsWith('*.')&&host.endsWith(h.slice(1))&&host.length>h.length-1);
+ let hit=-1,err='';for(let i=0;i<rules.length;i++){const r=rules[i];let pOk=true;if(r.p){try{pOk=new RegExp(r.p).test(u.pathname)}catch(e){err=`${i+1}번 규칙의 정규식 오류`;pOk=false}}if(hostOk(r.h,u.hostname)&&pOk){hit=i;break}}
+ const last=rules[rules.length-1];const noCatch=!last||last.h||last.p;
+ $('#ingOut').innerHTML=rules.map((r,i)=>`<div style="padding:2px 6px;font-size:.85rem" class="${i===hit?'hl':''}">${i<hit||hit<0?'⤵':i===hit?'✅':'·'} <b>${i+1}.</b> <code>${escH(r.h||'(아무 호스트)')}</code> <code>${escH(r.p||'(아무 경로)')}</code> → <code>${escH(r.s)}</code></div>`).join('')+
+  `<div style="margin-top:8px">${hit<0?'<span class="pill n">매칭 없음</span> cloudflared는 catch-all 없이는 설정을 거부해요.':rules[hit].s.startsWith('http_status')?`<span class="pill n">${escH(rules[hit].s.split(':')[1])} 응답</span> cloudflared가 바로 에러를 돌려줘요. 뒤쪽 서비스엔 가지 않아요.`:`<span class="pill y">전달</span> <code>${escH(rules[hit].s)}${escH(u.pathname+u.search)}</code>`}</div>`+
+  (err?`<div style="color:var(--red)">${err}</div>`:'')+(noCatch?'<div style="margin-top:4px"><span class="pill n">경고</span> 마지막 규칙이 catch-all(호스트·경로 모두 비움)이 아니에요.</div>':'')}
+$('#ingRules').oninput=ingR;$('#ingUrl').oninput=ingR;
+chipGroup($('#ingPresets'),[
+ {label:'일기 API',u:'https://api.ssobbs13.pp.ua/diaries/7'},{label:'actuator 시도',u:'https://api.ssobbs13.pp.ua/actuator/env'},
+ {label:'관리자',u:'https://admin.ssobbs13.pp.ua/'},{label:'프리뷰',u:'https://feat-1.preview.ssobbs13.pp.ua/'},{label:'등록 안 된 호스트',u:'https://www.ssobbs13.pp.ua/'}
+],it=>{$('#ingUrl').value=it.u;ingR()});
+
+/* ---------- ch11 비용 ---------- */
+function costR(){const r=Math.max(0,parseInt($('#costReq').value)||0),f=Math.max(1,parseInt($('#costFree').value)||1);
+ const rows=[['전환 전 (Function + Worker)',2],['1단계 (Function만)',1],['최종 (Workers 없음)',0]];
+ $('#costOut').innerHTML=rows.map(([l,k])=>{const u=r*k,p=Math.min(100,u/f*100);return `<div style="display:flex;justify-content:space-between;font-size:.88rem"><span>${l}: 요청당 ${k}회</span><b>${u.toLocaleString()} / ${f.toLocaleString()}</b></div><div class="meter"><i style="width:${Math.max(k?2:0,p)}%;background:${p>=100?'var(--red)':p>=70?'var(--accent)':'var(--green)'}"></i></div>`}).join('')+
+  `<small style="color:var(--muted)">${r*2>f?`전환 전 구조는 하루 <b>${Math.floor(f/2).toLocaleString()}</b>건부터 무료 한도를 넘어 에러(1027)가 나요. `:''}최종 구조는 API 요청이 Workers 한도와 무관해요. (Pages 정적 파일 요청은 무료·무제한)</small>`}
+$('#costReq').oninput=costR;$('#costFree').oninput=costR;costR();
+
+/* ---------- ch12 진단 트리 ---------- */
+const TREE={
+ start:{q:'<code>dig +short api.ssobbs13.pp.ua</code> 결과가 나오나요?',o:[['IP가 나온다','cf'],['아무것도 안 나온다','dnsNone']]},
+ dnsNone:{a:'<b>DNS 문제</b>예요. ① Cloudflare DNS에 <code>api</code> 레코드가 있나? ② zone이 Active인가? ③ <code>dig NS ssobbs13.pp.ua</code>가 Cloudflare인가? ④ 도메인이 만료(Hold)되지 않았나? (<code>whois</code>)'},
+ cf:{q:'브라우저에 <b>Cloudflare 에러 페이지</b>(주황색 로고, Ray ID)가 뜨나요?',o:[['뜬다','cfCode'],['안 뜬다 (앱 응답이나 브라우저 에러)','curlOk']]},
+ cfCode:{q:'에러 번호는?',o:[['1033','t1033'],['502','t502'],['524','t524'],['525 / 526','t525'],['403 / 1020','t403']]},
+ t1033:{a:'<b>터널이 끊김</b>. cloudflared가 엣지에 붙어있지 않아요. <code>docker compose ps</code>로 컨테이너 상태, <code>logs cloudflared</code>에서 토큰 오류나 아웃바운드 7844 차단을 확인하세요. 대시보드에서 터널이 Healthy인지도 봐요.'},
+ t502:{a:'<b>터널은 정상, 뒤쪽이 응답 없음</b>. cloudflared → <code>localhost:8080</code> 구간 문제. Spring이 떠 있나(<code>logs be</code>), 네트워크 공유가 맞나(Docker 챕터), ingress 서비스 주소 오타는 없나 확인하세요.'},
+ t524:{a:'<b>오리진이 100초 안에 응답 못 함</b>. 느린 쿼리, 외부 API 대기, 데드락. 긴 작업은 비동기(202 + 상태 조회)로 바꾸세요. Spring 쪽 타임아웃을 100초보다 짧게.'},
+ t525:{a:'<b>오리진 TLS 문제</b> (직접 오픈 방식). SSL 모드가 Full(strict)인데 오리진 인증서가 없거나 가짜. 터널을 쓰면 생기지 않아요.'},
+ t403:{a:'<b>엣지에서 차단</b>. Security → Events에서 Ray ID로 검색하면 어떤 규칙(WAF, 국가 차단, Access)이 막았는지 나와요.'},
+ curlOk:{q:'같은 요청을 <code>curl -v</code>로 보내면 성공하나요?',o:[['curl은 성공, 브라우저만 실패','browser'],['curl도 실패','status']]},
+ browser:{q:'브라우저 콘솔에 뭐라고 나오나요?',o:[['CORS 에러','bCors'],['Mixed Content','bMixed'],['요청은 가는데 로그인이 안 유지됨','bCookie']]},
+ bCors:{a:'<b>CORS</b>. Network 탭에서 OPTIONS 요청이 있나 보세요. OPTIONS가 401/403이면 Security에 <code>.cors { }</code>, 있는데 헤더가 없으면 allowed origin 철자(끝의 <code>/</code>, http vs https)를 확인하세요.'},
+ bMixed:{a:'<b>Mixed Content</b>. HTTPS 페이지에서 <code>http://</code> API를 부르고 있어요. FE의 API 주소를 <code>https://</code>로 바꾸세요. 서버가 만드는 리다이렉트가 http라면 <code>forward-headers-strategy</code>를 켜세요.'},
+ bCookie:{a:'<b>쿠키 문제</b>. ① fetch에 <code>credentials: "include"</code>? ② CORS에 <code>Allow-Credentials: true</code>? ③ 쿠키 <code>Domain</code>, <code>SameSite</code>, <code>Secure</code> 속성? 개발자 도구 → Application → Cookies와 Network 탭의 Set-Cookie 경고 아이콘을 보세요.'},
+ status:{q:'curl -v에서 어디까지 진행됐나요?',o:[['연결 단계에서 멈춤/실패','sConn'],['인증서 오류','t525b'],['HTTP 응답은 옴 (4xx/5xx)','sHttp']]},
+ sConn:{a:'<b>L3/L4 문제</b>. 주황 구름이면 엣지 연결 실패는 드물어요. 내 네트워크(회사 방화벽, VPN)를 의심하고 다른 망(휴대폰 테더링)에서 시도해보세요. 회색 구름이면 OCI Security List와 OS 방화벽을 확인하세요.'},
+ t525b:{a:'<b>TLS 문제</b>. <code>openssl s_client</code>로 받은 인증서의 SAN과 만료일을 확인하세요. 두 단계 서브도메인(<code>a.b.도메인</code>)이면 와일드카드가 안 덮어요.'},
+ sHttp:{q:'상태 코드는?',o:[['401','s401'],['403','s403'],['404','s404'],['500','s500']]},
+ s401:{a:'<b>인증 실패</b>. 토큰이 없거나, 만료(exp)됐거나, 서명 키가 달라요. JWT 해부기로 exp를 확인하고, Authorization 헤더 형식(<code>Bearer </code> 공백 포함)을 보세요.'},
+ s403:{a:'<b>권한 부족</b>. Spring이 보낸 403인지 Cloudflare가 보낸 403인지부터 구분하세요(응답 본문과 <code>server</code> 헤더). Spring이면 역할(RBAC)이나 객체 권한 로직, CSRF 토큰 누락을 확인해요.'},
+ s404:{a:'<b>경로 문제</b>. 응답이 Spring의 JSON 404면 컨트롤러 매핑(<code>/api</code> 접두사 유무), 빈 404면 터널 ingress의 catch-all에 걸린 거예요.'},
+ s500:{a:'<b>서버 코드 예외</b>. <code>docker compose logs be</code>에서 스택트레이스를 찾아요. 응답의 <code>cf-ray</code> 값을 로그에 남겨두면 요청을 추적하기 쉬워요.'}};
+let treePath=['start'];
+function treeR(){const id=treePath[treePath.length-1],n=TREE[id];
+ $('#treeCrumb').innerHTML=treePath.map((p,i)=>i===treePath.length-1?`<b>${i+1}단계</b>`:`${i+1}`).join(' → ');
+ $('#treeQ').innerHTML=n.q?`<b>Q.</b> ${n.q}`:`<span class="pill y">진단</span> ${n.a}`;
+ $('#treeOpts').innerHTML=n.o?n.o.map(o=>`<button class="chip" data-n="${o[1]}">${o[0]}</button>`).join(''):'';
+ $$('#treeOpts .chip').forEach(b=>b.onclick=()=>{treePath.push(b.dataset.n);treeR()})}
+$('#treeBack').onclick=()=>{if(treePath.length>1)treePath.pop();treeR()};$('#treeReset').onclick=()=>{treePath=['start'];treeR()};treeR();
+
+/* ---------- TCP HOL ---------- */
+const HOL=['A1','B1','C1','A2','B2','C2','A3','B3','C3'];let holLost=new Set(['A2']),holMode='h2';
+function holR(){const firstLost=HOL.findIndex(p=>holLost.has(p));
+ const st=HOL.map((p,i)=>{if(holLost.has(p))return'lost';if(holMode==='h2')return firstLost>=0&&i>firstLost?'wait':'ok';
+  const s=p[0];const li=HOL.findIndex((q,j)=>q[0]===s&&holLost.has(q));return li>=0&&i>li?'wait':'ok'});
+ $('#holPkts').innerHTML=HOL.map((p,i)=>`<button class="pkt ${st[i]}" data-p="${p}">${p}</button>`).join('');
+ $$('#holPkts .pkt').forEach(b=>b.onclick=()=>{const p=b.dataset.p;holLost.has(p)?holLost.delete(p):holLost.add(p);holR()});
+ const done=s=>HOL.filter((p,i)=>p[0]===s).every(p=>st[HOL.indexOf(p)]==='ok');
+ const w=st.filter(x=>x==='wait').length;
+ $('#holOut').innerHTML=`<span class="pill y">초록</span> 앱에 전달 <span class="pill i" style="background:var(--accent-soft);color:var(--accent)">주황</span> 도착했지만 대기 <span class="pill n">빨강</span> 유실(재전송 대기)<br>
+ 완료된 요청: ${['A','B','C'].filter(done).join(', ')||'없음'} · 도착했는데 묶여 있는 패킷 <b>${w}</b>개<br><small style="color:var(--muted)">${holMode==='h2'?'TCP는 바이트 순서를 지켜야 해서, 유실 지점 뒤의 모든 패킷이 스트림과 상관없이 기다려요.':'QUIC은 스트림마다 순서를 따로 관리해서, 유실된 스트림만 기다려요.'}</small>`}
+toggleGroup($('#holToggle'),v=>{holMode=v;holR()});
+
+/* ---------- HTTP 요청 빌더 · ETag ---------- */
+function rbR(){const m=$('#rbMethod').value,p=$('#rbPath').value||'/',auth=$('#rbAuth').checked,org=$('#rbOrigin').checked,idem=$('#rbIdem').checked,et=$('#rbEtag').checked;
+ const body=(m==='POST'||m==='PUT')?'{"title":"오늘","content":"맑음"}':'';const bl=new TextEncoder().encode(body).length;
+ const H=[['Host','api.ssobbs13.pp.ua']];if(auth)H.push(['Authorization','Bearer eyJhbGciOi…']);if(org)H.push(['Origin','https://ssobbs13.pp.ua']);H.push(['Accept','application/json']);
+ if(idem)H.push(['Idempotency-Key','7f3c9a2e-…']);if(et)H.push(['If-None-Match','"d41d8cd9"']);if(body){H.push(['Content-Type','application/json']);H.push(['Content-Length',String(bl)])}
+ $('#rbRaw').textContent=`${m} ${p} HTTP/1.1\n`+H.map(h=>`${h[0]}: ${h[1]}`).join('\n')+'\n\n'+body;
+ $('#rbCurl').textContent=`curl -i${m!=='GET'?` -X ${m}`:''} https://api.ssobbs13.pp.ua${p}`+H.filter(h=>!['Host','Content-Length'].includes(h[0])).map(h=>` \\\n  -H '${h[0]}: ${h[1]}'`).join('')+(body?` \\\n  -d '${body}'`:'');
+ const notes=[];notes.push('첫 줄 = <b>메서드 · 경로 · 버전</b>, 그 다음 헤더들, <b>빈 줄 하나</b>, 본문. 빈 줄이 헤더의 끝을 알려요.');
+ notes.push('<code>Host</code>가 있어서 IP 하나에 여러 도메인을 올릴 수 있어요(터널 ingress, 가상 호스트의 기반).');
+ if(org)notes.push('<code>Origin</code>은 브라우저가 자동으로 붙이고 JS가 바꿀 수 없어요. curl은 자유롭게 넣을 수 있어서 CORS가 서버 보안이 아닌 거예요.');
+ if(idem)notes.push(m==='POST'?'<code>Idempotency-Key</code>: 서버가 이 키로 처리 결과를 저장해두고, 같은 키로 재시도가 오면 새로 만들지 않고 저장한 응답을 돌려줘요.':'PUT/DELETE/GET은 원래 멱등이라 Idempotency-Key가 꼭 필요하진 않아요.');
+ if(et)notes.push(m==='GET'?'<code>If-None-Match</code>: "내가 가진 버전이 이거야. 안 바뀌었으면 본문 보내지 마". 서버는 <b>304</b>(본문 없음)로 답해요.':'조건부 헤더는 주로 GET에서 써요. PUT에서는 <code>If-Match</code>로 동시 수정 충돌(412)을 막는 데 써요.');
+ $('#rbNote').innerHTML=notes.map(n=>`<div style="margin:3px 0">• ${n}</div>`).join('')}
+['#rbMethod','#rbAuth','#rbOrigin','#rbIdem','#rbEtag'].forEach(s=>$(s).onchange=rbR);$('#rbPath').oninput=rbR;rbR();
+walker('#etagFlow',[
+ ['① 첫 요청: GET /diaries/7','브라우저는 캐시에 아무것도 없어요.'],
+ ['② 응답 200 + ETag: "v3"','본문(5KB)과 함께 "이 내용의 버전 표시는 v3"라고 알려줘요. Spring은 <code>ShallowEtagHeaderFilter</code>로 자동 생성할 수 있어요.'],
+ ['③ 다음 요청: If-None-Match: "v3"','브라우저가 "나 v3 가지고 있어"라고 함께 보내요.'],
+ ['④ 안 바뀌었으면 304 Not Modified','본문 없이 헤더만. 전송량이 거의 0이에요. 브라우저는 캐시한 v3를 그대로 써요.'],
+ ['⑤ 바뀌었으면 200 + ETag: "v4"','새 본문과 새 버전 표시를 받아요.']
+],{next:'#etagNext',reset:'#etagReset'});
+
+/* ---------- 암호학: 토큰 보관 · refresh ---------- */
+chipGroup($('#tokStore'),[
+ {label:'localStorage',x:'<span class="pill n">취약</span> JS로 읽을 수 있어서, XSS 한 번이면 토큰을 통째로 가져가요.',c:'<span class="pill y">안전</span> 자동 전송 안 됨',n:'구현이 가장 쉽지만 XSS에 가장 약해요. 새로고침해도 유지돼요.'},
+ {label:'메모리 (JS 변수)',x:'<span class="pill i">보통</span> 저장소에 안 남지만, XSS가 실행 중이면 요청을 대신 보낼 수는 있어요.',c:'<span class="pill y">안전</span>',n:'새로고침하면 사라져요. 그래서 보통 refresh token(HttpOnly 쿠키)과 짝을 지어, 페이지 로드 때 새 access token을 받아요. <b>SPA에서 가장 많이 권장되는 조합</b>이에요.'},
+ {label:'HttpOnly 쿠키',x:'<span class="pill y">안전</span> JS가 읽을 수 없어요. (XSS로 요청을 대신 보내는 건 여전히 가능)',c:'<span class="pill n">대책 필요</span> 자동 전송되니 SameSite + CSRF 토큰',n:'<code>HttpOnly; Secure; SameSite=Lax; Path=/</code>. FE와 API가 same-site(ssobbs13.pp.ua)라서 이 방식이 잘 맞아요.'}
+],it=>$('#tokStoreOut').innerHTML=`<div class="tablewrap"><table><tr><th>XSS (토큰 탈취)</th><th>CSRF</th></tr><tr><td>${it.x}</td><td>${it.c}</td></tr></table></div>${it.n}`,2);
+walker('#rtFlow',()=>$('#rtStolen').checked?[
+ ['공격자가 옛 refresh token R1을 훔침','사용자는 이미 R1으로 R2를 받아서 쓰고 있어요.'],
+ ['공격자: POST /auth/refresh (R1)','서버 DB에 R1은 "이미 사용됨"으로 표시돼 있어요.'],
+ ['서버: "재사용 감지!" 🚨','같은 토큰이 두 번 쓰였다는 건 누군가 훔쳤다는 뜻이에요. 이 계열(R1→R2→…) 전체를 폐기해요.'],
+ ['사용자와 공격자 모두 로그아웃','사용자는 다시 로그인하면 되고, 공격자는 더 이상 새 토큰을 못 받아요. 이게 회전(rotation)의 핵심이에요.']
+]:[
+ ['로그인','서버가 access token(15분, JWT)과 refresh token R1(14일, 랜덤 문자열, DB 저장)을 발급. R1은 HttpOnly 쿠키로.'],
+ ['API 호출','<code>Authorization: Bearer &lt;access&gt;</code>. 서버는 서명과 exp만 검사해요(DB 조회 없음).'],
+ ['15분 뒤 401','access token이 만료됐어요.'],
+ ['POST /auth/refresh (쿠키로 R1 자동 전송)','서버가 R1을 DB에서 확인 → <b>R1을 "사용됨" 처리하고 R2를 새로 발급</b> + 새 access token.'],
+ ['원래 요청 재시도','FE는 401을 받으면 refresh 후 한 번만 재시도하도록 만들어요. 동시에 여러 요청이 401을 받아도 refresh는 한 번만 하게 막아야 해요.']
+],{next:'#rtNext',reset:'#rtReset'});
+$('#rtStolen').onchange=()=>$('#rtReset').click();
+
+/* ---------- Docker ---------- */
+const DK={
+ name:{y:`services:
+  be:
+    image: diary-be
+  cloudflared:
+    image: cloudflare/cloudflared
+    # 같은 compose 네트워크 → 서비스 이름이 DNS 이름
+
+# 터널 ingress 서비스 주소
+service: http://be:8080`,d:'<span class="pill y">추천</span> 가장 표준적인 방법. 컨테이너가 서로 격리된 채로 이름으로 찾아요. be를 여러 개로 늘려도 이름은 그대로예요.'},
+ shared:{y:`services:
+  be:
+    image: diary-be
+  cloudflared:
+    image: cloudflare/cloudflared
+    network_mode: "service:be"   # be의 네트워크를 빌려 씀
+
+# 터널 ingress 서비스 주소
+service: http://localhost:8080`,d:'<span class="pill i">지금 구조</span> 두 컨테이너가 localhost를 공유해요. 대시보드의 <code>localhost:8080</code> 설정을 그대로 쓸 수 있어요. 대신 be가 재시작되면 cloudflared도 다시 붙어야 해요.'},
+ host:{y:`services:
+  be:
+    image: diary-be
+    ports: ["127.0.0.1:8080:8080"]
+  cloudflared:
+    image: cloudflare/cloudflared
+    network_mode: host           # 호스트 네트워크 그대로
+
+# 터널 ingress 서비스 주소
+service: http://localhost:8080`,d:'<span class="pill n">비추천</span> 격리가 사라져서 cloudflared가 호스트의 모든 포트에 닿아요. be가 호스트에 포트를 공개해야 해서 설정이 하나 더 늘어요.'}};
+toggleGroup($('#dkToggle'),v=>{$('#dkYaml').textContent=DK[v].y;$('#dkOut').innerHTML=DK[v].d});
+const Y2='<span class="pill y">닿음</span>',N2='<span class="pill n">못 닿음</span>',W2='<span class="pill n">닿음 ⚠</span>';
+chipGroup($('#portChips'),[
+ {label:'(ports 없음)',r:[Y2,N2,N2],d:'<span class="pill y">터널 구조의 정답</span> 같은 네트워크의 컨테이너만 닿아요. 호스트에서 확인하려면 <code>docker compose exec be curl localhost:8080</code>.'},
+ {label:'"127.0.0.1:8080:8080"',r:[Y2,Y2,N2],d:'<span class="pill y">안전</span> 호스트의 루프백에만 열려요. 서버에 SSH로 들어가서 <code>curl localhost:8080</code>으로 확인할 수 있어요.'},
+ {label:'"8080:8080"',r:[Y2,Y2,W2],d:'<span class="pill n">위험</span> 0.0.0.0에 열려요. Docker가 ufw를 우회하니, OCI Security List가 8080을 막고 있지 않으면 <b>전 세계에 Spring이 직접 노출</b>돼요.'},
+ {label:'"80:8080"',r:[Y2,Y2,W2],d:'<span class="pill n">위험</span> 호스트의 80으로 받아 컨테이너 8080으로. 1024 미만 포트는 원래 root 권한이 필요하지만 Docker 데몬이 대신 열어줘요.'}
+],it=>{$('#portTable').innerHTML=`<table><tr><th>같은 compose 컨테이너</th><th>호스트 자신 (SSH 접속 후)</th><th>인터넷</th></tr><tr><td>${it.r[0]}</td><td>${it.r[1]}</td><td>${it.r[2]}</td></tr></table>`;$('#portOut').innerHTML=it.d},2);
+
+/* ---------- 용어집 · 로드맵 보강 ---------- */
+GL.push(['CIDR','IP 범위 표기법. 10.0.0.0/24 = 앞 24비트 고정, 256개'],['NXDOMAIN','"그런 이름 없음" DNS 응답'],['NODATA','이름은 있지만 요청한 타입의 레코드가 없음'],['Negative caching','"없음" 응답도 일정 시간 캐시하는 것'],['DNSSEC','DNS 응답에 전자서명을 붙여 위조를 막는 기술'],['DS 레코드','상위 zone에 등록하는 DNSSEC 키 지문'],['DoH / DoT','DNS 질의를 HTTPS/TLS로 암호화'],['WHOIS / RDAP','도메인 등록 정보 조회 (RDAP는 JSON 후속 표준)'],['Grace / Redemption','만료 후 원가 갱신 기간 / 비싼 복구 기간'],['SAN','인증서에 적힌 사용 가능 도메인 목록'],['중간 인증서','루트 CA 대신 실제 발급을 하는 CA의 인증서. 서버가 함께 보내야 함'],['HSTS','브라우저가 HTTPS만 쓰도록 강제하는 헤더'],['Origin CA','Cloudflare 엣지만 신뢰하는 오리진용 무료 인증서'],['CF-Cache-Status','엣지 캐시 결과 헤더 (HIT, MISS, BYPASS, DYNAMIC…)'],['Cache key','캐시를 구분하는 기준 (기본: URL). 쿠키는 기본적으로 미포함'],['s-maxage','공유 캐시(CDN)용 max-age'],['ETag','응답 버전 표시. If-None-Match와 함께 304를 만듦'],['CSRF','쿠키 자동 전송을 악용해 사용자 몰래 요청을 보내는 공격'],['Simple request','preflight 없이 바로 보내지는 CORS 요청'],['Access-Control-Max-Age','preflight 결과 캐시 시간'],['Token bucket','토큰이 일정 속도로 차는 요청 제한 알고리즘'],['429','요청 과다. Retry-After 헤더로 대기 시간 안내'],['CSP','허용한 출처의 스크립트·연결만 허락하는 보안 헤더'],['Liveness / Readiness','살아있나(재시작 기준) / 받을 준비됐나(트래픽 기준)'],['Graceful shutdown','처리 중인 요청을 끝내고 종료'],['가용성 (nines)','99.9% = 연 8.8시간, 99.99% = 연 53분 중단'],['Refresh token rotation','refresh할 때마다 새 토큰 발급, 재사용 시 탈취로 간주'],['Idempotency-Key','POST 재시도 중복을 막는 요청 헤더'],['Bridge network','Docker 기본 네트워크. 컨테이너마다 사설 IP'],['network_mode: service','다른 컨테이너와 네트워크(localhost)를 공유'],['Port publishing','ports: 설정. 호스트 포트를 컨테이너로 연결'],['host.docker.internal','컨테이너 안에서 호스트를 가리키는 이름'],['Connect / Read timeout','연결 수립 대기 / 응답 데이터 대기 시간 제한'],['Ingress rule (cloudflared)','호스트명·경로를 위에서부터 비교해 첫 매칭 서비스로 전달']);
+GL.sort((a,b)=>a[0].localeCompare(b[0],'ko'));gl();
 </script>
 </body>
 </html>
