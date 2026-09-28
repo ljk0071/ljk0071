@@ -1,0 +1,16 @@
+### TLS/SSL error kinds in current gcloud stderr
+grep: /home/opc/.local/state/diary-db-iap-tunnel/stderr.log: No such file or directory
+### /var/oled/diary-forensics/pre-recovery-20260925T091158Z/iap-stderr.log
+ 159429 malformed
+    284 SSL: WRONG_VERSION_NUMBER
+    139 SSL: RECORD_LAYER_FAILURE
+     88 SSL: UNEXPECTED_MESSAGE
+      6 SSL: EXCESSIVE_MESSAGE_SIZE
+--- sample UNEXPECTED_MESSAGE context
+17906-  File "/home/opc/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/ssl.py", line 1088, in _create
+17907-    self.do_handshake()
+17908-    ~~~~~~~~~~~~~~~~~^^
+17909-  File "/home/opc/google-cloud-sdk/platform/bundledpythonunix/lib/python3.14/ssl.py", line 1384, in do_handshake
+17910-    self._sslobj.do_handshake()
+17911-    ~~~~~~~~~~~~~~~~~~~~~~~~~^^
+17912:ssl.SSLError: [SSL: UNEXPECTED_MESSAGE] unexpected message (_ssl.c:1082)

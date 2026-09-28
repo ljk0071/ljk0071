@@ -1,0 +1,38 @@
+### ROOT-CAUSE-CLASSIFICATION.txt
+Captured: 2026-09-25T08:35:21.325Z
+
+OLD_RESULT=3
+OLD_SECOND_RESULT=3
+FRESH_RESULT=99
+
+CLASSIFICATION=CONTROL_TUNNEL_NOT_AVAILABLE
+
+The fresh :15433 control could not be created.
+Inspect fresh tunnel logs before drawing a conclusion.
+### probe-old.txt
+[OLD-15432] target=127.0.0.1:15432
+[OLD-15432] start=1790325310314511163
+[OLD-15432] TCP_CONNECT=OK
+[OLD-15432] TCP_TIME=0.000137s
+[OLD-15432] PG_SSL_RESPONSE=TIMEOUT_OR_ERROR
+[OLD-15432] PG_SSL_TIME=0.201741s
+[OLD-15432] ERROR=ConnectionResetError(104, 'Connection reset by peer')
+### probe-old-second.txt
+[OLD-15432-SECOND] target=127.0.0.1:15432
+[OLD-15432-SECOND] start=1790325316783490690
+[OLD-15432-SECOND] TCP_CONNECT=OK
+[OLD-15432-SECOND] TCP_TIME=0.000136s
+[OLD-15432-SECOND] PG_SSL_RESPONSE=TIMEOUT_OR_ERROR
+[OLD-15432-SECOND] PG_SSL_TIME=4.027823s
+[OLD-15432-SECOND] ERROR=ConnectionResetError(104, 'Connection reset by peer')
+### probe-fresh.txt
+FRESH_RESULT=NOT_AVAILABLE
+### fresh-15433.stderr.log (tail)
+sqlite3.DatabaseError: database disk image is malformed
+ERROR: gcloud crashed (DatabaseError): database disk image is malformed
+
+If you would like to report this issue, please run the following command:
+  gcloud feedback
+
+To check gcloud for common problems, please run the following command:
+  gcloud info --run-diagnostics

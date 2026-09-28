@@ -1,0 +1,40 @@
+### hourly line counts
+    359 2026-09-24T01
+    262 2026-09-24T02
+    261 2026-09-24T03
+    376 2026-09-24T04
+   3322 2026-09-24T05
+  10799 2026-09-24T06
+  10799 2026-09-24T07
+  10800 2026-09-24T08
+### 05:44 sequence
+2026-09-24T05:41:54.222Z DEBUG: [518] ENQUEUED data_len [44] bytes_to_send[:20] [b"\x17\x03\x03\x00'\x14!\xf3\xae\x02(KK\xfe\x1a\x86?\x02Z~"]
+2026-09-24T05:41:54.225Z DEBUG: [518] SEND data_len [50] send_data[:20] b"\x00\x04\x00\x00\x00,\x17\x03\x03\x00'\x14!\xf3\xae\x02(KK\xfe"
+2026-09-24T05:41:54.345Z DEBUG: [518] RECV opcode [2] data_len [10] binary_data[:20] [b'\x00\x07\x00\x00\x00\x00\x00\x00\x06:']
+2026-09-24T05:41:54.347Z DEBUG: [518] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1c*h\x1c\x8e\x9a\xdbiS;']
+2026-09-24T05:41:56.223Z DEBUG: [518] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\t\xee'
+2026-09-24T05:43:52.020Z DEBUG: [518] ENQUEUED data_len [44] bytes_to_send[:20] [b"\x17\x03\x03\x00'\x0f\x12\x8e\xe9\x96'%(\x8d\xc9\xe5II\xef\x90"]
+2026-09-24T05:43:52.022Z DEBUG: [518] SEND data_len [50] send_data[:20] b"\x00\x04\x00\x00\x00,\x17\x03\x03\x00'\x0f\x12\x8e\xe9\x96'%(\x8d"
+2026-09-24T05:43:52.142Z DEBUG: [518] RECV opcode [2] data_len [10] binary_data[:20] [b'\x00\x07\x00\x00\x00\x00\x00\x00\x06f']
+2026-09-24T05:43:52.144Z DEBUG: [518] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1c\x8c\x9af\xd9Sc\xd3v#']
+2026-09-24T05:43:54.021Z DEBUG: [518] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\n\x0f'
+2026-09-24T05:44:01.601Z DEBUG: [518] ENQUEUED data_len [43] bytes_to_send[:20] [b'\x17\x03\x03\x00&D5>\\V\x1fc\xf9\x10\x8aKQ(\x83q']
+2026-09-24T05:44:01.604Z DEBUG: [518] ENQUEUED data_len [80] bytes_to_send[:20] [b'\x17\x03\x03\x00#\xd0pG\x87\xc7\x99{\x10\x8a\x03\x98\xed\xdf\xc2\xbb']
+2026-09-24T05:44:01.606Z DEBUG: [518] Received local EOF, closing connection
+2026-09-24T05:44:01.609Z DEBUG: [518] SEND data_len [49] send_data[:20] b'\x00\x04\x00\x00\x00+\x17\x03\x03\x00&D5>\\V\x1fc\xf9\x10'
+2026-09-24T05:44:01.611Z DEBUG: [518] SEND data_len [86] send_data[:20] b'\x00\x04\x00\x00\x00P\x17\x03\x03\x00#\xd0pG\x87\xc7\x99{\x10\x8a'
+2026-09-24T05:44:01.614Z DEBUG: [518] CLOSE
+2026-09-24T05:44:01.617Z INFO: [518] Client closed connection from [('<CLIENT_IP>', 47348)].
+2026-09-24T05:44:01.620Z DEBUG: On GCE from memory cache: False
+2026-09-24T05:44:01.623Z DEBUG: [519] user-agent [gcloud/582.0.0 command/gcloud.compute.start-iap-tunnel invocation-id/<ID> environment/None environment-version/None client-os/LINUX client-os-ver/6.12.0 client-pltf-arch/x86_64 interactive/False from-script/False python/3.14.7 term/  (Linux 6.12.0-204.92.4.4.3.el9uek.x86_64)]
+2026-09-24T05:44:01.626Z DEBUG: Cleaned [1] dead connection(s).
+2026-09-24T05:44:01.629Z DEBUG: credentials type for _GetAccessTokenCallback is [<googlecloudsdk.core.credentials.google_auth_credentials.Credentials object at 0x7ff68dd14ad0>].
+2026-09-24T05:44:01.721Z DEBUG: connections alive: [1]
+2026-09-24T05:44:01.724Z DEBUG: On GCE from memory cache: False
+2026-09-24T05:44:01.726Z INFO: [518] Received WebSocket Close message [1: 1].
+2026-09-24T05:44:01.838Z ERROR: [519] Error during local connection to [('<CLIENT_IP>', 33692)]: database disk image is malformed
+2026-09-24T05:44:01.840Z Traceback (most recent call last):
+2026-09-24T05:44:01.843Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 805, in RunReceiveLocalData
+2026-09-24T05:44:01.850Z     websocket_conn = self._InitiateConnection(
+### 05:44 malformed first
+38429:2026-09-24T05:44:01.838Z ERROR: [519] Error during local connection to [('<CLIENT_IP>', 33692)]: database disk image is malformed

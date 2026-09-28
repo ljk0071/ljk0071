@@ -1,0 +1,125 @@
+# Google Cloud SDK 582.0.0 (Apache License 2.0) — 발췌. "..."는 생략 표시.
+
+## lib/googlecloudsdk/command_lib/compute/iap_tunnel.py — RunReceiveLocalData (닫는 쪽 thread)
+  def RunReceiveLocalData(self, conn, socket_address, user_agent, conn_id=0):
+    websocket_conn = None
+    try:
+      websocket_conn = self._InitiateConnection(conn, ...)
+      while not self._shutdown:
+        data = conn.recv(utils.SUBPROTOCOL_MAX_DATA_FRAME_SIZE)
+        if not data:
+          websocket_conn.LocalEOF()
+          log.debug('[%d] Received local EOF, closing connection', conn_id)
+          if not websocket_conn.WaitForAllSent():
+            ...
+          break
+        websocket_conn.Send(data)
+    except (Exception, exceptions.Error) as e:
+      log.exception('[%d] Error during local connection to [%s]: %s', ...)
+    finally:
+      ...
+      try:
+        conn.close()                      # client 쪽 socket (trace: shutdown(6), close(6))
+      except EnvironmentError:
+        pass
+      try:
+        if websocket_conn:
+          websocket_conn.Close()          # → WebSocket SSL socket close (trace: write(7) x2, close(7))
+      except (EnvironmentError, exceptions.Error):
+        pass
+
+## lib/googlecloudsdk/api_lib/compute/iap_tunnel_websocket.py — IapTunnelWebSocket.Close
+  def Close(self):
+    """Close down local connection and WebSocket connection."""
+    self._stopping = True
+    self._unsent_data.put(StoppingError)
+    ...
+    if self._websocket_helper:
+      if not self._close_message_sent:
+        self._websocket_helper.SendClose()
+        self._close_message_sent = True
+      self._websocket_helper.Close()     # receive thread 를 join 하지 않음
+
+## lib/googlecloudsdk/api_lib/compute/iap_tunnel_websocket_helper.py
+  def Close(self, msg=''):
+    """Close the WebSocket."""
+    if not self._is_closed:
+      self._is_closed = True
+      try:
+        self._websocket.close()
+      except:  # pylint: disable=bare-except
+        pass
+  ...
+  def _ReceiveFromWebSocket(self):       # 별도 daemon thread (receive thread)
+    """Receive data from WebSocket connection."""
+    try:
+      ...
+        self._websocket.run_forever(origin=TUNNEL_CLOUDPROXY_ORIGIN, sslopt=self._sslopt)
+    except:  # pylint: disable=bare-except
+      ...
+    try:
+      self.Close()
+    ...
+
+## lib/googlecloudsdk/api_lib/compute/iap_tunnel_lightweight_websocket.py
+  def close(self, close_code=CLOSE_STATUS_NORMAL, close_message=six.b("")):
+    """Closes the connection."""
+    if self.connected and self.sock:     # lock 없는 check-then-act
+      try:
+        self.send_close(close_code, close_message)
+        self.sock.close()                # ← fd 번호 반납. 다른 thread 는 아직 SSL_read 중일 수 있음
+        self.sock = None
+        self.connected = False
+      except (websocket_exceptions.WebSocketConnectionClosedException, socket.error) as e:
+        ...
+
+  def run_forever(self, sslopt, **options):
+    """Main method that will stay running while the connection is open."""
+    try:
+      ...
+      self._connect(sslopt, **options)
+      while self.connected:
+        if self.sock.fileno() == -1:
+          raise websocket_exceptions.WebSocketConnectionClosedException(...)
+        self._wait_for_socket_to_ready(timeout=WEBSOCKET_RETRY_TIMEOUT_SECS)
+        frame = self.recv()               # → recv_frame → _recv_bytes
+        if frame.opcode == websocket_frame_utils.ABNF.OPCODE_CLOSE:
+          close_args = self._get_close_args(frame.data)
+          self.close()
+          self.on_close(*close_args)
+        else:
+          self.on_data(frame.data, frame.opcode)
+    ...
+
+  def _recv_bytes(self, buffersize):
+    ...
+        while total_bytes_read < buffersize:
+          bytes_received = self.sock.recv_into(view[total_bytes_read:],
+                                               buffersize - total_bytes_read)
+          # SSLSocket.recv_into → _ssl → OpenSSL SSL_read → read(<SSL_set_fd 로 받은 원시 fd>)
+    ...
+
+## lib/googlecloudsdk/command_lib/compute/iap_tunnel.py — _CleanDeadClientConnections (accept loop)
+  def _CleanDeadClientConnections(self):
+    """Erase reference to dead connections so they can be garbage collected."""
+    ...
+      for client_thread, conn in self._connections:
+        if not client_thread.is_alive():
+          dead_connections += 1
+          try:
+            conn.close()
+          ...
+      if dead_connections:
+        log.debug('Cleaned [%d] dead connection(s).' % dead_connections)
+        self._connections = conn_still_alive
+      gc.collect(2)
+      log.debug('connections alive: [%d]' % len(self._connections))
+
+# 옛 eBPF 감시 (trace-default-config.bt) 의 필터 — 결함
+    if ($inode->i_ino == 20396383 &&
+        $inode->i_sb->s_dev == 0xfc00) {          # ← 사용자 공간 표기(stat %D) 값
+
+# 같은 파일시스템에서 실측
+    stat -c %D <file>            → fc00          (new_encode_dev: major 252, minor 0)
+    bpftrace: f_inode->i_sb->s_dev → 0xfc00000   (커널 MKDEV: 252 << 20)
+    → 필터가 한 번도 참이 된 적 없음 → "TARGET WRITE 없음" 은 증거가 아니었음

@@ -1,0 +1,37 @@
+2026-09-26T19:27:43.653Z DEBUG: [93] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1c\xfe\xf5_\xae-K\xec\x95\xdc']
+2026-09-26T19:27:45.524Z DEBUG: [93] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\x14\xda'
+2026-09-26T19:29:41.788Z DEBUG: [93] ENQUEUED data_len [44] bytes_to_send[:20] [b"\x17\x03\x03\x00'\xcaQ\r\x80,\xe9D\xc3\x15\x14\xe5k$\xe3\xce"]
+2026-09-26T19:29:41.791Z DEBUG: [93] SEND data_len [50] send_data[:20] b"\x00\x04\x00\x00\x00,\x17\x03\x03\x00'\xcaQ\r\x80,\xe9D\xc3\x15"
+2026-09-26T19:29:41.914Z DEBUG: [93] RECV opcode [2] data_len [10] binary_data[:20] [b'\x00\x07\x00\x00\x00\x00\x00\x00\x08\x1d']
+2026-09-26T19:29:41.916Z DEBUG: [93] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1c\xa8\xc4\x8c!\x95\xbf\xb4\xe8\xdc']
+2026-09-26T19:29:43.788Z DEBUG: [93] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\x14\xfb'
+2026-09-26T19:31:19.964Z DEBUG: [93] ENQUEUED data_len [43] bytes_to_send[:20] [b'\x17\x03\x03\x00&\xa5\xd8\xe6\x02We\xf1\xcd\xa0\xed\xb6}\xd3\xe8\x95']
+2026-09-26T19:31:19.967Z DEBUG: [93] ENQUEUED data_len [80] bytes_to_send[:20] [b'\x17\x03\x03\x00#vQz\x9ec\x995\xa3n\xa6\x17\x0ci.F']
+2026-09-26T19:31:19.974Z DEBUG: [93] Received local EOF, closing connection
+2026-09-26T19:31:19.978Z DEBUG: [93] SEND data_len [49] send_data[:20] b'\x00\x04\x00\x00\x00+\x17\x03\x03\x00&\xa5\xd8\xe6\x02We\xf1\xcd\xa0'
+2026-09-26T19:31:19.981Z DEBUG: [93] SEND data_len [86] send_data[:20] b'\x00\x04\x00\x00\x00P\x17\x03\x03\x00#vQz\x9ec\x995\xa3n'
+2026-09-26T19:31:19.984Z DEBUG: [93] CLOSE
+2026-09-26T19:31:20.016Z INFO: [93] Client closed connection from [('<CLIENT_IP>', 35734)].
+2026-09-26T19:31:20.019Z DEBUG: On GCE from memory cache: False
+2026-09-26T19:31:20.023Z DEBUG: [94] user-agent [gcloud/582.0.0 command/gcloud.compute.start-iap-tunnel invocation-id/<ID> environment/None environment-version/None client-os/LINUX client-os-v
+2026-09-26T19:31:20.027Z DEBUG: Cleaned [1] dead connection(s).
+2026-09-26T19:31:20.030Z DEBUG: credentials type for _GetAccessTokenCallback is [<googlecloudsdk.core.credentials.google_auth_credentials.Credentials object at 0x7f3970558cd0>].
+2026-09-26T19:31:20.043Z DEBUG: connections alive: [1]
+2026-09-26T19:31:20.105Z DEBUG: On GCE from memory cache: False
+2026-09-26T19:31:20.108Z INFO: [93] Received WebSocket Close message [1: 1].
+2026-09-26T19:31:20.204Z ERROR: [94] Error during local connection to [('<CLIENT_IP>', 56440)]: database disk image is malformed
+2026-09-26T19:31:20.206Z Traceback (most recent call last):
+2026-09-26T19:31:20.209Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 805, in RunReceiveLocalData
+2026-09-26T19:31:20.211Z     websocket_conn = self._InitiateConnection(
+2026-09-26T19:31:20.213Z         conn,
+2026-09-26T19:31:20.216Z     ...<4 lines>...
+2026-09-26T19:31:20.220Z         conn_id=conn_id,
+2026-09-26T19:31:20.227Z     )
+2026-09-26T19:31:20.302Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 771, in _InitiateConnection
+2026-09-26T19:31:20.305Z     new_websocket.InitiateConnection()
+
+== hexdump of corrupted default_configs.db (first 64 bytes)
+00000000: 5351 4c69 7465 2066 6f72 6d61 7420 3300  SQLite format 3.
+00000010: 1000 0101 0040 2020 0000 0003 0017 0303  .....@  ........
+00000020: 0013 aa23 cbc9 0272 a982 f13d dea7 0fbe  ...#...r...=....
+00000030: 1559 2993 ea00 0000 0000 0001 0000 0000  .Y).............

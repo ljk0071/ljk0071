@@ -1,0 +1,52 @@
+### analyze fdrace2 (1500 conc10)
+events: {'ACCEPT': 1500, 'OPEN': 7492, 'IO': 189646, 'FREAD': 9000, 'CLOSE': 16393, 'SOCKET': 7407, 'SHUTDN': 3000, 'EBADF': 93}
+HIT (non-sqlite read/write on DB fd): 0
+STALE (old socket user touching new file generation): 0
+EBADF (use of already-closed fd): 93
+     68 tracepoint:syscalls:sys_exit_sendto
+     19 tracepoint:syscalls:sys_exit_recvfrom
+      6 tracepoint:syscalls:sys_exit_read
+### hunt.log
+09:26:41 round=1 corrupt_dbs=0 hit=0 raw_uaf=15 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 135), (('full', 'S'), 244), (('rst', 'S'), 121)]
+09:29:38 round=2 corrupt_dbs=0 hit=0 raw_uaf=28 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 119), (('full', 'S'), 274), (('rst', 'S'), 107)]
+09:32:32 round=3 corrupt_dbs=0 hit=0 raw_uaf=45 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 132), (('full', 'S'), 244), (('rst', 'S'), 124)]
+09:35:22 round=4 corrupt_dbs=0 hit=0 raw_uaf=61 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 146), (('full', 'S'), 250), (('rst', 'S'), 104)]
+09:38:16 round=5 corrupt_dbs=0 hit=0 raw_uaf=70 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 134), (('full', 'S'), 259), (('rst', 'S'), 107)]
+09:41:17 round=6 corrupt_dbs=0 hit=0 raw_uaf=89 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 135), (('full', 'S'), 252), (('rst', 'S'), 113)]
+09:44:16 round=7 corrupt_dbs=0 hit=0 raw_uaf=101 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 124), (('full', 'S'), 226), (('rst', 'S'), 150)]
+09:47:13 round=8 corrupt_dbs=0 hit=0 raw_uaf=112 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 136), (('full', 'S'), 255), (('rst', 'S'), 109)]
+09:50:07 round=9 corrupt_dbs=0 hit=0 raw_uaf=125 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 122), (('full', 'S'), 255), (('rst', 'S'), 123)]
+09:53:06 round=10 corrupt_dbs=0 hit=0 raw_uaf=146 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 125), (('full', 'S'), 235), (('rst', 'S'), 140)]
+09:56:07 round=11 corrupt_dbs=0 hit=0 raw_uaf=161 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 122), (('full', 'S'), 255), (('rst', 'S'), 123)]
+09:59:11 round=12 corrupt_dbs=0 hit=0 raw_uaf=171 tls_file_writes=0 SUMMARY [(('abrupt', 'SENT'), 122), (('full', 'S'), 271), (('rst', 'S'), 107)]
+no reproduction after 12 rounds
+### pair summary
+SUMMARY {'S': 1000}
+10:21:57 #950 ok {'S': 950}
+10:23:04 #1000 ok {'S': 1000}
+### pair2
+13:34:38 #50 ok {'S': 50}
+13:36:32 #100 ok {'S': 100}
+### load-summary
+SUMMARY [(('abrupt', 'SENT'), 69), (('full', 'S'), 139), (('rst', 'S'), 92)]
+SUMMARY [(('abrupt', 'SENT'), 357), (('full', 'S'), 759), (('full', 'TIMEOUT'), 1), (('rst', 'S'), 383)]
+SUMMARY [(('abrupt', 'SENT'), 135), (('full', 'S'), 244), (('rst', 'S'), 121)]
+SUMMARY [(('abrupt', 'SENT'), 119), (('full', 'S'), 274), (('rst', 'S'), 107)]
+SUMMARY [(('abrupt', 'SENT'), 132), (('full', 'S'), 244), (('rst', 'S'), 124)]
+SUMMARY [(('abrupt', 'SENT'), 146), (('full', 'S'), 250), (('rst', 'S'), 104)]
+SUMMARY [(('abrupt', 'SENT'), 134), (('full', 'S'), 259), (('rst', 'S'), 107)]
+SUMMARY [(('abrupt', 'SENT'), 135), (('full', 'S'), 252), (('rst', 'S'), 113)]
+SUMMARY [(('abrupt', 'SENT'), 124), (('full', 'S'), 226), (('rst', 'S'), 150)]
+SUMMARY [(('abrupt', 'SENT'), 136), (('full', 'S'), 255), (('rst', 'S'), 109)]
+SUMMARY [(('abrupt', 'SENT'), 122), (('full', 'S'), 255), (('rst', 'S'), 123)]
+SUMMARY [(('abrupt', 'SENT'), 125), (('full', 'S'), 235), (('rst', 'S'), 140)]
+SUMMARY [(('abrupt', 'SENT'), 122), (('full', 'S'), 255), (('rst', 'S'), 123)]
+SUMMARY [(('abrupt', 'SENT'), 122), (('full', 'S'), 271), (('rst', 'S'), 107)]
+### lab300: same-thread 1183 cross-thread 597 db-reuse<200ms 197 min_ms 0.03 median_ms 4.2
+### raw-fd EBADF detail (fdrace2)
+read fd=17 reader_tid=502660 closer_tid=502798 gap_ms=0.18
+read fd=23 reader_tid=505835 closer_tid=505975 gap_ms=0.26
+read fd=17 reader_tid=510398 closer_tid=510317 gap_ms=0.07
+read fd=12 reader_tid=512090 closer_tid=512252 gap_ms=0.35
+read fd=11 reader_tid=520126 closer_tid=520250 gap_ms=3.79
+read fd=8 reader_tid=523681 closer_tid=523635 gap_ms=110.68

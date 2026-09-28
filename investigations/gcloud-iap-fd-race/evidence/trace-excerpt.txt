@@ -1,0 +1,101 @@
+# bpftrace excerpt, gcloud start-iap-tunnel pid 784375 (nsecs = CLOCK_MONOTONIC)
+# tid 1421083 = _ReceiveFromWebSocket thread of conn [93]; tid 1421118 = RunReceiveLocalData thread of conn [93]; tid 1431669 = handler thread of conn [94]
+1782994483758112 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1782994484310035 IO     tid=1421083 fd=6 tracepoint:syscalls:sys_enter_sendto
+1782996355584267 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1782997486670764 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1783112618900675 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1783112744694864 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1783112746043553 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1783112746076144 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1783112746408372 IO     tid=1421083 fd=6 tracepoint:syscalls:sys_enter_sendto
+1783114619712111 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1783115748224655 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1783210794447320 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1783210794813040 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1783210794881670 SHUTDN tid=1421118 fd=6 how=2
+1783210794934250 CLOSE  tid=1421118 fd=6
+1783210795261518 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1783210795334326 IO     tid=1421118 fd=7 tracepoint:syscalls:sys_enter_write
+1783210795370684 CLOSE  tid=1421118 fd=7
+1783210800071097 OPEN   tid=1431669 fd=7 /home/opc/.config/gcloud-diary-iap/active_config
+1783210800137653 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_read
+1783210800146870 FREAD  tid=1431669 fd=7 ino=20396382 pos=0 len=8
+1783210800153333 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_read
+1783210800154636 FREAD  tid=1431669 fd=7 ino=20396382 pos=7 len=1
+1783210800174753 CLOSE  tid=1431669 fd=7
+1783210800281204 OPEN   tid=1431669 fd=7 /home/opc/.config/gcloud-diary-iap/default_configs.db
+1783210800312674 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800314698 FREAD  tid=1431669 fd=7 ino=23194204 pos=0 len=100
+1783210800492314 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800617059 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800632419 FREAD  tid=1431669 fd=7 ino=23194204 pos=24 len=16
+1783210800672694 CLOSE  tid=1431669 fd=7
+1783210800736124 OPEN   tid=1431669 fd=7 /home/opc/.config/gcloud-diary-iap/default_configs.db
+1783210800757786 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800759549 FREAD  tid=1431669 fd=7 ino=23194204 pos=0 len=100
+1783210800881228 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800962192 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800963985 FREAD  tid=1431669 fd=7 ino=23194204 pos=24 len=16
+1783210800975998 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210800983442 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210801044016 CLOSE  tid=1431669 fd=7
+1783210875242833 OPEN   tid=1431669 fd=7 /home/opc/.config/gcloud-diary-iap/active_config
+1783210875296264 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_read
+1783210875298508 FREAD  tid=1431669 fd=7 ino=20396382 pos=0 len=8
+1783210875305011 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_read
+1783210875306433 FREAD  tid=1431669 fd=7 ino=20396382 pos=7 len=1
+1783210875324368 CLOSE  tid=1431669 fd=7
+1783210875422643 OPEN   tid=1431669 fd=7 /home/opc/.config/gcloud-diary-iap/default_configs.db
+1783210875438032 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210875439976 FREAD  tid=1431669 fd=7 ino=23194204 pos=0 len=100
+1783210875611861 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210875719143 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210875721067 FREAD  tid=1431669 fd=7 ino=23194204 pos=24 len=16
+1783210875757235 CLOSE  tid=1431669 fd=7
+1783210875818321 OPEN   tid=1431669 fd=7 /home/opc/.config/gcloud-diary-iap/default_configs.db
+1783210875829722 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210875831436 FREAD  tid=1431669 fd=7 ino=23194204 pos=0 len=100
+1783210875949419 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210935320369 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210935337711 FREAD  tid=1431669 fd=7 ino=23194204 pos=24 len=16
+1783210935339094 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_read
+1783210935341608 FREAD  tid=1421083 fd=7 ino=23194204 pos=0 len=29
+1783210935360444 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210935369572 IO     tid=1431669 fd=7 tracepoint:syscalls:sys_enter_pread64
+1783210935394108 IO     tid=1421083 fd=7 tracepoint:syscalls:sys_enter_write
+1783210935397805 FWRITE tid=1421083 fd=7 ino=23194204 pos=29 len=24 head=\x17\x03\x03\x00\x13\xaa#\xcb\xc9\x02r\xa9\x82\xf1=\xde
+!!! TLS-LOOKING WRITE TO REGULAR FILE !!! tid=1421083 comm=Thread-275 (_Re
+!!! TLS-LOOKING WRITE TO REGULAR FILE !!! tid=1421083 comm=Thread-275 (_Re
+ustack:
+        __write+79
+        0x5627de228a30
+        0x5627de113346
+        0x5627de113227
+        0x5627de5e0a63
+        0x5627de5943be
+        0x5627de5eeb03
+        0x5627de5da308
+        0x5627de5da5b4
+        0x5627de592fcb
+        0x5627de59f3d9
+        0x5627ddfdda94
+        0x5627ddd38995
+        PyObject_Vectorcall+85
+        0x5627dde67cdf
+        _PyEval_EvalFrameDefault+254
+        0x5627dde57653
+        0x5627ddd2cf9f
+        0x5627dde5ca42
+        _PyEval_EvalFrameDefault+254
+        0x5627dde57653
+        0x5627ddd2cf9f
+        0x5627dde878f8
+        0x5627dde67499
+        _PyEval_EvalFrameDefault+254
+        0x5627dde57653
+        0x5627ddd2cf9f
+        0x5627de06e801
+        0x5627ddeead19
+        start_thread+825
+

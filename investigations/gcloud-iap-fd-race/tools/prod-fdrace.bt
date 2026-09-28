@@ -1,0 +1,88 @@
+// PROD: diary-db-iap-tunnel gcloud process fd lifecycle / file I/O / raw-fd use-after-close tracer (tgid = $1)
+// 목적: "close된 socket fd 번호가 sqlite 파일로 재사용되고, 그 fd에 TLS record가 써지는가"를
+// syscall 단위로 기록한다.
+config = { max_strlen = 128 }
+
+BEGIN { printf("=== fdrace tracer started, target pid=%d ===\n", $1); }
+
+// ---- fd 생성 ----
+tracepoint:syscalls:sys_enter_openat /pid == $1/ { @fn[tid] = str(args.filename); }
+tracepoint:syscalls:sys_exit_openat /pid == $1 && has_key(@fn, tid)/ {
+  printf("%lu OPEN   tid=%d fd=%d %s\n", nsecs, tid, args.ret, @fn[tid]);
+  delete(@fn, tid);
+}
+tracepoint:syscalls:sys_exit_socket /pid == $1/ { printf("%lu SOCKET tid=%d fd=%d\n", nsecs, tid, args.ret); }
+tracepoint:syscalls:sys_exit_accept4 /pid == $1/ { printf("%lu ACCEPT tid=%d fd=%d\n", nsecs, tid, args.ret); }
+tracepoint:syscalls:sys_exit_accept /pid == $1/ { printf("%lu ACCEPT tid=%d fd=%d\n", nsecs, tid, args.ret); }
+tracepoint:syscalls:sys_exit_dup /pid == $1/ { printf("%lu DUP    tid=%d fd=%d\n", nsecs, tid, args.ret); }
+
+// ---- fd 해제 ----
+tracepoint:syscalls:sys_enter_close /pid == $1/ { printf("%lu CLOSE  tid=%d fd=%d\n", nsecs, tid, args.fd); }
+tracepoint:syscalls:sys_enter_shutdown /pid == $1/ { printf("%lu SHUTDN tid=%d fd=%d how=%d\n", nsecs, tid, args.fd, args.how); }
+
+// ---- write/read syscall 진입 시 fd 기록 (vfs_* 에는 fd가 없으므로 tid로 연결) ----
+tracepoint:syscalls:sys_enter_write   /pid == $1/ { @wfd[tid] = args.fd; }
+tracepoint:syscalls:sys_enter_pwrite64 /pid == $1/ { @wfd[tid] = args.fd; }
+tracepoint:syscalls:sys_exit_write    /pid == $1/ { delete(@wfd, tid); }
+tracepoint:syscalls:sys_exit_pwrite64 /pid == $1/ { delete(@wfd, tid); }
+tracepoint:syscalls:sys_enter_read    /pid == $1/ { @rfd[tid] = args.fd; }
+tracepoint:syscalls:sys_enter_pread64 /pid == $1/ { @rfd[tid] = args.fd; }
+tracepoint:syscalls:sys_exit_read     /pid == $1/ { delete(@rfd, tid); }
+tracepoint:syscalls:sys_exit_pread64  /pid == $1/ { delete(@rfd, tid); }
+
+// ---- 일반 파일(S_IFREG)에 대한 write: sqlite 정상 write + 이상 write 모두 ----
+kprobe:vfs_write /pid == $1/ {
+  $f = (struct file *)arg0;
+  if (($f->f_inode->i_mode & 0xF000) == 0x8000) {
+    $h0 = *(uint8 *)uptr(arg1);
+    printf("%lu FWRITE tid=%d fd=%d ino=%lu pos=%ld len=%lu head=%r\n",
+           nsecs, tid, @wfd[tid], $f->f_inode->i_ino, *(int64 *)arg3, arg2,
+           buf(uptr(arg1), arg2 < 16 ? arg2 : 16));
+    if ($h0 == 0x17 || $h0 == 0x15 || $h0 == 0x16) {
+      printf("!!! TLS-LOOKING WRITE TO REGULAR FILE !!! tid=%d comm=%s\nustack:%s\nkstack:%s\n",
+             tid, comm, ustack(30), kstack(15));
+    }
+  }
+}
+
+// ---- 일반 파일 read (OpenSSL이 TLS header 5 bytes를 파일에서 읽는지 확인) ----
+kprobe:vfs_read /pid == $1/ {
+  $f = (struct file *)arg0;
+  if (($f->f_inode->i_mode & 0xF000) == 0x8000 && arg2 < 4096) {
+    printf("%lu FREAD  tid=%d fd=%d ino=%lu pos=%ld len=%lu\n",
+           nsecs, tid, @rfd[tid], $f->f_inode->i_ino, *(int64 *)arg3, arg2);
+    if (arg2 == 5) {
+      printf("!!! 5-BYTE READ FROM REGULAR FILE (TLS record header size) !!! tid=%d\nustack:%s\n",
+             tid, ustack(30));
+    }
+  }
+}
+
+// fdrace.bt 보강: 모든 fd I/O의 (tid, fd)와 EBADF(닫힌 fd 사용)를 기록한다.
+// 분석: DB 파일 generation의 fd를 opener가 아닌 thread가 I/O 하면 = race 적중.
+tracepoint:syscalls:sys_enter_read,
+tracepoint:syscalls:sys_enter_write,
+tracepoint:syscalls:sys_enter_recvfrom,
+tracepoint:syscalls:sys_enter_sendto,
+tracepoint:syscalls:sys_enter_recvmsg,
+tracepoint:syscalls:sys_enter_sendmsg,
+tracepoint:syscalls:sys_enter_pread64,
+tracepoint:syscalls:sys_enter_pwrite64
+/pid == $1/ { printf("%lu IO     tid=%d fd=%d %s\n", nsecs, tid, args.fd, probe); @iofd[tid] = args.fd; }
+
+tracepoint:syscalls:sys_exit_read,
+tracepoint:syscalls:sys_exit_write,
+tracepoint:syscalls:sys_exit_recvfrom,
+tracepoint:syscalls:sys_exit_sendto,
+tracepoint:syscalls:sys_exit_recvmsg,
+tracepoint:syscalls:sys_exit_sendmsg,
+tracepoint:syscalls:sys_exit_pread64,
+tracepoint:syscalls:sys_exit_pwrite64
+/pid == $1/ {
+  if (args.ret == -9) {
+    printf("%lu EBADF  tid=%d fd=%d %s\n", nsecs, tid, @iofd[tid], probe);
+    if ((int64)@iofd[tid] >= 0) { printf("!!! RAW-FD USE-AFTER-CLOSE !!! tid=%d fd=%d\nustack:%s\n", tid, @iofd[tid], ustack(40)); }
+  }
+  delete(@iofd, tid);
+}
+END { clear(@fn); clear(@wfd); clear(@rfd); clear(@iofd); }

@@ -1,0 +1,136 @@
+2026-09-25T10:28:55.548Z DEBUG: [9] ENQUEUED data_len [44] bytes_to_send[:20] [b"\x17\x03\x03\x00'hJ\x8f\x86\x87#\xb5\xd7\x97L\xa7_\xefv\x0e"]
+2026-09-25T10:28:55.550Z DEBUG: [9] SEND data_len [50] send_data[:20] b"\x00\x04\x00\x00\x00,\x17\x03\x03\x00'hJ\x8f\x86\x87#\xb5\xd7\x97"
+2026-09-25T10:28:55.675Z DEBUG: [9] RECV opcode [2] data_len [10] binary_data[:20] [b'\x00\x07\x00\x00\x00\x00\x00\x00\x06f']
+2026-09-25T10:28:55.677Z DEBUG: [9] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1cx\x96\x11\x0f\xa9\xf2 t\xaa']
+2026-09-25T10:28:57.549Z DEBUG: [9] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\n\x0f'
+2026-09-25T10:30:46.382Z DEBUG: [9] ENQUEUED data_len [44] bytes_to_send[:20] [b'\x17\x03\x03\x00\'\x1ar"\xca\xaf\x1d9\x16I\xef\xb5"\xa0\xc5\x04']
+2026-09-25T10:30:46.384Z DEBUG: [9] SEND data_len [50] send_data[:20] b'\x00\x04\x00\x00\x00,\x17\x03\x03\x00\'\x1ar"\xca\xaf\x1d9\x16I'
+2026-09-25T10:30:46.509Z DEBUG: [9] RECV opcode [2] data_len [10] binary_data[:20] [b'\x00\x07\x00\x00\x00\x00\x00\x00\x06\x92']
+2026-09-25T10:30:46.512Z DEBUG: [9] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1c\xad\xc9Xvh\\\x8e\x05\t']
+2026-09-25T10:30:48.383Z DEBUG: [9] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\n0'
+2026-09-25T10:32:37.216Z DEBUG: [9] ENQUEUED data_len [44] bytes_to_send[:20] [b"\x17\x03\x03\x00'\xa0Yt\x82\x92\rG\xaf\x86\x1aQI\x99N\xcc"]
+2026-09-25T10:32:37.219Z DEBUG: [9] SEND data_len [50] send_data[:20] b"\x00\x04\x00\x00\x00,\x17\x03\x03\x00'\xa0Yt\x82\x92\rG\xaf\x86"
+2026-09-25T10:32:37.343Z DEBUG: [9] RECV opcode [2] data_len [10] binary_data[:20] [b'\x00\x07\x00\x00\x00\x00\x00\x00\x06\xbe']
+2026-09-25T10:32:37.345Z DEBUG: [9] RECV opcode [2] data_len [39] binary_data[:20] [b'\x00\x04\x00\x00\x00!\x17\x03\x03\x00\x1c\xf6\xf3\xfb\x02gu\xe3\xa0x']
+2026-09-25T10:32:39.217Z DEBUG: [9] SEND data_len [10] send_data[:20] b'\x00\x07\x00\x00\x00\x00\x00\x00\nQ'
+2026-09-25T10:32:43.008Z DEBUG: [9] ENQUEUED data_len [123] bytes_to_send[:20] [b'\x17\x03\x03\x00&\xf2\xec\xc6&\xde\xd2~\x9c\x94K\xe1\xdc\xa9\x8e\xa5']
+2026-09-25T10:32:43.012Z DEBUG: [9] SEND data_len [129] send_data[:20] b'\x00\x04\x00\x00\x00{\x17\x03\x03\x00&\xf2\xec\xc6&\xde\xd2~\x9c\x94'
+2026-09-25T10:32:43.015Z DEBUG: [9] CLOSE
+2026-09-25T10:32:43.017Z DEBUG: [9] Received local EOF, closing connection
+2026-09-25T10:32:43.020Z INFO: [9] Client closed connection from [('<CLIENT_IP>', 50996)].
+2026-09-25T10:32:43.022Z DEBUG: Cleaned [1] dead connection(s).
+2026-09-25T10:32:43.131Z DEBUG: connections alive: [1]
+2026-09-25T10:32:43.135Z DEBUG: On GCE from memory cache: False
+2026-09-25T10:32:43.139Z DEBUG: [10] user-agent [gcloud/582.0.0 command/gcloud.compute.start-iap-tunnel invocation-id/<ID> environment/None environment-version/None client-os/LINUX client-os-ver/6.12.0 client-pltf-arch/x86_64 interactive/False from-script/False python/3.14.7 term/  (Linux 6.12.0-204.92.4.4.3.el9uek.x86_64)]
+2026-09-25T10:32:43.142Z DEBUG: credentials type for _GetAccessTokenCallback is [<googlecloudsdk.core.credentials.google_auth_credentials.Credentials object at 0x7f9534c60cd0>].
+2026-09-25T10:32:43.204Z INFO: [9] Received WebSocket Close message [1: 1].
+2026-09-25T10:32:43.242Z ERROR: [10] Error during local connection to [('<CLIENT_IP>', 56058)]: database disk image is malformed
+2026-09-25T10:32:43.244Z Traceback (most recent call last):
+2026-09-25T10:32:43.247Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 805, in RunReceiveLocalData
+2026-09-25T10:32:43.249Z     websocket_conn = self._InitiateConnection(
+2026-09-25T10:32:43.252Z         conn,
+2026-09-25T10:32:43.302Z     ...<4 lines>...
+2026-09-25T10:32:43.306Z         conn_id=conn_id,
+2026-09-25T10:32:43.309Z     )
+2026-09-25T10:32:43.326Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 771, in _InitiateConnection
+2026-09-25T10:32:43.328Z     new_websocket.InitiateConnection()
+2026-09-25T10:32:43.332Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-09-25T10:32:43.335Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/api_lib/compute/iap_tunnel_websocket.py", line 157, in InitiateConnection
+2026-09-25T10:32:43.338Z     self._StartNewWebSocket()
+2026-09-25T10:32:43.341Z     ~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-09-25T10:32:43.343Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/api_lib/compute/iap_tunnel_websocket.py", line 298, in _StartNewWebSocket
+2026-09-25T10:32:43.347Z     headers += ['Authorization: Bearer ' + self._get_access_token_callback()]
+2026-09-25T10:32:43.405Z                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^
+2026-09-25T10:32:43.408Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 332, in _GetAccessTokenCallback
+2026-09-25T10:32:43.411Z     store.RefreshIfAlmostExpire(credentials)
+2026-09-25T10:32:43.417Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^
+2026-09-25T10:32:43.420Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/credentials/store.py", line 1263, in RefreshIfAlmostExpire
+2026-09-25T10:32:43.423Z     RefreshIfExpireWithinWindow(
+2026-09-25T10:32:43.426Z     ~~~~~~~~~~~~~~~~~~~~~~~~~~~^
+2026-09-25T10:32:43.503Z         credentials, window=_CREDENTIALS_EXPIRY_WINDOW, for_adc=for_adc
+2026-09-25T10:32:43.506Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.509Z     )
+2026-09-25T10:32:43.512Z     ^
+2026-09-25T10:32:43.515Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/credentials/store.py", line 1259, in RefreshIfExpireWithinWindow
+2026-09-25T10:32:43.519Z     Refresh(credentials, for_adc=for_adc)
+2026-09-25T10:32:43.524Z     ~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.603Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/credentials/store.py", line 1044, in Refresh
+2026-09-25T10:32:43.606Z     request_client = requests.GoogleAuthRequest()
+2026-09-25T10:32:43.609Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/requests.py", line 569, in GoogleAuthRequest
+2026-09-25T10:32:43.611Z     session = GetSession(
+2026-09-25T10:32:43.613Z         client_certificate=client_certificate,
+2026-09-25T10:32:43.616Z         client_key=client_key)
+2026-09-25T10:32:43.618Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/requests.py", line 98, in GetSession
+2026-09-25T10:32:43.620Z     http_client = RequestWrapper().WrapWithDefaults(
+2026-09-25T10:32:43.622Z         http_client,
+2026-09-25T10:32:43.625Z         streaming_response_body=streaming_response_body,
+2026-09-25T10:32:43.627Z         redact_request_body_reason=redact_request_body_reason)
+2026-09-25T10:32:43.629Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/transport.py", line 175, in WrapWithDefaults
+2026-09-25T10:32:43.631Z     gcloud_ua = MakeUserAgentString(
+2026-09-25T10:32:43.633Z         properties.VALUES.metrics.command_name.Get())
+2026-09-25T10:32:43.636Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/transport.py", line 641, in MakeUserAgentString
+2026-09-25T10:32:43.638Z     architecture = GetAndCacheArchitecture(user_platform)
+2026-09-25T10:32:43.640Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/transport.py", line 624, in GetAndCacheArchitecture
+2026-09-25T10:32:43.704Z     active_config_store.Set('client_arch', arch)
+2026-09-25T10:32:43.707Z     ~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.709Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 211, in Set
+2026-09-25T10:32:43.711Z     self._StoreAttribute(
+2026-09-25T10:32:43.713Z     ~~~~~~~~~~~~~~~~~~~~^
+2026-09-25T10:32:43.716Z         config_attr,
+2026-09-25T10:32:43.718Z         ^^^^^^^^^^^^
+2026-09-25T10:32:43.720Z         config_value,
+2026-09-25T10:32:43.722Z         ^^^^^^^^^^^^^
+2026-09-25T10:32:43.725Z     )
+2026-09-25T10:32:43.727Z     ^
+2026-09-25T10:32:43.729Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 320, in _StoreAttribute
+2026-09-25T10:32:43.732Z     self._Execute(
+2026-09-25T10:32:43.734Z     ~~~~~~~~~~~~~^
+2026-09-25T10:32:43.736Z         'REPLACE INTO config (config_attr, value) VALUES (?,?)',
+2026-09-25T10:32:43.738Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.741Z         (config_attr, config_value),
+2026-09-25T10:32:43.743Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.745Z     )
+2026-09-25T10:32:43.747Z     ^
+2026-09-25T10:32:43.805Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 145, in _Execute
+2026-09-25T10:32:43.808Z     return cur.Execute(*args)
+2026-09-25T10:32:43.810Z            ~~~~~~~~~~~^^^^^^^
+2026-09-25T10:32:43.813Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 65, in Execute
+2026-09-25T10:32:43.815Z     return self._cursor.execute(*args)
+2026-09-25T10:32:43.817Z            ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+2026-09-25T10:32:43.819Z sqlite3.DatabaseError: database disk image is malformed
+2026-09-25T10:32:43.822Z INFO: [10] Client closed connection from [('<CLIENT_IP>', 56058)].
+2026-09-25T10:32:43.824Z ERROR: Error while receiving from client.
+2026-09-25T10:32:43.826Z Traceback (most recent call last):
+2026-09-25T10:32:43.828Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 977, in _HandleNewConnection
+2026-09-25T10:32:43.831Z     user_agent = transport.MakeUserAgentString()
+2026-09-25T10:32:43.833Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/transport.py", line 641, in MakeUserAgentString
+2026-09-25T10:32:43.835Z     architecture = GetAndCacheArchitecture(user_platform)
+2026-09-25T10:32:43.838Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/transport.py", line 606, in GetAndCacheArchitecture
+2026-09-25T10:32:43.870Z     active_config_store = config_sqlite_store.GetConfigStore()
+2026-09-25T10:32:43.904Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 84, in GetConfigStore
+2026-09-25T10:32:43.907Z     return _GetSqliteStore(config_name)
+2026-09-25T10:32:43.909Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 379, in _GetSqliteStore
+2026-09-25T10:32:43.911Z     config_store = SqliteConfigStore(sqlite_config_file, config_name)
+2026-09-25T10:32:43.914Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 138, in __init__
+2026-09-25T10:32:43.916Z     self._Execute(
+2026-09-25T10:32:43.919Z     ~~~~~~~~~~~~~^
+2026-09-25T10:32:43.921Z         'CREATE TABLE IF NOT EXISTS config '
+2026-09-25T10:32:43.923Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.925Z         '(config_attr TEXT PRIMARY KEY, value BLOB)'
+2026-09-25T10:32:43.928Z         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+2026-09-25T10:32:43.930Z     )
+2026-09-25T10:32:43.932Z     ^
+2026-09-25T10:32:43.934Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 145, in _Execute
+2026-09-25T10:32:43.937Z     return cur.Execute(*args)
+2026-09-25T10:32:43.939Z            ~~~~~~~~~~~^^^^^^^
+2026-09-25T10:32:43.941Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/core/config_sqlite_store.py", line 65, in Execute
+2026-09-25T10:32:43.944Z     return self._cursor.execute(*args)
+2026-09-25T10:32:43.946Z            ~~~~~~~~~~~~~~~~~~~~^^^^^^^
+2026-09-25T10:32:43.948Z sqlite3.DatabaseError: database disk image is malformed
+2026-09-25T10:32:44.005Z DEBUG: Cleaned [1] dead connection(s).
+2026-09-25T10:32:44.008Z DEBUG: connections alive: [1]
+2026-09-25T10:32:48.430Z DEBUG: Cleaned [1] dead connection(s).
+2026-09-25T10:32:48.509Z ERROR: Error while receiving from client.
+2026-09-25T10:32:48.511Z Traceback (most recent call last):
+2026-09-25T10:32:48.514Z   File "/home/opc/google-cloud-sdk/lib/googlecloudsdk/command_lib/compute/iap_tunnel.py", line 977, in _HandleNewConnection
+2026-09-25T10:32:48.516Z     user_agent = transport.MakeUserAgentString()

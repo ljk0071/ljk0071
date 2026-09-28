@@ -1,0 +1,50 @@
+### near-miss (fdrace-pid784375-20260925T134124Z.log line 292)
+1675931571603947 IO     tid=784443 fd=2 tracepoint:syscalls:sys_enter_write
+1675931571607754 FWRITE tid=784443 fd=2 ino=776162 pos=275511075 len=121 head=DEBUG: [0] ENQUE
+1675931579500661 IO     tid=784443 fd=4 tracepoint:syscalls:sys_enter_write
+1675931579502895 FWRITE tid=784443 fd=4 ino=23194203 pos=11051 len=163 head=2026-09-25 13:43
+1675931580625656 IO     tid=784443 fd=6 tracepoint:syscalls:sys_enter_recvfrom
+1675931699860192 IO     tid=784460 fd=7 tracepoint:syscalls:sys_enter_read
+1675931700270908 IO     tid=784460 fd=2 tracepoint:syscalls:sys_enter_write
+1675931700288551 FWRITE tid=784460 fd=2 ino=776162 pos=275511310 len=104 head=DEBUG: [0] RECV 
+1675931700455697 IO     tid=784460 fd=4 tracepoint:syscalls:sys_enter_write
+1675931700469924 FWRITE tid=784460 fd=4 ino=23194203 pos=11370 len=146 head=2026-09-25 13:43
+1675931701473721 IO     tid=784460 fd=7 tracepoint:syscalls:sys_enter_read
+1675931701490703 IO     tid=784460 fd=7 tracepoint:syscalls:sys_enter_read
+1675931701688647 IO     tid=784460 fd=2 tracepoint:syscalls:sys_enter_write
+1675931701691543 FWRITE tid=784460 fd=2 ino=776162 pos=275511414 len=129 head=DEBUG: [0] RECV 
+1675931701869429 IO     tid=784460 fd=4 tracepoint:syscalls:sys_enter_write
+1675931701872004 FWRITE tid=784460 fd=4 ino=23194203 pos=11516 len=171 head=2026-09-25 13:43
+1675931701910716 IO     tid=784460 fd=6 tracepoint:syscalls:sys_enter_sendto
+1675934704522372 IO     tid=784460 fd=7 tracepoint:syscalls:sys_enter_read
+1675978378552555 IO     tid=784443 fd=2 tracepoint:syscalls:sys_enter_write
+1675978378565138 FWRITE tid=784443 fd=2 ino=776162 pos=275511632 len=130 head=DEBUG: [0] ENQUE
+1675978379299967 IO     tid=784443 fd=4 tracepoint:syscalls:sys_enter_write
+1675978379303734 FWRITE tid=784443 fd=4 ino=23194203 pos=11818 len=172 head=2026-09-25 13:44
+1675978380551232 IO     tid=784443 fd=6 tracepoint:syscalls:sys_enter_recvfrom
+1675978386370760 IO     tid=784443 fd=2 tracepoint:syscalls:sys_enter_write
+1675978386386530 FWRITE tid=784443 fd=2 ino=776162 pos=275511885 len=115 head=DEBUG: [0] ENQUE
+1675978386500024 IO     tid=784443 fd=4 tracepoint:syscalls:sys_enter_write
+1675978386502519 FWRITE tid=784443 fd=4 ino=23194203 pos=12155 len=157 head=2026-09-25 13:44
+1675978386536984 IO     tid=784443 fd=6 tracepoint:syscalls:sys_enter_recvfrom
+1675978439828938 IO     tid=784443 fd=2 tracepoint:syscalls:sys_enter_write
+1675978439846371 FWRITE tid=784443 fd=2 ino=776162 pos=275512105 len=50 head=DEBUG: [0] Recei
+1675978441809330 IO     tid=784443 fd=4 tracepoint:syscalls:sys_enter_write
+1675978441814912 FWRITE tid=784443 fd=4 ino=23194203 pos=12459 len=92 head=2026-09-25 13:44
+1675978442089401 IO     tid=784443 fd=2 tracepoint:syscalls:sys_enter_write
+1675978442093017 FWRITE tid=784443 fd=2 ino=776162 pos=275512155 len=65 head=INFO: [0] Client
+1675978442220358 IO     tid=784443 fd=4 tracepoint:syscalls:sys_enter_write
+1675978442223444 FWRITE tid=784443 fd=4 ino=23194203 pos=12551 len=108 head=2026-09-25 13:44
+1675978442266545 SHUTDN tid=784443 fd=-1 how=2
+1675978444188066 IO     tid=784443 fd=2 tracepoint:syscalls:sys_enter_write
+1675978444268498 FWRITE tid=784443 fd=2 ino=776162 pos=275512220 len=17 head=DEBUG: [0] CLOSE
+1675978444670007 IO     tid=784443 fd=4 tracepoint:syscalls:sys_enter_write
+1675978444726564 FWRITE tid=784443 fd=4 ino=23194203 pos=12659 len=59 head=2026-09-25 13:44
+1675978445696236 IO     tid=784443 fd=7 tracepoint:syscalls:sys_enter_write
+1675978445830710 IO     tid=784443 fd=7 tracepoint:syscalls:sys_enter_write
+1675978445870755 CLOSE  tid=784443 fd=7
+1675978535335496 IO     tid=784460 fd=7 tracepoint:syscalls:sys_enter_read
+1675978535348952 EBADF  tid=784460 fd=7 tracepoint:syscalls:sys_exit_read
+!!! RAW-FD USE-AFTER-CLOSE !!! tid=784460 fd=7
+ustack:
+        __GI_read+76
