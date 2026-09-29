@@ -1622,7 +1622,7 @@ function load(): State {
 <div class="keypoints"><p class="kp-title">이 장의 핵심</p><ul>
 <li><a class="t" href="#g-client-state" data-g="client-state">클라이언트 상태</a>는 Zustand에, <a class="t" href="#g-server-state" data-g="server-state">서버 상태</a>는 TanStack Query에 둡니다. 장바구니 목록은 앞쪽, 재고 확인은 뒤쪽입니다.</li>
 <li>Zustand의 <a class="t" href="#g-zustand-persist" data-g="zustand-persist">persist</a>로 <code>localStorage</code>에 저장하고, <code>storage</code> 이벤트로 다른 탭과 맞춥니다.</li>
-<li><a class="t" href="#g-optimistic-update" data-g="optimistic-update">낙관적 업데이트</a>는 "이전 값 저장 → 화면 먼저 변경 → 실패하면 복원" 세 단계입니다. 같은 대상의 변경은 순서대로 실행해야 롤백이 서로 덮어쓰지 않습니다.</li>
+<li><a class="t" href="#g-optimistic-update" data-g="optimistic-update">낙관적 업데이트</a>는 "서버가 받아들인 값 기억 → 화면 먼저 변경 → 마지막 요청이 실패하면 그 값으로 복원" 세 단계입니다. 빠른 연속 변경에서는 더 새로운 변경이 남아 있는 동안 롤백하지 말아야 하고, 같은 대상의 요청은 <code>scope</code>로 순서대로 보냅니다.</li>
 <li>금액은 원 단위 정수로만 계산하고, 화면에 보일 때만 <code>Intl.NumberFormat('ko-KR')</code>으로 바꿉니다.</li>
 </ul></div>
 
@@ -1709,18 +1709,21 @@ export function syncCartAcrossTabs(): () =&gt; void {
 
 <h2>5.3 낙관적 업데이트와 롤백</h2>
 <p>수량을 5로 바꾸었는데 서버 응답을 기다리느라 0.3초 동안 숫자가 안 바뀌면 사용자는 다시 누릅니다. 그래서 화면을 먼저 바꿉니다. 대신 서버가 "재고가 2개 남았습니다"라고 거절하면 원래 값으로 돌려놓아야 합니다.</p>
-<pre data-lang="ts" data-label="example-app/src/features/cart/useCartMutation.ts" data-src="src/features/cart/useCartMutation.ts" data-start="1" data-end="34"><code>import { useMutation } from '@tanstack/react-query';
+<pre data-lang="ts" data-label="example-app/src/features/cart/useCartMutation.ts" data-src="src/features/cart/useCartMutation.ts" data-start="1" data-end="54"><code>import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { HttpError, request } from '@/shared/lib/http';
 import { type CartLine, useCartStore } from './store';
 
 type Vars = { line: Omit&lt;CartLine, 'quantity'&gt;; quantity: number };
 
-// 화면을 먼저 바꾸고(낙관적 업데이트) 서버가 거절하면 이전 상태로 되돌린다.
+// 상품별로 "서버가 마지막으로 받아들인 줄"과 아직 끝나지 않은 요청 수를 기억한다.
+const inflight = new Map&lt;string, { confirmed: CartLine | undefined; pending: number }&gt;();
+
+// 화면을 먼저 바꾸고(낙관적 업데이트) 서버가 거절하면 서버가 받아들인 상태로 되돌린다.
 export function useCartMutation() {
   const [error, setError] = useState&lt;string | null&gt;(null);
   const mutation = useMutation({
-    // 같은 scope의 변경은 순서대로 하나씩 실행된다. 롤백이 서로 덮어쓰지 않게 한다.
+    // 같은 scope의 요청은 순서대로 하나씩 서버로 간다. (화면은 바로 바뀐다)
     scope: { id: 'cart' },
     mutationFn: ({ line, quantity }: Vars) =&gt;
       request(`/cart/items/${line.productId}`, {
@@ -1730,25 +1733,50 @@ export function useCartMutation() {
     onMutate: ({ line, quantity }) =&gt; {
       setError(null);
       const { lines, setLine } = useCartStore.getState();
-      const previous = lines.find((l) =&gt; l.productId === line.productId);
+      const entry = inflight.get(line.productId) ?? {
+        confirmed: lines.find((l) =&gt; l.productId === line.productId),
+        pending: 0,
+      };
+      entry.pending += 1;
+      inflight.set(line.productId, entry);
       setLine({ ...line, quantity });
-      return { previous };
     },
-    onError: (err, { line }, result) =&gt; {
+    onSuccess: (_data, { line, quantity }) =&gt; {
+      const entry = inflight.get(line.productId);
+      if (entry) entry.confirmed = { ...line, quantity };
+    },
+    onError: (err, { line }) =&gt; {
+      const entry = inflight.get(line.productId);
+      // 더 새로운 변경이 남아 있으면 건드리지 않는다. 마지막 요청이 실패했을 때만 되돌린다.
+      if (!entry || entry.pending &gt; 1) return;
       const { setLine, remove } = useCartStore.getState();
-      if (result?.previous) setLine(result.previous);
+      if (entry.confirmed) setLine(entry.confirmed);
       else remove(line.productId);
       setError(err instanceof HttpError ? err.message : '장바구니를 바꾸지 못했습니다.');
+    },
+    onSettled: (_data, _err, { line }) =&gt; {
+      const entry = inflight.get(line.productId);
+      if (!entry) return;
+      entry.pending -= 1;
+      if (entry.pending === 0) inflight.delete(line.productId);
     },
   });
   return { ...mutation, error };
 }</code></pre>
 <ol>
-<li><strong>onMutate</strong> — 바꾸기 전 줄(<code>previous</code>)을 꺼내 두고 화면을 새 수량으로 바꿉니다. 반환값은 나중에 onError가 받습니다.</li>
+<li><strong>onMutate</strong> — 이 상품의 "서버가 마지막으로 받아들인 줄"(<code>confirmed</code>)을 기억해 두고, 진행 중인 요청 수(<code>pending</code>)를 하나 올린 뒤 화면을 새 수량으로 바꿉니다.</li>
 <li><strong>mutationFn</strong> — <code>PUT /api/cart/items/:productId</code>로 재고를 확인합니다.</li>
-<li><strong>onError</strong> — 이전 줄이 있었으면 되돌리고, 없던 상품이면 지웁니다. 사용자에게는 서버가 보낸 이유를 보여 줍니다.</li>
+<li><strong>onSuccess</strong> — 서버가 받아들였으니 <code>confirmed</code>를 새 줄로 바꿉니다.</li>
+<li><strong>onError</strong> — 더 새로운 변경이 남아 있으면(<code>pending &gt; 1</code>) 아무것도 하지 않습니다. 마지막 요청이 실패했을 때만 <code>confirmed</code>로 되돌리고(없던 상품이면 지웁니다), 서버가 보낸 이유를 보여 줍니다.</li>
+<li><strong>onSettled</strong> — 성공이든 실패든 <code>pending</code>을 하나 내립니다.</li>
 </ol>
-<p><code>scope: { id: 'cart' }</code>가 중요합니다. 같은 scope의 변경은 하나씩 순서대로 실행됩니다. 사용자가 수량을 3 → 4 → 5로 빠르게 바꿨는데 4가 실패하고 5가 성공하는 경우, 순서가 섞이면 4의 롤백이 5를 덮어쓸 수 있습니다.</p>
+<p>사용자가 수량을 3 → 4 → 5로 빠르게 바꾸는 경우를 봅시다. <code>onMutate</code>는 요청 순서를 기다리지 않고 바로 실행되므로 화면은 3 → 4 → 5로 즉시 바뀝니다. 이때 4가 실패하고 5가 성공한다면 화면은 5로 남아야 합니다. 그런데 "요청 전 값"(3)으로 무조건 되돌리면 화면이 3이 되어, 서버(5)와 어긋납니다.</p>
+<ul>
+<li><strong>4 실패 → 5 성공</strong>: 4의 <code>onError</code> 시점에 5가 아직 진행 중(<code>pending &gt; 1</code>)이므로 되돌리지 않습니다. 화면 5, 서버 5.</li>
+<li><strong>4 성공 → 5 실패</strong>: 5가 마지막이므로 <code>confirmed</code>(4)로 되돌립니다. 화면 4, 서버 4.</li>
+<li><strong>4 실패 → 5 실패</strong>: 5의 <code>onError</code>에서 <code>confirmed</code>(3)로 되돌립니다. 화면 3, 서버 3. ("요청 전 값"을 쓰면 실패한 4로 되돌아가 어긋납니다.)</li>
+</ul>
+<p><code>scope: { id: 'cart' }</code>는 다른 문제를 막습니다. <code>scope</code>가 없으면 요청 4와 5가 동시에 나가서, 5가 먼저 서버에 도착하고 4가 뒤늦게 도착해 서버가 4로 끝날 수 있습니다. 같은 scope의 요청은 하나씩 순서대로 서버로 가므로 서버는 마지막 변경(5)으로 끝납니다. 화면을 바꾸는 <code>onMutate</code>는 대기하지 않으니 사용자는 지연을 느끼지 못합니다.</p>
 <p>이 동작은 컴포넌트 테스트로 지킵니다. 재고가 2개인 <code>p-010</code>을 5개로 바꾸면 응답 전에 5가 보이고, 409 뒤에 1로 돌아옵니다.</p>
 <pre data-lang="ts" data-label="example-app/tests/CartPage.test.tsx · 1–27행" data-src="tests/CartPage.test.tsx" data-start="1" data-end="27"><code>import { expect, test } from '@rstest/core';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
@@ -3335,7 +3363,7 @@ TB.QUIZ = {
     { q: "장바구니 목록과 재고 확인을 나눈 방식으로 옳은 것은?", o: ["둘 다 Zustand", "목록은 Zustand(클라이언트 상태), 재고 확인은 서버 요청(TanStack Query 뮤테이션)", "둘 다 TanStack Query 캐시", "둘 다 localStorage에 직접"], a: 1, e: "원본이 어디 있는지로 나눕니다. 장바구니 초안은 브라우저가, 재고는 서버가 원본입니다." },
     { q: "탭 A에서 장바구니를 바꿨을 때 탭 B가 알 수 있는 방법은?", o: ["탭 B에서 <code>storage</code> 이벤트를 받아 persist를 다시 읽는다.", "탭 A가 탭 B에 직접 함수를 호출한다.", "서비스 워커가 자동으로 맞춘다.", "알 방법이 없다."], a: 0, e: "브라우저는 다른 탭이 localStorage를 바꾸면 <code>storage</code> 이벤트를 보냅니다. 예제 앱은 이때 <code>persist.rehydrate()</code>를 부릅니다." },
     { q: "낙관적 업데이트에서 <code>onMutate</code>가 반환해야 하는 것은?", o: ["서버 응답", "롤백에 쓸 이전 값", "새 쿼리 키", "아무것도 반환하지 않는다."], a: 1, e: "반환값이 <code>onError</code>의 세 번째 인자로 넘어옵니다." },
-    { q: "뮤테이션에 <code>scope: { id: 'cart' }</code>를 준 이유는?", o: ["캐시를 지우려고", "같은 scope의 변경을 순서대로 실행해 롤백이 서로 덮어쓰지 않게", "요청을 병렬로 보내려고", "재시도를 끄려고"], a: 1, e: "빠른 연속 변경에서 앞의 실패 롤백이 뒤의 성공을 덮어쓰는 경쟁을 막습니다." },
+    { q: "뮤테이션에 <code>scope: { id: 'cart' }</code>를 준 이유는?", o: ["캐시를 지우려고", "같은 scope의 요청이 서버에 순서대로 하나씩 가게 해서, 늦게 도착한 옛 요청이 서버 값을 덮어쓰지 않게", "화면 변경까지 순서대로 기다리게", "재시도를 끄려고"], a: 1, e: "요청 순서를 지킵니다. 화면을 바꾸는 <code>onMutate</code>는 기다리지 않고 바로 실행됩니다. 실패 롤백이 새 변경을 덮어쓰지 않게 하는 일은 <code>pending</code>·<code>confirmed</code>가 맡습니다." },
     { q: "<code>formatKRW(0.1 + 0.2)</code>를 부르면?", o: ["₩0", "₩0.3", "RangeError", "₩1"], a: 2, e: "원 단위 정수만 받습니다. 조용히 반올림하지 않고 오류로 버그를 드러냅니다." }
   ],
   ch6: [
