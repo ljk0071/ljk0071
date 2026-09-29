@@ -1750,7 +1750,20 @@ export function useCartMutation() {
 </ol>
 <p><code>scope: { id: 'cart' }</code>가 중요합니다. 같은 scope의 변경은 하나씩 순서대로 실행됩니다. 사용자가 수량을 3 → 4 → 5로 빠르게 바꿨는데 4가 실패하고 5가 성공하는 경우, 순서가 섞이면 4의 롤백이 5를 덮어쓸 수 있습니다.</p>
 <p>이 동작은 컴포넌트 테스트로 지킵니다. 재고가 2개인 <code>p-010</code>을 5개로 바꾸면 응답 전에 5가 보이고, 409 뒤에 1로 돌아옵니다.</p>
-<pre data-lang="ts" data-label="example-app/tests/CartPage.test.tsx · 14–27행" data-src="tests/CartPage.test.tsx" data-start="14" data-end="27"><code>test('재고보다 많이 담으면 화면을 먼저 바꾼 뒤 서버 거절에 맞춰 되돌린다', async () =&gt; {
+<pre data-lang="ts" data-label="example-app/tests/CartPage.test.tsx · 1–27행" data-src="tests/CartPage.test.tsx" data-start="1" data-end="27"><code>import { expect, test } from '@rstest/core';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { useCartStore } from '@/features/cart/store';
+import { renderRoute } from './render';
+
+const line = {
+  productId: 'p-010',
+  name: '재고 적은 상품',
+  price: 10_000,
+  imageUrl: '',
+  quantity: 1,
+};
+
+test('재고보다 많이 담으면 화면을 먼저 바꾼 뒤 서버 거절에 맞춰 되돌린다', async () =&gt; {
   useCartStore.setState({ lines: [line] });
   renderRoute('/cart');
   const input = await screen.findByRole('spinbutton', { name: '재고 적은 상품 수량' });
@@ -1856,7 +1869,24 @@ export type CheckoutForm = z.output&lt;typeof checkoutSchema&gt;;</code></pre>
 <li><code>z.input</code>과 <code>z.output</code>을 따로 내보냅니다. <code>trim()</code>처럼 값을 바꾸는 규칙이 있으면 폼에 넣는 모양과 검증 뒤의 모양이 다르기 때문입니다. <code>useForm&lt;입력, 컨텍스트, 출력&gt;</code>에 둘 다 넘깁니다.</li>
 </ul>
 <p>스키마는 순수 함수라서 화면 없이 테스트할 수 있습니다. 틀린 세 칸이 순서대로 보고되는지 확인합니다.</p>
-<pre data-lang="ts" data-label="example-app/tests/checkoutSchema.test.ts · 18–23행" data-src="tests/checkoutSchema.test.ts" data-start="18" data-end="23"><code>test('휴대폰 번호·우편번호·동의를 검사한다', () =&gt; {
+<pre data-lang="ts" data-label="example-app/tests/checkoutSchema.test.ts · 1–23행" data-src="tests/checkoutSchema.test.ts" data-start="1" data-end="23"><code>import { expect, test } from '@rstest/core';
+import { checkoutSchema } from '@/features/checkout/schema';
+
+const valid = {
+  recipient: '김하나',
+  phone: '010-1234-5678',
+  zipCode: '06236',
+  address1: '서울시 강남구 테헤란로 1',
+  address2: '101호',
+  paymentMethod: 'card',
+  agree: true,
+};
+
+test('올바른 주문서는 통과한다', () =&gt; {
+  expect(checkoutSchema.safeParse(valid).success).toBe(true);
+});
+
+test('휴대폰 번호·우편번호·동의를 검사한다', () =&gt; {
   const r = checkoutSchema.safeParse({ ...valid, phone: '02-123', zipCode: '1234', agree: false });
   expect(r.success).toBe(false);
   const paths = r.error?.issues.map((i) =&gt; i.path.join('.'));
@@ -2020,7 +2050,25 @@ export async function withIdempotency(
 <tr><td>같은 키, 다른 내용</td><td>422 Unprocessable Content</td><td>키를 버리고 사용자에게 다시 시도하게 함</td></tr>
 </tbody></table></div>
 <p>E2E는 결제 버튼을 <code>dblclick</code>으로 두 번 눌러 <code>POST /api/orders</code>가 한 번만 나가는지, 헤더에 UUID 모양의 키가 붙는지 확인합니다. 단위 테스트는 같은 키로 동시에 두 번 보내 주문이 하나만 생기는지 봅니다.</p>
-<pre data-lang="ts" data-label="example-app/tests/idempotency.test.ts · 19–26행" data-src="tests/idempotency.test.ts" data-start="19" data-end="26"><code>test('같은 Idempotency-Key로 두 번 보내면 주문은 하나만 생긴다', async () =&gt; {
+<pre data-lang="ts" data-label="example-app/tests/idempotency.test.ts · 1–26행" data-src="tests/idempotency.test.ts" data-start="1" data-end="26"><code>import { expect, test } from '@rstest/core';
+import type { Order } from '@/features/order/types';
+import { request } from '@/shared/lib/http';
+
+const body = {
+  lines: [{ productId: 'p-001', quantity: 1 }],
+  shipping: {
+    recipient: '김하나',
+    phone: '010-1234-5678',
+    zipCode: '06236',
+    address1: '서울',
+    address2: '',
+  },
+  paymentMethod: 'card',
+};
+const post = (key: string, b: unknown = body) =&gt;
+  request&lt;Order&gt;('/orders', { method: 'POST', body: b, headers: { 'Idempotency-Key': key } });
+
+test('같은 Idempotency-Key로 두 번 보내면 주문은 하나만 생긴다', async () =&gt; {
   const [a, b] = await Promise.allSettled([post('k-1'), post('k-1')]);
   // 동시에 오면 두 번째는 409(처리 중), 끝난 뒤 다시 보내면 첫 결과를 그대로 받는다.
   expect(a.status).toBe('fulfilled');
@@ -2149,7 +2197,16 @@ export default function OrderCompletePage() {
 <pre data-lang="bash" data-label="터미널"><code>npm run build:rsdoctor   # RSDOCTOR=true rsbuild build
 open .rsdoctor/rsdoctor-report.html</code></pre>
 <p><code>mode: 'brief'</code>는 보고서 HTML 한 파일과 JSON을 만듭니다. 서버를 띄우지 않아 CI에서도 쓸 수 있고, JSON은 스크립트로 읽을 수 있습니다. 예제 앱의 <code>scripts/measure.mjs</code>가 이 JSON에서 "청크마다 든 패키지"를 뽑아 아래 위젯에 넘깁니다.</p>
-<pre data-lang="ts" data-label="example-app/scripts/measure.mjs · 57–78행" data-src="scripts/measure.mjs" data-start="57" data-end="78"><code>// Rsdoctor JSON에서 청크마다 어떤 패키지가 들어 있는지 뽑는다.
+<pre data-lang="ts" data-label="example-app/scripts/measure.mjs · 1–6행, 57–78행" data-src="scripts/measure.mjs" data-start="1" data-end="78"><code>// 빌드 결과를 실측해 metrics/build.json에 남긴다. 교과서의 숫자는 모두 이 파일에서 가져온다.
+// 사용법: npm run measure
+import { readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
+import { gzipSync } from 'node:zlib';
+import { createRsbuild, loadConfig, mergeRsbuildConfig } from '@rsbuild/core';
+
+// …
+
+// Rsdoctor JSON에서 청크마다 어떤 패키지가 들어 있는지 뽑는다.
 function composition() {
   const { data } = JSON.parse(readFileSync('.rsdoctor/rsdoctor-data.json', 'utf8'));
   const byId = new Map(data.moduleGraph.modules.map((m) =&gt; [m.id, m]));
@@ -2532,7 +2589,17 @@ export default defineConfig({
 <li>데스크톱 Chrome과 모바일(Pixel 7) 두 프로젝트로 같은 테스트를 돌립니다.</li>
 </ul>
 <p>구매 흐름 테스트는 목록에서 완료까지 누르고, 새로고침·뒤로 가기·콘솔 오류까지 확인합니다.</p>
-<pre data-lang="ts" data-label="example-app/e2e/purchase.spec.ts · 11–50행" data-src="e2e/purchase.spec.ts" data-start="11" data-end="50"><code>test('목록 → 상세 → 장바구니 → 주문서 → 모의 결제 → 주문 완료', async ({ page }) =&gt; {
+<pre data-lang="ts" data-label="example-app/e2e/purchase.spec.ts · 1–50행" data-src="e2e/purchase.spec.ts" data-start="1" data-end="50"><code>import { expect, type Page, test } from '@playwright/test';
+
+async function fillCheckout(page: Page) {
+  await page.getByLabel('받는 분').fill('김하나');
+  await page.getByLabel('휴대폰 번호').fill('010-1234-5678');
+  await page.getByLabel('우편번호').fill('06236');
+  await page.getByLabel('주소', { exact: true }).fill('서울시 강남구 테헤란로 1');
+  await page.getByLabel('주문 내용을 확인했으며 결제에 동의합니다.').check();
+}
+
+test('목록 → 상세 → 장바구니 → 주문서 → 모의 결제 → 주문 완료', async ({ page }) =&gt; {
   const errors: string[] = [];
   page.on('pageerror', (e) =&gt; errors.push(e.message));
   page.on('console', (m) =&gt; m.type() === 'error' &amp;&amp; errors.push(m.text()));
