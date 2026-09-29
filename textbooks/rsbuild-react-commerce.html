@@ -1127,7 +1127,7 @@ export function RootLayout() {
     &lt;/div&gt;
   );
 }</code></pre>
-<p>라우터와 QueryClient를 묶는 컴포넌트는 라우터를 인자로 받습니다. 그래서 브라우저에서는 <code>createBrowserRouter</code>, 테스트와 데모에서는 <code>createMemoryRouter</code>로 같은 <code>routes</code>를 씁니다(9장, 11장).</p>
+<p>아래 <code>App</code>은 라우터를 직접 만들지 않고 <strong>인자(<code>router</code>)로 받기만</strong> 합니다. <code>routes</code>는 "어떤 주소에 어떤 화면을 보여 줄지"를 적은 배열일 뿐이고, 그것을 실제로 돌리는 라우터는 바깥에서 만들어 넘깁니다.</p>
 <pre data-lang="ts" data-label="example-app/src/app/App.tsx" data-src="src/app/App.tsx" data-start="1" data-end="14"><code>import { QueryClientProvider } from '@tanstack/react-query';
 import { useState } from 'react';
 import type { DataRouter } from 'react-router';
@@ -1142,6 +1142,18 @@ export function App({ router }: { router: DataRouter }) {
     &lt;/QueryClientProvider&gt;
   );
 }</code></pre>
+<p>그래서 <code>routes</code> 하나를 두고, 라우터만 상황에 맞게 바꿔 끼웁니다.</p>
+<ul>
+<li><strong>실제 브라우저</strong>: <code>createBrowserRouter(routes)</code>. 주소창의 URL을 읽고, 이동하면 주소창을 바꿉니다.</li>
+<li><strong>테스트·데모</strong>: <code>createMemoryRouter(routes, { initialEntries: ['/cart'] })</code>. 주소를 브라우저가 아니라 메모리에 두므로 주소창이 없는 환경(테스트 러너, 페이지 안의 데모)에서도 같은 화면 코드가 돕니다.</li>
+</ul>
+<pre data-lang="tsx" data-label="입구만 다르고 App과 routes는 같습니다"><code>// 브라우저 입구
+&lt;App router={createBrowserRouter(routes)} /&gt;
+
+// 테스트·데모 입구
+&lt;App router={createMemoryRouter(routes, { initialEntries: ['/'] })} /&gt;</code></pre>
+<p>라우트를 두 번 정의하지 않아도 되는 이유가 이것입니다. 실제 사용은 9장(테스트)과 11장(데모)에서 봅니다. MSW는 서버 응답을 흉내 낼 뿐 라우팅과는 관계없고, <code>HashRouter</code>는 URL을 <code>#</code> 뒤에 두는 브라우저용 방식이라 이 문제의 답이 아닙니다.</p>
+
 
 <h2>3.2 lazy 코드 스플리팅</h2>
 <p><code>lazy: () =&gt; import('...')</code>를 만나면 Rspack이 그 파일과 거기서만 쓰는 코드를 따로 떼어 비동기 청크로 만듭니다. <code>webpackChunkName</code> 주석은 청크 이름을 정합니다. Rspack은 webpack의 이 주석 문법을 그대로 이해합니다.</p>
