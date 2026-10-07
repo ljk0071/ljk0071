@@ -1691,6 +1691,8 @@
   showDevice();
 
   // 호버와 터치: 버튼 하나, 좌우 넘김
+  // iOS Safari는 페이지에 터치 리스너가 하나도 없으면 누르는 동안 :active를 적용하지 않아요. 빈 리스너 하나로 풀려요.
+  document.addEventListener('touchstart', () => {}, { passive: true });
   pmMount($('fxStage'), { tag: 'button', t: '올리거나, 탭 키로 이동하거나, 눌러 보세요', v: 'fx',
     c: 'transition hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 active:scale-95 pointer-coarse:min-h-12',
     cn: {
