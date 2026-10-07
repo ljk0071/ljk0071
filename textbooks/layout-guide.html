@@ -1,0 +1,1730 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>모바일·데스크톱 레이아웃 가이드</title>
+<style>
+  :root {
+    --bg: #fafaf8; --panel: #fff; --ink: #1a1a1a; --sub: #6b6b6b; --rule: #e2e2dc;
+    --accent: #2f6fed; --accent-soft: #e6eefe; --warn: #c2410c; --ok: #15803d;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #141414; --panel: #1d1d1d; --ink: #ececec; --sub: #a0a0a0; --rule: #333;
+      --accent: #7aa7ff; --accent-soft: #1c2a47; --warn: #fb923c; --ok: #4ade80;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 16px/1.7 system-ui, -apple-system, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    word-break: keep-all;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 32px 16px 80px; }
+
+  /* 제목 단계: h1 문서 > h2 부 > h3 섹션 > h4 소제목 */
+  h1 { font-size: 1.75rem; line-height: 1.3; margin: 0 0 8px; }
+  h2.part { font-size: 1.5rem; line-height: 1.3; margin: 72px 0 4px; padding-top: 24px; border-top: 3px solid var(--ink); scroll-margin-top: 8px; }
+  h2.part small { display: block; font-size: 0.85rem; color: var(--accent); margin-bottom: 2px; }
+  .part-desc { color: var(--sub); margin: 0; }
+  h3.sec { font-size: 1.25rem; line-height: 1.4; margin: 48px 0 8px; padding-top: 24px; border-top: 1px solid var(--rule); scroll-margin-top: 8px; }
+  .part-desc + h3.sec { margin-top: 24px; padding-top: 0; border-top: 0; }
+  h3.sec .no { color: var(--accent); margin-right: 0.4em; }
+  h4 { font-size: 1.05rem; margin: 28px 0 6px; }
+  p { margin: 8px 0; }
+  .lead { color: var(--sub); }
+  code { font: 0.875em ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--panel); border: 1px solid var(--rule); border-radius: 8px; padding: 12px; overflow-x: auto; font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 12px 0 0; }
+  pre code { background: none; padding: 0; }
+  a { color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.925rem; margin: 12px 0; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { color: var(--sub); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+  ol.rules { padding-left: 1.2rem; }
+  ol.rules li { margin: 12px 0; }
+  ol.rules li > b { display: block; }
+
+  .two { display: grid; gap: 12px; margin: 16px 0; }
+  @media (min-width: 600px) { .two { grid-template-columns: 1fr 1fr; } }
+  .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; margin: 16px 0; }
+  .two .card { margin: 0; }
+  .card b { display: block; margin-bottom: 2px; }
+  .howto ul { margin: 4px 0 0; padding-left: 1.1rem; }
+  .try { margin-top: 12px; font-size: 0.95rem; }
+  .try b { display: inline-block; margin-right: 8px; padding: 0 8px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 0.75rem; line-height: 1.7; vertical-align: 1px; }
+
+  /* 목차 */
+  .toc { margin-top: 16px; background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 14px 10px 6px; }
+  .toc-title { margin: 0; padding: 0 8px 8px; font-size: 0.8rem; font-weight: 600; color: var(--sub); letter-spacing: 0.04em; }
+  @media (min-width: 640px) { .toc-cols { columns: 2; column-gap: 16px; } }
+  .toc-part { break-inside: avoid; padding-bottom: 10px; }
+  .toc a { display: block; padding: 6px 8px; color: var(--ink); text-decoration: none; line-height: 1.45; }
+  .toc a.toc-head { font-size: 0.875rem; font-weight: 700; border-top: 2px solid var(--ink); }
+  .toc a.toc-row { display: grid; grid-template-columns: 1.5rem 1fr; gap: 6px; font-size: 0.925rem; border-top: 1px solid var(--rule); }
+  .toc a.toc-row span:first-child { color: var(--sub); font-variant-numeric: tabular-nums; }
+  @media (hover: hover) { .toc a:hover { background: var(--accent-soft); color: var(--accent); } }
+  .toc a:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  /* 데모 공통 */
+  .demo { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px; padding: 16px; margin: 12px 0 16px; }
+  .controls { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 14px; font-size: 0.9rem; }
+  .seg { display: flex; flex-wrap: wrap; gap: 6px; }
+  .seg button {
+    font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--rule);
+    border-radius: 999px; padding: 6px 12px; min-height: 36px; cursor: pointer;
+  }
+  .seg button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .controls label { display: flex; align-items: center; gap: 8px; }
+  .controls input[type="text"] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 5px 8px; width: 11rem; }
+  .controls input[type="range"] { width: 10rem; }
+  .plain { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--rule); border-radius: 6px; padding: 8px 12px; cursor: pointer; }
+  .stage { border: 1px dashed var(--sub); border-radius: 8px; padding: 12px; max-width: 100%; }
+  .cq { container-type: inline-size; }
+  .badge { display: inline-block; font-size: 0.8rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--rule); }
+  .note { margin-top: 12px; padding: 10px 12px; border-radius: 8px; background: var(--accent-soft); font-size: 0.925rem; }
+  .note.bad { border-left: 3px solid var(--warn); }
+  .note.good { border-left: 3px solid var(--ok); }
+  .note code { background: var(--panel); }
+  .cap { margin: 10px 0 0; font-size: 0.8rem; color: var(--sub); }
+  .cap + pre { margin-top: 4px; background: var(--bg); font-size: 12px; }
+
+  /* 간격으로 묶음 찾기 */
+  .spwrap { display: grid; gap: 20px; }
+  @media (min-width: 600px) { .spwrap { grid-template-columns: 1fr 1fr; align-items: start; } }
+  .sp { padding: 6px; font-size: 0.85rem; }
+  .sp .blk { background: var(--bg); border: 1px solid var(--rule); border-radius: 4px; padding: 4px 10px; }
+  .sp .spg.on { outline: 2px dashed var(--accent); outline-offset: 3px; border-radius: 3px; }
+  .spctl { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 0.875rem; }
+  .spctl li { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+  .spctl button { min-width: 4.5rem; min-height: 36px; font-family: ui-monospace, Menlo, monospace; }
+
+  /* 작업 순서 */
+  .wf { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: start; }
+  .wf figure { margin: 0; }
+  .wf figcaption { font-size: 0.8rem; color: var(--sub); margin-bottom: 6px; }
+  .wf .scr { border: 1px solid var(--sub); border-radius: 6px; padding: 10px; display: grid; gap: 10px; }
+  .wf .dsk .scr { grid-template-columns: 1fr 1fr; align-items: center; gap: 16px; }
+  .wf .g { display: grid; gap: 6px; border-radius: 3px; }
+  .wf .b { height: 8px; background: var(--rule); border-radius: 3px; }
+  .wf .b.t { height: 14px; background: var(--ink); }
+  .wf .b.c { width: 45%; height: 12px; background: var(--accent); }
+  .wf .f { height: 52px; border: 1px solid var(--sub); border-radius: 4px; }
+  .wf.show-d .dsk .g, .wf.show-d .dsk .f, .wf.show-m .mob .g, .wf.show-m .mob .f { outline: 2px dashed var(--accent); outline-offset: 3px; }
+  pre:has(#stepCode:empty) { display: none; }
+
+  /* 상자가 안 맞을 때 */
+  .mini { margin: 0; }
+  .minicards { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 0.9rem; }
+  .minicards li { display: flex; justify-content: space-between; border: 1px solid var(--rule); border-radius: 8px; padding: 10px 12px; }
+
+  /* 살아 있는 코드: 모형이 코드에 적힌 태그와 Tailwind 클래스를 실제로 달아요. */
+  /* 칸이 내용만큼 늘어나지 않게 고정해야 모형의 max-width: 100%가 칸 폭에서 멈춰요. */
+  .pm-table { table-layout: fixed; }
+  .pm-table th:nth-child(1) { width: 18%; }
+  .pm-table th:nth-child(3) { width: 48%; }
+  .pm-table code { overflow-wrap: anywhere; }
+  tr.pm-head td { border-bottom: 0; }
+  tr.pm-row td { padding-top: 0; padding-bottom: 16px; }
+  .pm-kind { margin: 14px 0 6px; font-size: 0.85rem; color: var(--ink); }
+  tr.pm-row .controls { margin: 4px 0 0; }
+  .pm-code summary { display: inline-block; padding: 8px 0; font-size: 0.85rem; color: var(--accent); cursor: pointer; }
+  .pm-code summary::before { content: "▸ "; }
+  .pm-code[open] summary::before { content: "▾ "; }
+  .pm-code summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pm-code pre { margin-top: 0; }
+  .pm-code .cap { margin: 0 0 4px; }
+  .pm-code .tw { font: inherit; color: var(--accent); background: none; border: 0; border-radius: 3px; padding: 3px 1px; cursor: pointer; text-decoration: underline dotted; text-underline-offset: 3px; }
+  .pm-code .tw[aria-pressed="false"] { color: var(--sub); text-decoration: line-through; }
+  .pm-code .tw:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  @media (hover: hover) { .pm-code .tw:hover { background: var(--accent-soft); } }
+  .pm-why { margin-top: 8px; }
+  .pm-why:empty { display: none; }
+  .pm-shows { margin-top: 10px; display: grid; gap: 8px; }
+  .pm-shows p, .pm-shows figure { margin: 0; min-width: 0; }
+  .pm-shows figcaption { margin-bottom: 4px; font-size: 0.8rem; color: var(--sub); }
+  .pm-copy { background: var(--bg); }
+  .pm-code .pm-n { color: var(--sub); }
+  .pm-code.pm-raw > .cap { display: none; }
+  .pm-stage { font-size: 0.85rem; line-height: 1.5; tab-size: 4; }
+  .pm-stage * { border: 0 solid; }
+  /* 모형 안은 Tailwind가 기본으로 하는 초기화(preflight)와 같은 상태예요. */
+  .pm-stage :is(h1, h3, p, ul, figure) { margin: 0; padding: 0; }
+  .pm-stage :is(h1, h3) { font-size: inherit; font-weight: inherit; line-height: inherit; }
+  .pm-stage ul { list-style: none; }
+  .pm-stage a { color: inherit; text-decoration: inherit; }
+  .pm-stage button { font: inherit; color: inherit; background: transparent; border-radius: 0; padding: 0; appearance: button; }
+  /* 꾸밈: 코드에 안 나오는 색, 테두리, 글자 크기, 안쪽 여백, 내용 대신 정해 둔 높이 */
+  .pm-stage .blk { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 6px; padding: 4px 10px; }
+  .pm-stage .cen { outline: 2px dashed var(--accent); outline-offset: -1px; border-radius: 4px; }
+  .pm-stage .grp { outline: 2px dashed var(--accent); outline-offset: 4px; border-radius: 4px; }
+  .pm-stage .bars { font-size: 0.9rem; }
+  .pm-stage .track { height: 8px; background: linear-gradient(to right, var(--ink) var(--fill), var(--rule) 0); }
+  .pm-stage .f92 { --fill: 92%; }
+  .pm-stage .f64 { --fill: 64%; }
+  .pm-stage .f8 { --fill: 8%; }
+  .pm-stage .num { font-family: ui-monospace, Menlo, monospace; }
+  .pm-stage .h { font-size: 1.25rem; font-weight: 700; line-height: 1.3; }
+  .pm-stage .d { color: var(--sub); font-size: 0.9rem; }
+  .pm-stage .cta { background: var(--ink); color: var(--bg); border-radius: 6px; padding: 6px 12px; font-size: 0.875rem; }
+  .pm-stage .fig { border: 1px solid var(--rule); border-radius: 8px; padding: 12px; background: var(--bg); min-height: 96px; }
+  .pm-stage .strong { font-weight: 700; }
+  .pm-stage .as { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 8px; padding: 10px; }
+  .pm-stage .btn { border: 1px solid var(--rule); border-radius: 6px; padding: 6px 12px; background: var(--bg); cursor: pointer; }
+  .pm-stage .fx { border: 1px solid var(--rule); border-radius: 10px; padding: 8px 18px; background: var(--bg); cursor: pointer; }
+  .pm-stage .fx:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .pm-stage .snapbox { padding-bottom: 8px; }
+  .pm-stage .snapcard { height: 88px; line-height: 88px; text-align: center; border-radius: 8px; background: var(--accent-soft); border: 1px solid var(--accent); }
+  /* 모형이 실제로 다는 Tailwind 클래스. 코드에서 클래스를 끄면 모형에서 이 클래스가 빠져요. */
+  .pm-stage .grid { display: grid; }
+  .pm-stage .flex { display: flex; }
+  .pm-stage .inline-block { display: inline-block; }
+  .pm-stage .hidden { display: none; }
+  .pm-stage .flex-col { flex-direction: column; }
+  .pm-stage .flex-wrap { flex-wrap: wrap; }
+  .pm-stage .flex-1 { flex: 1 1 0%; }
+  .pm-stage .shrink-0 { flex-shrink: 0; }
+  .pm-stage .gap-2 { gap: 8px; }
+  .pm-stage [class~="gap-2.5"] { gap: 10px; }
+  .pm-stage .gap-3 { gap: 12px; }
+  .pm-stage .gap-4 { gap: 16px; }
+  .pm-stage .items-center { align-items: center; }
+  .pm-stage .justify-center { justify-content: center; }
+  .pm-stage .justify-between { justify-content: space-between; }
+  .pm-stage .justify-items-center { justify-items: center; }
+  .pm-stage .justify-self-start { justify-self: flex-start; }
+  .pm-stage .col-span-3 { grid-column: span 3 / span 3; }
+  .pm-stage .grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .pm-stage .grid-cols-subgrid { grid-template-columns: subgrid; }
+  .pm-stage [class~="grid-cols-[6rem_1fr_3rem]"] { grid-template-columns: 6rem 1fr 3rem; }
+  .pm-stage [class~="grid-cols-[auto_1fr_auto]"] { grid-template-columns: auto 1fr auto; }
+  .pm-stage [class~="grid-cols-[repeat(auto-fit,minmax(7rem,1fr))]"] { grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); }
+  .pm-stage [class~="grid-cols-[8rem_minmax(0,1fr)]"] { grid-template-columns: 8rem minmax(0, 1fr); }
+  .pm-stage .mx-auto { margin-inline: auto; }
+  .pm-stage .mb-2 { margin-bottom: 8px; }
+  .pm-stage .mb-7 { margin-bottom: 28px; }
+  .pm-stage .px-4 { padding-inline: 16px; }
+  .pm-stage .w-full { width: 100%; }
+  .pm-stage .h-32 { height: 8rem; }
+  .pm-stage .content-center { align-content: center; }
+  .pm-stage .w-12 { width: 3rem; }
+  .pm-stage .w-24 { width: 6rem; }
+  .pm-stage .w-32 { width: 8rem; }
+  .pm-stage [class~="w-[70%]"] { width: 70%; }
+  .pm-stage .max-w-80 { max-width: 20rem; }
+  .pm-stage .min-w-0 { min-width: 0; }
+  .pm-stage .text-right { text-align: right; }
+  .pm-stage .wrap-break-word { overflow-wrap: break-word; }
+  .pm-stage .overflow-x-auto { overflow-x: auto; }
+  .pm-stage .snap-x { scroll-snap-type: x var(--pm-snap, proximity); }
+  .pm-stage .snap-mandatory { --pm-snap: mandatory; }
+  .pm-stage .snap-start { scroll-snap-align: start; }
+  .pm-stage .transition { transition-property: color, background-color, border-color, outline-color, text-decoration-color, fill, stroke, --tw-gradient-from, --tw-gradient-via, --tw-gradient-to, opacity, box-shadow, transform, translate, scale, rotate, filter, -webkit-backdrop-filter, backdrop-filter, display, content-visibility, overlay, pointer-events; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+  @media (hover: hover) {
+    .pm-stage [class~="hover:-translate-y-1"]:hover { translate: 0 -4px; }
+    .pm-stage [class~="hover:shadow-lg"]:hover { box-shadow: 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 0 #0000, 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1); }
+  }
+  .pm-stage [class~="focus-visible:-translate-y-1"]:focus-visible { translate: 0 -4px; }
+  .pm-stage [class~="active:scale-95"]:active { scale: 0.95; }
+  @media (pointer: coarse) { .pm-stage [class~="pointer-coarse:min-h-12"] { min-height: 3rem; } }
+
+  /* 목록과 상세 */
+  .md { display: grid; gap: 12px; font-size: 0.9rem; }
+  .md .list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; align-content: start; }
+  .md .list button { width: 100%; text-align: left; }
+  .md .list button[aria-current="true"] { border-color: var(--accent); background: var(--accent-soft); }
+  .md .detail { display: none; border: 1px solid var(--rule); border-radius: 8px; padding: 12px; min-height: 120px; }
+  .md .detail p { margin: 8px 0 0; }
+  .md.has-sel .list { display: none; }
+  .md.has-sel .detail { display: block; }
+
+  /* 데모 안에서 부모 폭이 넓어졌을 때 = 데스크톱 배치 */
+  @container (min-width: 520px) {
+    .pm-stage [class~="lg:flex"] { display: flex; }
+    .pm-stage [class~="lg:hidden"] { display: none; }
+    .pm-stage [class~="lg:flex-row"] { flex-direction: row; }
+    .pm-stage [class~="lg:flex-1"] { flex: 1 1 0%; }
+    .pm-stage [class~="lg:items-center"] { align-items: center; }
+    .pm-stage [class~="lg:gap-6"] { gap: 24px; }
+    .pm-stage [class~="lg:gap-x-6"] { column-gap: 24px; }
+    .pm-stage [class~="lg:grid-cols-2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .pm-stage [class~="lg:grid-cols-[1fr_10rem]"] { grid-template-columns: 1fr 10rem; }
+    .pm-stage [class~="lg:col-start-2"] { grid-column-start: 2; }
+    .pm-stage [class~="lg:row-span-2"] { grid-row: span 2 / span 2; }
+    .pm-stage [class~="lg:row-start-1"] { grid-row-start: 1; }
+    .md { grid-template-columns: 11rem 1fr; }
+    .md .list, .md.has-sel .list { display: grid; }
+    .md .detail { display: block; }
+    .md .back { display: none; }
+    .md .detail p { margin-top: 0; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <h1>모바일·데스크톱 레이아웃 가이드</h1>
+  <p class="lead">Tailwind로 한 화면을 모바일과 데스크톱 양쪽에 맞출 때 쓰는 판단 기준을 모았어요. 작은 것에서 큰 것 순서로 읽어요. 한 줄 배치(1부), 섹션 구조(2부), 배치 말고 달라지는 것(3부) 순이에요.</p>
+
+  <div class="card howto">
+    <b>데모 보는 법</b>
+    <ul>
+      <li>버튼으로 방식을 바꾸고 "부모 폭" 슬라이더로 화면이 좁아지는 상황을 만들어요.</li>
+      <li>회색 점선은 부모 요소, 파란 점선은 묶음이에요.</li>
+      <li>데모는 창 폭이 아니라 부모 폭이 넓어질 때(520px 이상) 데스크톱 배치로 바뀌어요. 코드에서 <code>lg:</code>가 붙은 클래스가 그때 적용되는 부분이에요.</li>
+      <li>"HTML 코드 보기"를 펼치면 그 모형의 코드가 나와요. 클래스를 누르면 그 클래스가 꺼지고 모형에 바로 반영돼요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</li>
+      <li>모형은 코드에 적힌 태그와 클래스를 그대로 달고 있어요. 코드에 없는 건 색, 테두리, 글자 크기, 안쪽 여백 같은 꾸밈뿐이에요. 모형 안은 Tailwind의 기본 초기화(제목과 문단의 바깥 여백 0, 목록 점 없음)와 <code>break-keep</code>이 걸린 상태예요.</li>
+      <li>폰에서는 화면이 좁아서 데모가 데스크톱 배치까지 넓어지지 못해요. 데스크톱 브라우저에서 보고, <a class="ref" href="#hover-touch"></a>(호버와 터치)만 폰에서도 열어 보세요.</li>
+    </ul>
+  </div>
+
+  <nav class="toc" aria-label="목차">
+    <p class="toc-title">목차</p>
+    <div class="toc-cols" id="toc"></div>
+  </nav>
+
+  <!-- ───────── 1부 ───────── -->
+  <h2 class="part" id="part1"><small>1부</small><span>한 줄 배치하기: flex와 grid</span></h2>
+  <p class="part-desc">요소 몇 개를 한 줄에 놓을 때 flex와 grid 중 무엇을 쓸지 정해요.</p>
+
+  <h3 class="sec" id="diff" data-toc="flex와 grid의 차이">flex와 grid의 차이: 누가 폭을 정하나</h3>
+  <div class="two">
+    <div class="card"><b>flex — 자식이 정해요</b>각 요소가 자기 내용만큼 폭을 차지하고, 남는 공간을 나눠 가져요. 한 줄로 나열할 때 써요.</div>
+    <div class="card"><b>grid — 부모가 정해요</b>부모가 열을 먼저 선언하고 요소는 그 칸에 들어가요. 같은 열의 칸은 폭이 같아요. 여러 행의 열을 맞출 때 써요.</div>
+  </div>
+  <p>어느 쪽이 더 좋은 게 아니에요. 아래 두 데모에서 한 번은 grid가, 한 번은 flex가 맞아요.</p>
+
+  <h3 class="sec" id="grid-case" data-toc="grid가 맞는 경우">grid가 맞는 경우: 여러 행의 열을 맞출 때</h3>
+  <p>랜딩 페이지의 반응 지수 막대와 같은 구조예요. 행마다 라벨 · 막대 · 숫자가 반복돼요.</p>
+  <p class="try"><b>해 보기</b>버튼을 왼쪽부터 차례로 누르면서 막대의 시작점과 끝점을 보세요. 첫 라벨도 길게 바꿔 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="barSeg">
+        <button data-v="m-auto" aria-pressed="true">flex (폭 지정 없음)</button>
+        <button data-v="m-fixed" aria-pressed="false">flex (폭 고정)</button>
+        <button data-v="m-grid" aria-pressed="false">grid (폭 고정)</button>
+        <button data-v="m-sub" aria-pressed="false">grid + subgrid (폭 자동)</button>
+      </div>
+      <label>첫 라벨 <input type="text" id="barLabel" value="여성시대"></label>
+      <label>부모 폭 <input type="range" id="barW" min="220" max="720" value="720"></label>
+    </div>
+    <div class="stage pm-stage" id="barStage"></div>
+    <p class="cap">행마다 실제 폭</p>
+    <pre id="barMeas"></pre>
+    <div class="note" id="barNote"></div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+
+  <h4><code>grid-cols-[6rem_1fr_3rem]</code> 읽는 법</h4>
+  <p>대괄호 안의 <code>_</code>는 공백이에요. CSS로는 <code>grid-template-columns: 6rem 1fr 3rem</code>, 곧 열 세 개의 폭이에요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th>값</th><th>뜻</th><th>정하는 법</th></tr>
+    <tr><td><code>6rem</code></td><td>라벨 열. 고정 폭 (보통 96px)</td><td>가장 긴 라벨이 들어가고 조금 남는 폭</td></tr>
+    <tr><td><code>1fr</code></td><td>막대 열. 남는 폭 전부</td><td>정하지 않아요. 부모 폭에서 나머지를 뺀 값이에요</td></tr>
+    <tr><td><code>3rem</code></td><td>숫자 열. 고정 폭 (보통 48px)</td><td>가장 긴 숫자 "100%"가 들어가는 폭</td></tr>
+  </table>
+  </div>
+  <p>부모가 320px이고 간격이 12px이면 막대 열은 320 − 96 − 48 − 12 × 2 = 152px이에요. 위 데모에서 "grid (폭 고정)"을 고르고 부모 폭을 움직이면, 라벨과 숫자는 그대로고 막대 폭만 바뀌어요.</p>
+  <div class="two">
+    <div class="card"><b>흔한 방식</b>행마다 <code>grid-cols-[6rem_1fr_3rem]</code>를 반복해요. 폭을 직접 정해야 하고 더 긴 이름이 들어오면 다시 정해야 해요. 행이 서너 개고 데이터가 정해져 있으면 충분해요.</div>
+    <div class="card"><b>더 나은 방식</b>부모에 <code>grid-cols-[auto_1fr_auto]</code>를 한 번 선언하고 각 행은 <code>grid-cols-subgrid</code>로 물려받아요. 가장 긴 라벨에 맞춰 열 폭이 스스로 정해져요. 데모의 네 번째 버튼이에요.</div>
+  </div>
+
+  <h3 class="sec" id="flex-case" data-toc="flex가 맞는 경우">flex가 맞는 경우: 폭이 내용마다 달라야 할 때</h3>
+  <p>태그, 버튼 묶음, 내비게이션 링크가 여기에 해당해요.</p>
+  <p class="try"><b>해 보기</b>버튼을 바꿔 가며 부모 폭을 줄여 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="tagSeg">
+        <button data-v="t-flex" aria-pressed="true">flex-wrap</button>
+        <button data-v="t-grid3" aria-pressed="false">grid 3열</button>
+        <button data-v="t-auto" aria-pressed="false">grid auto-fit</button>
+      </div>
+      <label>부모 폭 <input type="range" id="tagW" min="220" max="720" value="720"></label>
+    </div>
+    <div class="stage pm-stage" id="tagStage"></div>
+    <div class="note" id="tagNote"></div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+
+  <h3 class="sec" id="choose">고르는 기준</h3>
+  <p>질문은 하나예요. <b>여러 행이나 칸의 폭을 서로 맞춰야 하나?</b> 맞춰야 하면 grid, 내용 길이에 맡겨도 되면 flex예요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th>상황</th><th>선택</th><th>Tailwind 예</th></tr>
+    <tr><td>여러 행에서 열 폭이 같아야 함</td><td>grid</td><td><code>grid grid-cols-[6rem_1fr_3rem]</code></td></tr>
+    <tr><td>모바일 1열 → 데스크톱 2열</td><td>grid</td><td><code>grid lg:grid-cols-2</code></td></tr>
+    <tr><td>한 줄 나열, 폭은 내용대로</td><td>flex</td><td><code>flex flex-wrap gap-2</code></td></tr>
+    <tr><td>양끝으로 밀기 (로고 ↔ 메뉴)</td><td>flex</td><td><code>flex justify-between</code></td></tr>
+    <tr><td>아이콘 + 글자 한 쌍</td><td>flex</td><td><code>flex items-center gap-2</code></td></tr>
+    <tr><td>세로로 쌓기만 함</td><td>둘 다 됨</td><td><code>grid gap-4</code> 또는 <code>flex flex-col gap-4</code></td></tr>
+  </table>
+  </div>
+  <p>둘은 섞어 써요. 큰 틀은 grid로 나누고 그 안의 작은 나열은 flex로 놓는 경우가 많아요. 지금 <code>dashboard.tsx</code>도 2단 배치는 grid, 푸터의 양끝 정렬은 flex예요.</p>
+
+  <!-- ───────── 2부 ───────── -->
+  <h2 class="part" id="part2"><small>2부</small><span>구조 잡기: 묶음</span></h2>
+  <p class="part-desc">한 화면을 모바일과 데스크톱 양쪽에 맞추려면, 무엇을 무엇과 묶을지가 먼저 정해져야 해요.</p>
+
+  <h3 class="sec" id="why-group">묶음이 왜 필요한가</h3>
+  <p><b>묶음</b>은 요소 몇 개를 감싸는 부모 요소예요. 래퍼(wrapper)라고도 불러요. <code>div</code>일 때가 많고, 의미가 있으면 <code>section</code>, <code>ul</code>, <code>figure</code>를 써요.</p>
+  <p>묶음이 필요한 이유는 grid와 flex가 <b>바로 아래 자식만</b> 배치하기 때문이에요. "제목·설명·버튼은 왼쪽, 카드는 오른쪽"을 시키려면 제목·설명·버튼이 먼저 한 덩어리로 묶여 있어야 해요.</p>
+  <div class="card"><b>배치가 바뀔 때 같이 움직이는 것끼리 한 부모에 넣어요.</b>모바일에서 세로로 쌓이다가 데스크톱에서 좌우로 갈라진다면, 갈라지는 두 덩어리가 각각 묶음이에요. 그 둘의 공통 부모가 <code>lg:grid-cols-2</code>를 받는 자리예요.</div>
+  <p class="try"><b>해 보기</b>"묶음 없음"인 채로 부모 폭을 줄였다 넓혀 보세요. 그다음 "묶음 있음"으로 바꿔서 다시 해 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="heroSeg">
+        <button data-v="flat" aria-pressed="true">묶음 없음</button>
+        <button data-v="grouped" aria-pressed="false">묶음 있음</button>
+      </div>
+      <label>부모 폭 <input type="range" id="heroW" min="240" max="720" value="720"></label>
+      <span class="badge" id="heroBadge"></span>
+    </div>
+    <div class="stage cq pm-stage" id="heroStage"></div>
+    <div class="note" id="heroNote"></div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+
+  <h3 class="sec" id="find-group">묶음을 찾는 질문</h3>
+  <p>묶음은 감각으로 정하는 게 아니에요. 대부분 시안에서 확인할 수 있는 질문 세 개로 정해져요. 감각처럼 보이는 건 이 질문에 여러 번 답해 본 사람이 빨리 답하는 거예요.</p>
+
+  <h4>질문 1. 간격이 어디서 넓어지나</h4>
+  <p>가장 기계적인 방법이에요. 요소 사이 간격을 재서 주변보다 눈에 띄게 넓은 곳이 묶음의 경계예요. 디자이너가 간격으로 이미 묶음을 표시해 둔 거예요.</p>
+  <p class="try"><b>해 보기</b>숫자를 눌러 간격을 바꿔 보세요. 전부 같게도 만들어 보세요.</p>
+  <div class="demo">
+    <div class="spwrap">
+      <div class="sp" id="sp"></div>
+      <ul class="spctl" id="spCtl"></ul>
+    </div>
+    <div class="note" id="spNote"></div>
+  </div>
+
+  <h4>질문 2. 두 요소가 같이 다니나</h4>
+  <p>요소 두 개를 골라 모바일 시안과 데스크톱 시안에서 비교해요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th>두 요소가…</th><th>그러면</th></tr>
+    <tr><td>모바일에서는 위아래로, 데스크톱에서는 좌우로 놓인다 (또는 그 반대)</td><td>방향을 바꾸는 부모 아래에 둘을 둬요. 예: <code>grid lg:grid-cols-2</code></td></tr>
+    <tr><td>붙은 채로 함께 움직여서 다른 덩어리의 옆으로 간다</td><td>둘을 감싸는 묶음을 만들어요. 그 묶음이 통째로 움직여요.</td></tr>
+    <tr><td>배경, 테두리, 최대 폭을 같이 쓴다</td><td>그 배경이나 테두리를 가진 상자로 감싸요.</td></tr>
+    <tr><td>합쳐서 한 단어로 부를 수 있다 (카드, 내비게이션, 목록)</td><td>의미가 있는 요소로 감싸요. 예: <code>figure</code>, <code>nav</code>, <code>ul</code></td></tr>
+    <tr><td>어느 것도 아니다</td><td>묶지 않아요. 형제로 둬요.</td></tr>
+  </table>
+  </div>
+
+  <h4>질문 3. 이 div를 지우면 뭐가 깨지나</h4>
+  <p>반대 방향의 확인이에요. 이미 있는 div가 정말 필요한지 의심될 때 써요. 지워도 깨지는 게 없으면 묶음이 아니니 지워요.</p>
+  <p class="try"><b>해 보기</b>경우마다 "div 지우기"를 눌러 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="dtSeg">
+        <button data-v="a" aria-pressed="true">경우 A: 문단을 감싼 div</button>
+        <button data-v="b" aria-pressed="false">경우 B: 이름과 숫자를 감싼 div</button>
+      </div>
+      <button class="plain" id="dtBtn" type="button"></button>
+    </div>
+    <div class="stage pm-stage" id="dtStage"></div>
+    <div class="note" id="dtNote"></div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+
+  <h4>질문으로 안 정해질 때</h4>
+  <div class="scroll">
+  <table>
+    <tr><th>상황</th><th>정하는 방법</th></tr>
+    <tr><td>같은 결과를 내는 구조가 여러 개</td><td>HTML이 덜 깊은 쪽을 골라요.</td></tr>
+    <tr><td>간격이 비슷하거나 데스크톱 시안이 없음</td><td>의미로 묶어요. "제목 + 설명 + 버튼", "사진 + 설명글", "라벨 + 입력칸"처럼 한 가지를 설명하는 요소들은 데스크톱에서도 거의 항상 같이 움직여요.</td></tr>
+    <tr><td>나중에 요소가 늘어날 것 같음</td><td>기획을 아는 만큼만 맞힐 수 있어요. 모르면 지금 시안대로 해요.</td></tr>
+  </table>
+  </div>
+  <p>여기서 틀려도 비용은 작아요. 간격을 부모가 갖게 해 두면(<a class="ref" href="#rules"></a>) 묶음을 바꾸는 건 div 하나를 넣고 빼는 일이에요.</p>
+
+  <h3 class="sec" id="order" data-toc="작업 순서">작업 순서: 구조는 먼저, 스타일은 모바일부터</h3>
+  <p>모바일 화면을 다 만든 뒤 데스크톱에서 묶으려 하면 어려워요. 이미 맞춰 놓은 모바일 간격을 다시 손봐야 하기 때문이에요.</p>
+  <p>"모바일 우선"은 <b>CSS를 쓰는 순서</b>에 대한 규칙이에요. HTML 구조는 두 시안을 모두 보고 먼저 정해요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th></th><th>무엇을 보고 정하나</th></tr>
+    <tr><td>HTML 구조 (묶음)</td><td>모바일과 데스크톱 시안 둘 다</td></tr>
+    <tr><td>CSS (클래스)</td><td>모바일 먼저, 그다음 <code>lg:</code></td></tr>
+  </table>
+  </div>
+  <p class="try"><b>해 보기</b>1단계부터 차례로 눌러 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="stepSeg">
+        <button data-v="0" aria-pressed="true">1. 나란히 놓기</button>
+        <button data-v="1" aria-pressed="false">2. 데스크톱에서 찾기</button>
+        <button data-v="2" aria-pressed="false">3. 모바일에서 확인</button>
+        <button data-v="3" aria-pressed="false">4. 구조 쓰기</button>
+        <button data-v="4" aria-pressed="false">5. 스타일 쓰기</button>
+      </div>
+    </div>
+    <div class="wf" id="wf">
+      <figure class="mob"><figcaption>모바일</figcaption>
+        <div class="scr"><div class="g"><div class="b t"></div><div class="b"></div><div class="b c"></div></div><div class="f"></div></div>
+      </figure>
+      <figure class="dsk"><figcaption>데스크톱</figcaption>
+        <div class="scr"><div class="g"><div class="b t"></div><div class="b"></div><div class="b c"></div></div><div class="f"></div></div>
+      </figure>
+    </div>
+    <div class="note" id="stepNote"></div>
+    <pre><code id="stepCode"></code></pre>
+  </div>
+  <p>5단계에서 접두사가 없는 클래스는 모든 폭에 적용되니 모바일 스타일이 돼요. <code>lg:</code>가 붙은 클래스는 화면 폭 1024px 이상에서 그걸 덮어써요. 그래서 모바일을 먼저 완성하고 달라지는 것만 <code>lg:</code>로 더해요.</p>
+
+  <h3 class="sec" id="rules" data-toc="코드로 쓸 때 지킬 세 가지">묶음을 코드로 쓸 때 지킬 세 가지</h3>
+
+  <h4>① 묶음 사이 간격은 부모가 갖기</h4>
+  <p>묶음과 묶음 사이 간격을 자식의 margin으로 주면, 배치가 바뀔 때 그 여백이 엉뚱한 곳에 남아요. 부모의 <code>gap</code>으로 주면 세로로 쌓일 때는 위아래 간격이, 가로로 놓일 때는 좌우 간격이 돼요.</p>
+  <p class="try"><b>해 보기</b>두 방식을 바꿔 가며 부모 폭을 줄였다 넓혀 보세요. 넓을 때 파란 점선 상자의 아래쪽을 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="gapSeg">
+        <button data-v="mg" aria-pressed="true">간격을 자식이 가짐 (margin)</button>
+        <button data-v="gp" aria-pressed="false">간격을 부모가 가짐 (gap)</button>
+      </div>
+      <label>부모 폭 <input type="range" id="gapW" min="240" max="720" value="720"></label>
+    </div>
+    <div class="stage cq pm-stage" id="gapStage"></div>
+    <div class="note" id="gapNote"></div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+  <p>묶음 안에서 요소마다 간격이 달라 <code>gap</code> 하나로 안 될 때는 뒤따르는 요소에 <code>mt-*</code>를 줘요. 방향은 위쪽 하나로만 쓰고 묶음의 마지막 요소 아래에는 여백을 두지 않아요. 지금 <code>dashboard.tsx</code>가 이 방식이에요. 글 묶음과 카드 사이는 <code>gap-8 lg:gap-20</code>, 글 묶음 안은 <code>mt-5</code>와 <code>mt-1</code>이에요.</p>
+
+  <h4>② 배경은 바깥 요소에, 폭 제한과 배치는 안쪽 요소에</h4>
+  <p>배경은 화면 끝까지 가야 하고 내용은 최대 폭 안에 있어야 해요. 한 요소가 둘을 다 할 수 없으니 나눠요.</p>
+  <pre><code>&lt;section class="bg-paper"&gt;                  ← 배경: 화면 끝까지
+  &lt;div class="container-page                ← 폭 제한: 최대 폭과 좌우 여백
+              grid gap-8
+              lg:grid-cols-2 lg:gap-20"&gt;    ← 배치가 바뀌는 지점
+    &lt;div&gt;...&lt;/div&gt;                          ← 묶음 1: 제목 · 설명 · 버튼
+    &lt;figure&gt;...&lt;/figure&gt;                    ← 묶음 2: 카드
+  &lt;/div&gt;
+&lt;/section&gt;</code></pre>
+  <p><code>dashboard.tsx</code> 맨 위 주석 "섹션은 전체 폭, 내용만 container-page"가 이 규칙이에요.</p>
+
+  <h4>③ HTML 순서는 모바일에서 읽는 순서로</h4>
+  <p>스크린리더와 탭 키는 화면에 보이는 위치가 아니라 HTML 순서를 따라요. 데스크톱은 CSS로 배치만 바꾸고 순서는 건드리지 않아요.</p>
+
+  <h3 class="sec" id="mismatch">상자가 두 시안에서 안 맞을 때</h3>
+  <p>모바일과 데스크톱의 모양이 가로·세로 전환보다 더 많이 다를 때예요. 방법이 세 가지 있어요. <b>위에서부터 시도해서 되는 첫 번째에서 멈춰요.</b> 아래로 갈수록 관리할 것이 늘어나기 때문이에요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th>방법</th><th>맞는 경우</th><th>주의할 점</th></tr>
+    <tr><td>1. CSS로 자리만 옮기기</td><td>요소는 같고 위치만 달라요.</td><td>화면에 보이는 순서와 HTML 순서가 달라져요. 읽는 순서가 뒤바뀔 정도면 쓰지 않아요.</td></tr>
+    <tr><td>2. 둘 다 두고 하나만 보이기</td><td>작은 조각의 모양이 달라요. 예: 햄버거 버튼 ↔ 가로 메뉴</td><td>큰 덩어리에 쓰면 같은 내용을 두 번 관리해요.</td></tr>
+    <tr><td>3. JS로 하나만 그리기</td><td>모양보다 동작이 달라요. 예: 카드 목록 ↔ 표, 하단 시트 ↔ 팝오버</td><td>서버에서 화면을 미리 그리는 구조면 처음에 다른 쪽이 잠깐 보일 수 있어요.</td></tr>
+  </table>
+  </div>
+  <p class="try"><b>해 보기</b>방법마다 부모 폭을 줄였다 넓혀 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <div class="seg" id="s3Seg">
+        <button data-v="css" aria-pressed="true">1. CSS로 자리만 옮기기</button>
+        <button data-v="hide" aria-pressed="false">2. 둘 다 두고 하나만 보이기</button>
+        <button data-v="js" aria-pressed="false">3. JS로 하나만 그리기</button>
+      </div>
+      <label>부모 폭 <input type="range" id="s3W" min="240" max="720" value="720"></label>
+      <span class="badge" id="s3Badge"></span>
+    </div>
+    <div class="stage cq pm-stage" id="s3Stage"></div>
+    <div class="note" id="s3Note"></div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+  <h4>방법을 고른 뒤: 두 벌이 되는 범위 정하기</h4>
+  <p>방법 2와 3은 같은 내용을 두 가지 모양으로 만들어요. 그래서 방법을 고른 다음에는 어디까지 두 벌로 만들지를 따로 정해요. 아래 두 방식은 방법 2·3 중 하나를 가리키는 게 아니라, 둘 모두에 해당하는 기준이에요.</p>
+  <div class="two">
+    <div class="card"><b>흔한 방식</b>섹션이나 페이지 전체를 두 벌 만들어요. 방법 2라면 <code>hidden lg:block</code> / <code>lg:hidden</code>, 방법 3이라면 <code>isDesktop ? &lt;DesktopPage /&gt; : &lt;MobilePage /&gt;</code>예요. 빠르지만 고칠 때마다 두 곳을 고쳐야 해요.</div>
+    <div class="card"><b>더 나은 방식</b>데이터와 로직은 하나로 두고, 모양이 다른 조각의 보여 주는 컴포넌트만 나눠요. 방법 2라도 <code>&lt;ReactionCards rows={rows} /&gt;</code>와 <code>&lt;ReactionTable rows={rows} /&gt;</code>를 같이 두고 하나만 보이면 <code>rows</code>는 하나예요.</div>
+  </div>
+  <p>방법 3이 방법 2보다 나은 것도 아니에요. 방법 2는 처음부터 맞는 쪽이 보이고 JS가 필요 없어요. 방법 3은 둘을 HTML에 같이 둘 수 없을 때만 써요. 포커스 관리가 서로 다르거나, 같은 <code>id</code>나 폼 필드가 두 번 들어가거나, 두 번 그리기에 무거울 때예요.</p>
+  <p>"아예 다른 디자인"으로 보여도, 두 시안에서 같은 요소에 같은 색을 칠해 보면 정말 다른 부분은 메뉴나 표 같은 한두 조각인 경우가 많아요. 그 조각에만 방법 2나 3을 쓰고 나머지는 그대로 둬요.</p>
+
+  <h3 class="sec" id="practice">익숙해지는 방법</h3>
+
+  <h4>기본형 이름으로 부르기</h4>
+  <p>레이아웃은 몇 가지 기본형의 조합이에요. 아래는 <a href="https://every-layout.dev">Every Layout</a>이 붙인 이름 중 자주 쓰는 다섯 개예요.</p>
+  <p class="try"><b>해 보기</b>이름마다 있는 부모 폭을 줄였다 넓혀 보세요. 그 이름의 모형들이 같이 바뀌어요. "HTML 코드 보기"를 펼쳐서 클래스를 누르면 그 클래스가 꺼지고 위 모형에 바로 반영돼요. 다시 누르면 켜져요. 눌러도 모형이 그대로일 때는 그 이유가 코드 아래에 나와요. Sidebar에서는 눌러서 달라진 것도 무엇이 왜 달라졌는지 나와요.</p>
+  <div class="scroll">
+  <table class="pm-table">
+    <tr><th>기본형</th><th>하는 일</th><th>flex와 grid 중 고르는 기준</th></tr>
+    <tr class="pm-head"><td>Stack</td><td>세로로 쌓고 일정한 간격</td><td>결과가 같아요. 더 자주 보이는 건 <code>flex flex-col</code>이고, 한 단어 짧은 건 <code>grid</code>예요.</td></tr>
+    <tr class="pm-row"><td colspan="3">
+      <div class="controls"><label>부모 폭 <input type="range" class="pmW" min="240" max="720" value="720"></label></div>
+      <p class="cap pm-kind"><span class="badge">grid</span> <code>grid gap-2</code> 자식이 한 열에 쌓여요.</p>
+      <div class="stage cq pm-stage" data-pm="stack-g"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">flex</span> <code>flex flex-col gap-2</code> 방향을 세로로 바꾼 flex예요. 보이는 결과는 grid와 같아요.</p>
+      <div class="stage cq pm-stage" data-pm="stack-f"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+    </td></tr>
+    <tr class="pm-head"><td>Cluster</td><td>가로 나열, 넘치면 줄바꿈</td><td>flex예요. grid로 하면 칸 폭이 모두 같아져서 다른 모양이 돼요. (<a class="ref" href="#flex-case"></a>)</td></tr>
+    <tr class="pm-row"><td colspan="3">
+      <div class="controls"><label>부모 폭 <input type="range" class="pmW" min="240" max="720" value="720"></label></div>
+      <p class="cap pm-kind"><span class="badge">flex</span> <code>flex flex-wrap gap-2</code> 칸 폭이 내용만큼이에요.</p>
+      <div class="stage cq pm-stage" data-pm="cluster-f"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">grid</span> <code>grid grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] gap-2</code> 줄바꿈은 되지만 칸 폭이 모두 같아져요.</p>
+      <div class="stage cq pm-stage" data-pm="cluster-g"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+    </td></tr>
+    <tr class="pm-head"><td>Switcher</td><td>좁으면 세로, 넓으면 가로</td><td>grid예요. 부모에 클래스 하나만 더하면 되고 자식은 건드리지 않아요.</td></tr>
+    <tr class="pm-row"><td colspan="3">
+      <div class="controls"><label>부모 폭 <input type="range" class="pmW" min="240" max="720" value="720"></label></div>
+      <p class="cap pm-kind"><span class="badge">grid</span> <code>grid gap-2 lg:grid-cols-2</code> 부모에 <code>lg:grid-cols-2</code>만 더해요.</p>
+      <div class="stage cq pm-stage" data-pm="switcher-g"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">flex</span> <code>flex flex-col gap-2 lg:flex-row</code> 부모는 방향을 바꾸고, 자식마다 <code>lg:flex-1</code>로 폭을 나눠 가져요.</p>
+      <div class="stage cq pm-stage" data-pm="switcher-f"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+    </td></tr>
+    <tr class="pm-head"><td>Center</td><td>최대 폭을 두고 가운데 정렬</td><td>flex도 grid도 아니고 <code>mx-auto</code>예요. 부모를 건드리지 않고 자기 클래스만으로 끝나요.</td></tr>
+    <tr class="pm-row"><td colspan="3">
+      <div class="controls"><label>부모 폭 <input type="range" class="pmW" min="240" max="720" value="720"></label></div>
+      <p class="cap pm-kind"><span class="badge">margin</span> <code>mx-auto max-w-80 px-4</code> 기본이에요. 좌우 margin이 남는 폭을 반씩 가져요.</p>
+      <div class="stage cq pm-stage" data-pm="center-m"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">flex</span> <code>flex justify-center</code> 부모가 자식을 가운데로 모아요. 자식에 <code>w-full</code>이 없으면 내용 폭으로 줄어들어요.</p>
+      <div class="stage cq pm-stage" data-pm="center-f"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">grid</span> <code>grid justify-items-center</code> flex와 같은 구조고, <code>justify-center</code> 자리에 <code>justify-items-center</code>를 써요. Chrome처럼 <code>justify-items-center</code>를 grid가 아닌 보통 블록 요소에도 적용하는 브라우저에서는, 코드에서 <code>grid</code>를 꺼도 자식이 가운데에 그대로 있어요. 최근에 생긴 동작이라 다른 브라우저에서는 <code>grid</code>를 끄면 가운데 정렬이 풀릴 수 있으니, 실제 코드에서는 <code>grid</code>와 같이 써요.</p>
+      <div class="stage cq pm-stage" data-pm="center-g"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">block</span> <code>h-32 content-center</code> 세로 가운데도 flex나 grid 없이 돼요. <code>content-center</code>(<code>align-content: center</code>)는 2024년부터 주요 브라우저가 보통 블록 요소에서도 지원해요. 남는 높이가 있어야 하니 부모에 높이를 줬고, 가로 가운데는 안쪽 요소의 <code>mx-auto</code>가 그대로 맡아요.</p>
+      <div class="stage cq pm-stage" data-pm="center-b"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+    </td></tr>
+    <tr class="pm-head"><td>Sidebar</td><td>한쪽 고정 폭, 나머지 전부</td><td>폭이 정해진 2열 뼈대는 grid예요. 사이드바를 접었다 펴거나 폭을 내용에 맡기면 flex예요.</td></tr>
+    <tr class="pm-row"><td colspan="3">
+      <div class="controls"><label>부모 폭 <input type="range" class="pmW" min="240" max="720" value="720"></label></div>
+      <p class="cap pm-kind"><span class="badge">grid</span> <code>grid grid-cols-[8rem_minmax(0,1fr)] gap-2</code> 두 열의 폭이 부모 한 줄에 다 있어요. 둘째 열을 <code>1fr</code>로만 쓰면 띄어쓰기 없는 긴 낱말보다 좁아지지 못해서 부모 밖으로 넘쳐요. 그래서 <code>minmax(0,1fr)</code>로 써요. 상자가 좁아졌을 때 줄바꿈할 곳이 없는 긴 낱말이 상자 밖으로 삐져나오는 건 <code>wrap-break-word</code>가 막아요.</p>
+      <div class="stage cq pm-stage" data-pm="sidebar-g"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+      <p class="cap pm-kind"><span class="badge">flex</span> <code>flex gap-2</code> 폭을 자식이 정해요. 부모 폭을 끝까지 줄인 뒤 클래스를 꺼 보세요. <code>min-w-0</code>이 없으면 본문 상자가 띄어쓰기 없는 긴 낱말보다 좁아지지 못해서 부모 밖으로 넘쳐요. 그때 <code>shrink-0</code>까지 없으면 사이드바도 눌려요. <code>min-w-0</code>은 상자만 줄여요. 줄어든 상자보다 긴 낱말이 상자 밖으로 삐져나오는 건 <code>wrap-break-word</code>가 막아요. 꺼 보면 삐져나오는 게 보여요.</p>
+      <div class="stage cq pm-stage" data-pm="sidebar-f"></div>
+      <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+    </td></tr>
+  </table>
+  </div>
+  <p>코드의 값은 모형과 같아요. 다만 모형은 <code>lg:</code> 대신 부모 폭 520px에서 바뀌고, 상자의 색과 안쪽 여백은 코드에서 뺐어요. Center의 점선은 <code>px-4</code>가 만드는 좌우 여백까지 포함한 상자예요.</p>
+  <p><a class="ref" href="#why-group"></a> 데모의 화면을 이 이름으로 읽으면 이래요.</p>
+  <pre><code>Center            mx-auto max-w-5xl px-4
+└ Switcher        grid gap-8 lg:grid-cols-2
+   ├ Stack        grid gap-4          ← 제목 · 설명 · 버튼
+   └ 카드</code></pre>
+  <p>화면을 볼 때 이렇게 이름이 붙으면 묶음이 정해진 거예요. 이름이 안 붙으면 구조가 아직 애매한 거예요.</p>
+
+  <h4>연습 방법</h4>
+  <ol class="rules">
+    <li><b>잘 만든 사이트를 개발자 도구로 열어요.</b>폭을 줄였다 넓혔다 하면서 어느 요소에서 배치가 바뀌는지 찾아요. 그 요소가 묶음들의 부모예요.</li>
+    <li><b>코드를 쓰기 전에 시안 위에 상자를 그려요.</b>종이든 Figma든 상관없어요. <a class="ref" href="#find-group"></a>의 질문에 답하는 과정이 눈에 남아요.</li>
+    <li><b>그린 상자를 기본형 이름으로 불러 봐요.</b>몇 화면만 이렇게 해 보면 시안을 볼 때 상자가 먼저 보이기 시작해요.</li>
+  </ol>
+
+  <!-- ───────── 3부 ───────── -->
+  <h2 class="part" id="part3"><small>3부</small><span>배치 너머: 상호작용과 우선순위</span></h2>
+  <p class="part-desc">여기까지는 요소를 어디에 놓느냐만 다뤘어요. 모바일과 데스크톱은 그 밖에도 달라요.</p>
+
+  <h3 class="sec" id="enough">배치만 바꾸면 충분한가</h3>
+  <p>화면 종류에 따라 달라요.</p>
+  <div class="two">
+    <div class="card"><b>읽는 화면 — 대체로 충분</b>랜딩, 글, 소개 화면이에요. 위에서 아래로 읽고 버튼 하나 누르는 일은 장치가 달라도 같아요. 재배치에 상호작용(<a class="ref" href="#hover-touch"></a>)만 더하면 돼요.</div>
+    <div class="card"><b>일하는 화면 — 부족함</b>대시보드, 편집기, 관리 화면이에요. 한 손으로 잠깐 쓰는 상황과 책상에서 오래 쓰는 상황이 달라서 우선순위와 이동 방식(<a class="ref" href="#work-screen"></a>)부터 달라져요.</div>
+  </div>
+  <div class="card"><b>화면마다 던질 질문</b>"이 화면에서 사용자가 하려는 일이, 폰을 들고 있을 때와 책상에 앉아 있을 때 같은가?" 같으면 읽는 화면처럼, 다르면 일하는 화면처럼 다뤄요.</div>
+
+  <h4>무엇이 같고 무엇이 다른가</h4>
+  <div class="scroll">
+  <table>
+    <tr><th>층</th><th>모바일과 데스크톱</th><th>다루는 곳</th></tr>
+    <tr><td>내용, 기능</td><td>같음</td><td>바로 아래</td></tr>
+    <tr><td>배치</td><td>다름</td><td><a href="#part1">1부</a>, <a href="#part2">2부</a></td></tr>
+    <tr><td>상호작용</td><td>다름</td><td><a class="ref" href="#hover-touch"></a></td></tr>
+    <tr><td>우선순위, 이동, 입력</td><td>다름</td><td><a class="ref" href="#work-screen"></a></td></tr>
+  </table>
+  </div>
+  <p>내용과 기능은 줄이지 않아요. "모바일 사용자는 바쁘니까 기능을 빼자"는 접근은 권하지 않아요. 모바일로만 접속하는 사람에게는 뺀 기능이 곧 못 쓰는 기능이 돼요. 구글 검색도 모바일 화면의 내용을 기준으로 색인해요.</p>
+
+  <h3 class="sec" id="hover-touch" data-toc="호버와 터치">상호작용: 호버와 터치</h3>
+  <p>데스크톱에서는 호버 효과가, 모바일에서는 터치 동작이 경험을 좋게 만들어요. 이걸 설계할 때 전제가 두 가지 있어요.</p>
+  <div class="two">
+    <div class="card"><b>기준은 화면 폭이 아니라 입력 장치</b>아이패드는 넓지만 터치고, 터치스크린 노트북은 둘 다 돼요. <code>lg:</code>로 나누지 않고 입력 장치 조건으로 나눠요.</div>
+    <div class="card"><b>달라지는 건 상호작용뿐</b>레이아웃과 내용은 같아요. 같은 요소에 "호버일 때는 이것, 터치일 때는 저것"을 붙여요. 화면을 두 벌 만들지 않아요.</div>
+  </div>
+
+  <h4>입력 장치 조건</h4>
+  <div class="scroll">
+  <table>
+    <tr><th>CSS 조건</th><th>뜻</th><th>Tailwind v4</th></tr>
+    <tr><td><code>(hover: hover)</code></td><td>호버가 되는 장치</td><td><code>hover:</code> (이 조건이 자동으로 붙어요)</td></tr>
+    <tr><td><code>(pointer: fine)</code></td><td>마우스처럼 정밀한 포인터</td><td><code>pointer-fine:</code></td></tr>
+    <tr><td><code>(pointer: coarse)</code></td><td>손가락처럼 뭉툭한 포인터</td><td><code>pointer-coarse:</code></td></tr>
+  </table>
+  </div>
+  <p class="try"><b>해 보기</b>버튼에 마우스를 올리거나, 탭 키로 이동하거나, 눌러 보세요. 폰에서 열면 결과가 달라져요.</p>
+  <div class="demo">
+    <p style="margin-top:0">지금 이 기기 → <span id="devOut"></span></p>
+    <div class="stage pm-stage" id="fxStage"></div>
+    <div class="note">마우스는 올리면 떠오르고, 키보드는 초점이 가면 같은 효과가 나고, 터치는 누르는 동안 작아져요. 손가락 기기에서는 버튼도 더 커요. HTML은 하나예요.</div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+
+  <h4>호버를 터치로 옮기기</h4>
+  <p>호버 효과를 설계할 때마다 "터치에서는 이 목적을 무엇으로 채우나"를 같이 정해요. 아래가 그 짝이에요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th>호버로 하던 것</th><th>터치에서는</th></tr>
+    <tr><td>올리면 미리보기</td><td>스크롤로 화면에 들어올 때 재생, 또는 탭해서 열기</td></tr>
+    <tr><td>올리면 버튼이 나타남</td><td>항상 보이게 하거나, 옆으로 밀기, 길게 누르기</td></tr>
+    <tr><td>커서를 따라다니는 효과</td><td>스크롤에 연동된 움직임</td></tr>
+    <tr><td>툴팁</td><td>글자로 항상 표시하거나, 탭하면 열리는 말풍선</td></tr>
+    <tr><td>올리면 펼쳐지는 메뉴</td><td>탭하면 열리는 서랍·아코디언</td></tr>
+    <tr><td>화살표 눌러 넘기기</td><td>좌우로 밀기</td></tr>
+  </table>
+  </div>
+
+  <h4>잘 알려진 예시</h4>
+  <div class="scroll">
+  <table>
+    <tr><th>서비스</th><th>마우스</th><th>터치</th></tr>
+    <tr><td>YouTube</td><td>썸네일에 올리면 미리보기 재생</td><td>스크롤하다 화면에 들어오면 자동 재생</td></tr>
+    <tr><td>Netflix</td><td>카드에 올리면 커지면서 예고편 표시</td><td>탭하면 상세 시트가 올라옴</td></tr>
+    <tr><td>Instagram</td><td>그리드 사진에 올리면 좋아요 수 표시</td><td>두 번 탭해서 좋아요</td></tr>
+    <tr><td>Pinterest</td><td>핀에 올리면 저장 버튼 표시</td><td>길게 누르면 메뉴가 펼쳐짐</td></tr>
+    <tr><td>Airbnb</td><td>카드에 올리면 사진 넘김 화살표 표시</td><td>사진을 좌우로 밀어서 넘김</td></tr>
+  </table>
+  </div>
+  <p>공통점은 같은 목적을 장치에 맞는 동작으로 바꿨다는 거예요. YouTube는 양쪽 다 "누르기 전에 미리 보기"가 목적이에요. 서비스 화면은 수시로 바뀌니 지금은 다를 수 있어요.</p>
+
+  <h4>CSS만으로 되는 좌우 넘김</h4>
+  <div class="demo">
+    <div class="stage pm-stage" id="snapStage"></div>
+    <div class="note">손가락으로 밀거나 트랙패드로 넘기면 카드 단위로 멈춰요. 부모의 <code>flex overflow-x-auto snap-x snap-mandatory</code>와 자식의 <code>snap-start</code>면 돼요. 하단 시트나 밀어서 삭제처럼 손가락을 따라가는 동작은 보통 라이브러리를 써요.</div>
+    <details class="pm-code"><summary>HTML 코드 보기</summary><p class="cap">클래스를 누르면 꺼지고, 다시 누르면 켜져요. 눌러도 모형이 그대로면 그 이유가 코드 아래에 나와요.</p><pre><code></code></pre><div class="note pm-why" role="status"></div></details>
+  </div>
+
+  <div class="two">
+    <div class="card"><b>흔한 방식</b><code>lg:</code>를 기준으로 데스크톱에만 호버 효과를 넣고 모바일은 비워 둬요. 모바일이 밋밋해지고 아이패드에서 어긋나요.</div>
+    <div class="card"><b>더 나은 방식</b>입력 장치 조건으로 나누고 호버 효과마다 터치에서의 짝을 같이 정해요.</div>
+  </div>
+  <div class="card"><b>지켜야 할 한 가지</b>호버로만 볼 수 있는 정보나 기능은 만들지 않아요. 호버는 더 즐겁게 하는 층이고 없어도 쓸 수 있어야 해요. 키보드 사용자도 호버를 못 하니 <code>focus-visible:</code>을 같이 붙여요.</div>
+
+  <h3 class="sec" id="work-screen" data-toc="일하는 화면">우선순위와 이동: 일하는 화면</h3>
+  <p>폰은 한 손으로 잠깐씩 쓰고 데스크톱은 책상에서 두 손으로 오래 써요. 그래서 조작을 반복하는 화면은 배치 말고도 아래가 달라져요.</p>
+  <div class="scroll">
+  <table>
+    <tr><th>달라지는 것</th><th>모바일</th><th>데스크톱</th></tr>
+    <tr><td>우선순위</td><td>한 화면에 한 가지 일. 나머지는 접어요.</td><td>목록과 상세를 나란히 펼쳐요.</td></tr>
+    <tr><td>이동 방식</td><td>엄지가 닿는 아래쪽 탭</td><td>위쪽이나 옆쪽 메뉴</td></tr>
+    <tr><td>입력</td><td>입력 칸을 줄이고 선택지나 자동 완성으로</td><td>타이핑, 단축키</td></tr>
+    <tr><td>장치 기능</td><td>카메라, 공유, 위치</td><td>끌어다 놓기, 여러 개 한꺼번에 처리</td></tr>
+  </table>
+  </div>
+  <p>가장 흔한 예가 목록과 상세예요. 넓으면 둘을 나란히 보여 주고 좁으면 한 번에 하나만 보여 줘요.</p>
+  <p class="try"><b>해 보기</b>넓은 상태에서 항목을 눌러 보고 부모 폭을 줄인 뒤 다시 눌러 보세요.</p>
+  <div class="demo">
+    <div class="controls">
+      <label>부모 폭 <input type="range" id="mdW" min="240" max="720" value="720"></label>
+    </div>
+    <div class="stage cq" id="mdStage">
+      <div class="md" id="md">
+        <ul class="list" id="mdList"></ul>
+        <div class="detail">
+          <button class="plain back" id="mdBack" type="button">← 목록</button>
+          <p id="mdText">왼쪽에서 하나를 고르세요.</p>
+        </div>
+      </div>
+    </div>
+    <div class="note">내용과 기능은 양쪽이 같아요. 달라진 건 "한 번에 무엇을 보여 주나"와 "어떻게 이동하나"예요. 좁을 때만 뒤로 가기 버튼이 생겨요.</div>
+  </div>
+  <p>이런 차이는 <a class="ref" href="#mismatch"></a>의 방법 2나 3으로 만들어요. 위 데모는 방법 2예요.</p>
+  <p>모바일을 먼저 설계하라는 조언(Luke Wroblewski, 『Mobile First』)도 같은 맥락이에요. 좁은 화면에서 먼저 정하면 무엇이 중요한지 골라야 하고 데스크톱은 거기에 여유를 더하는 작업이 돼요. 반대로 하면 데스크톱 화면을 좁은 화면에 구겨 넣게 돼요.</p>
+
+  <!-- ───────── 마무리 ───────── -->
+  <h2 class="part" id="part4"><small>마무리</small><span>정리</span></h2>
+  <p class="part-desc">읽은 순서와 실제로 작업하는 순서는 달라요. 화면 하나를 만들 때는 아래 순서로 해요.</p>
+
+  <h3 class="sec" id="summary">한 화면을 만드는 순서</h3>
+  <ol class="rules">
+    <li><b>두 시안을 나란히 놓고 상자를 그려요.</b>간격이 넓어지는 곳과 좌우로 갈라지는 곳이 경계예요. → <a class="ref" href="#find-group"></a>, <a class="ref" href="#order"></a></li>
+    <li><b>상자대로 HTML 구조를 써요.</b>순서는 모바일에서 읽는 순서로 쓰고 배경과 폭 제한은 다른 요소에 둬요. → <a class="ref" href="#rules"></a></li>
+    <li><b>묶음마다 flex인지 grid인지 골라요.</b>폭을 서로 맞춰야 하면 grid, 내용 길이에 맡기면 flex예요. → <a class="ref" href="#choose"></a></li>
+    <li><b>모바일 스타일을 쓰고, 달라지는 것만 <code>lg:</code>로 더해요.</b>묶음 사이 간격은 부모의 <code>gap</code>으로 줘요. → <a class="ref" href="#order"></a>, <a class="ref" href="#rules"></a></li>
+    <li><b>상자가 안 맞는 조각만 따로 처리해요.</b>CSS로 자리 옮기기, 숨기기, JS 순서로 시도해요. → <a class="ref" href="#mismatch"></a></li>
+    <li><b>호버 효과를 넣을 때마다 터치에서의 짝을 정해요.</b>호버로만 쓸 수 있는 기능은 만들지 않아요. → <a class="ref" href="#hover-touch"></a></li>
+    <li><b>일하는 화면이면 우선순위와 이동 방식을 따로 정해요.</b>내용과 기능은 줄이지 않아요. → <a class="ref" href="#enough"></a>, <a class="ref" href="#work-screen"></a></li>
+  </ol>
+
+  <h3 class="sec" id="more">더 읽을거리</h3>
+  <div class="scroll">
+  <table>
+    <tr><th>이름</th><th>내용</th></tr>
+    <tr><td><a href="https://every-layout.dev">Every Layout</a></td><td>레이아웃을 기본형으로 나누는 방법이에요. <a class="ref" href="#practice"></a>의 이름이 여기서 왔어요.</td></tr>
+    <tr><td>Intrinsic Web Design</td><td>Jen Simmons가 붙인 이름이에요. 브레이크포인트를 늘리기보다 <code>fr</code>, <code>minmax</code>, <code>auto-fit</code>으로 스스로 맞춰지게 해요.</td></tr>
+    <tr><td>Atomic Design</td><td>Brad Frost의 방법이에요. 작은 부품 → 묶음 → 섹션 순으로 쌓아요. 컴포넌트를 어디서 자를지 정할 때 써요.</td></tr>
+    <tr><td>Mobile First</td><td>Luke Wroblewski의 책이에요. 좁은 화면에서 먼저 정해야 하는 이유를 다뤄요.</td></tr>
+    <tr><td><a href="https://tailwindcss.com/docs/responsive-design">Tailwind 반응형 문서</a></td><td>모바일 우선 규칙과 컨테이너 쿼리(<code>@container</code>) 사용법이 있어요.</td></tr>
+  </table>
+  </div>
+</main>
+
+<script>
+  const $ = (id) => document.getElementById(id);
+
+  function seg(segId, onChange) {
+    const buttons = [...$(segId).querySelectorAll('button')];
+    buttons.forEach((b) => b.addEventListener('click', () => {
+      buttons.forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      onChange(b.dataset.v);
+    }));
+    onChange(buttons.find((b) => b.getAttribute('aria-pressed') === 'true').dataset.v);
+  }
+  function widthSlider(sliderId, stageId) {
+    const apply = () => { $(stageId).style.width = $(sliderId).value + 'px'; };
+    $(sliderId).addEventListener('input', apply);
+    apply();
+  }
+  function note(id, kind, html) {
+    $(id).className = 'note ' + kind;
+    $(id).innerHTML = html;
+  }
+  // 데모는 창 폭이 아니라 부모 폭으로 전환돼요(컨테이너 쿼리, 안쪽 폭 520px 기준).
+  const isWide = (stageId) => $(stageId).clientWidth - 24 >= 520;
+
+  // 섹션 번호, 목차, 본문 속 "N번" 링크를 제목 순서에서 만들어요. 섹션을 옮겨도 번호가 따라와요.
+  const secNo = {};
+  let tocPart;
+  document.querySelectorAll('h2.part, h3.sec').forEach((h) => {
+    if (h.matches('.part')) {
+      tocPart = document.createElement('div');
+      tocPart.className = 'toc-part';
+      tocPart.innerHTML = `<a class="toc-head" href="#${h.id}">${h.children[0].textContent} · ${h.children[1].textContent}</a>`;
+      $('toc').append(tocPart);
+      return;
+    }
+    const n = Object.keys(secNo).length + 1;
+    secNo[h.id] = n;
+    tocPart.insertAdjacentHTML('beforeend',
+      `<a class="toc-row" href="#${h.id}"><span>${n}</span><span>${h.dataset.toc || h.textContent}</span></a>`);
+    h.insertAdjacentHTML('afterbegin', `<span class="no">${n}.</span>`);
+  });
+  const ref = (id) => `<a href="#${id}">${secNo[id]}번</a>`;
+  document.querySelectorAll('a.ref').forEach((a) => { a.textContent = secNo[a.hash.slice(1)] + '번'; });
+
+  // ───────── 살아 있는 코드: 모형과 코드를 같은 데이터에서 만들어요 ─────────
+  // 코드의 클래스를 누르면 모형의 같은 요소에서 그 클래스가 빠져요. 눌러도 모형이 그대로면 이유를 코드 아래에 적어요.
+  // 노드: tag(기본 div) · c = Tailwind 클래스 · t = 글자 · k = 자식 · v = 코드에 안 나오는 꾸밈 클래스(글자만 있는 div는 기본 blk)
+  //       n = 코드 줄 끝에 붙는 설명 · cn = 클래스마다 붙는 설명(클래스를 한 줄에 하나씩 적어요) · as = 이유 문장에서 부르는 이름
+  //       each = 같은 모양으로 반복할 행들(t, k, v를 행을 받는 함수로 줄 수 있고, 코드에는 첫 행만 적어요)
+  //       ref = 바깥에서 글자를 바꿀 때 쓰는 이름
+  const pmClasses = new WeakMap(); // 요소 → 코드에 적힌 클래스 목록
+  const pmRoles = new WeakMap();   // 요소 → 이유 문장에서 부르는 이름
+  const pmCopies = new WeakSet();  // 반복 행 가운데 코드에 안 적힌 둘째 행부터
+  const pmToggles = new WeakMap(); // 모형 → 누를 수 있는 { els, name } 전부. 반복 행은 els에 같이 들어 있어요.
+  const pmLast = new WeakMap();    // 모형 → 마지막에 눌렀는데 그대로였던 것
+  const pmPanel = (stage) => {
+    let panel = stage.nextElementSibling;
+    while (!panel.matches('.pm-code')) panel = panel.nextElementSibling;
+    return panel;
+  };
+  const pmNote = (text) => Object.assign(document.createElement('span'), { className: 'pm-n', textContent: text });
+  const pmIsOn = (toggle) => toggle.els[0].classList.contains(toggle.name);
+  const pmFlip = (toggle, on) => toggle.els.forEach((el) => el.classList.toggle(toggle.name, on));
+
+  function pmMount(stage, tree) {
+    const panel = pmPanel(stage);
+    const code = panel.querySelector('code');
+    const made = { code, toggles: new Map(), refs: {} };
+    code.replaceChildren();
+    panel.classList.toggle('pm-raw', tree.raw != null);
+    if (tree.raw != null) { // JS가 그리는 모형처럼 클래스를 누를 수 없는 것
+      stage.innerHTML = tree.raw;
+      code.textContent = tree.code;
+    } else {
+      stage.replaceChildren(...pmBuild(tree, made, 0, '', true));
+      code.lastChild.textContent = code.lastChild.textContent.trimEnd();
+    }
+    pmToggles.set(stage, [...made.toggles.values()]);
+    pmLast.set(stage, null);
+    panel.querySelector('.pm-why').innerHTML = '';
+    stage.dispatchEvent(new Event('pm:change'));
+    return made.refs;
+  }
+  function pmBuild(node, made, depth, path, shown, row) {
+    const { code } = made;
+    return (node.each || [row]).map((data, i) => {
+      const val = (x) => (typeof x === 'function' ? x(data) : x);
+      const inCode = shown && i === 0;
+      const tag = node.tag || 'div';
+      const el = document.createElement(tag);
+      const tw = node.c ? node.c.split(' ') : [];
+      const kids = val(node.k);
+      const pad = '  '.repeat(depth);
+      el.className = [val(node.v) ?? (kids || tag !== 'div' ? '' : 'blk'), ...tw].filter(Boolean).join(' ');
+      pmClasses.set(el, tw);
+      if (node.as) pmRoles.set(el, node.as);
+      if (!inCode) pmCopies.add(el);
+      if (inCode) code.append(pad + '<' + tag);
+      tw.forEach((name, j) => {
+        const key = path + ' ' + name;
+        if (!made.toggles.has(key)) made.toggles.set(key, { els: [], name, line: code.textContent.split('\n').length + (node.cn ? 1 : 0) });
+        const toggle = made.toggles.get(key);
+        toggle.els.push(el);
+        if (!inCode) return;
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.className = 'tw';
+        b.textContent = name;
+        b.setAttribute('aria-pressed', 'true');
+        b.addEventListener('click', () => pmPress(el.closest('.pm-stage'), toggle, b));
+        if (!node.cn) code.append(j ? ' ' : ' class="', b);
+        else code.append(j ? '' : ' class="', '\n' + pad + '  ', b, node.cn[name] ? pmNote(' '.repeat(Math.max(3, 34 - name.length)) + '← ' + node.cn[name]) : '');
+      });
+      if (inCode && tw.length) code.append(node.cn ? '\n' + pad + '"' : '"');
+      const said = inCode && node.n ? pmNote('   ← ' + node.n) : '';
+      const ref = node.ref && (made.refs[node.ref] ||= { els: [], text: null });
+      if (ref) ref.els.push(el);
+      if (kids) {
+        if (inCode) code.append('>', said, '\n');
+        kids.forEach((child, j) => el.append(...pmBuild(child, made, depth + 1, path + '/' + j, inCode, data)));
+        if (inCode) code.append(pad + '</' + tag + '>\n');
+      } else {
+        const text = document.createTextNode(val(node.t) || '');
+        el.textContent = text.data;
+        if (ref && inCode) ref.text = text;
+        if (inCode) code.append('>', text, '</' + tag + '>', said, '\n');
+      }
+      return el;
+    });
+  }
+  function pmPress(stage, toggle, button) {
+    const before = pmBox(stage);
+    const on = !pmIsOn(toggle);
+    pmFlip(toggle, on);
+    button.setAttribute('aria-pressed', String(on));
+    // 눌렀는데 모형이 그대로면 그 이유를 적어요. 달라졌으면 무엇이 달라졌는지 적고, 적을 게 없으면 지워요.
+    const same = pmMoved(before, pmBox(stage)) < PM_SEEN;
+    pmLast.set(stage, same ? toggle : null);
+    pmExplain(stage);
+    const said = same ? '' : pmChange(stage, toggle);
+    if (said) pmPanel(stage).querySelector('.pm-why').innerHTML = `<b>${pmName(toggle.name, '을', '를')} ${on ? '켰어요' : '껐어요'}.</b> ${said}`;
+    stage.dispatchEvent(new Event('pm:change'));
+  }
+
+  // 모형 안 모든 요소의 자리와 크기. 글자의 자리(정렬이나 줄바꿈만 바뀌는 경우)와 가로 스크롤이 생겼는지도 같이 봐요.
+  function pmBox(stage) {
+    const o = stage.getBoundingClientRect();
+    const range = document.createRange();
+    return [...stage.querySelectorAll('*')].flatMap((e) => {
+      const r = e.getBoundingClientRect();
+      const box = [r.left - o.left, r.top - o.top, r.width, r.height, getComputedStyle(e).overflowX !== 'visible' && e.scrollWidth > e.clientWidth ? 99 : 0];
+      if (e.firstChild && e.firstChild.nodeType === 3) {
+        range.selectNodeContents(e);
+        const t = range.getBoundingClientRect();
+        box.push(t.left - o.left, t.top - o.top, t.width, t.height);
+      }
+      return box;
+    });
+  }
+  // 두 상태에서 가장 많이 움직인 값(px). 2px보다 작으면 눈에 안 보이니 그대로인 것으로 봐요.
+  const pmMoved = (a, b) => a.reduce((most, n, i) => Math.max(most, Math.abs(n - b[i])), 0);
+  const PM_SEEN = 2;
+  // 이 클래스를 켜고 끌 때 모형이 얼마나 달라지나. 실제로 해 보고 되돌려요.
+  function pmEffect(stage, toggle) {
+    const a = pmBox(stage);
+    pmFlip(toggle);
+    const b = pmBox(stage);
+    pmFlip(toggle);
+    return pmMoved(a, b);
+  }
+  // 이 브라우저가 justify-items를 grid가 아닌 블록에도 적용하나. 최근에 생긴 동작이라 브라우저마다 달라요.
+  const pmBlockJustify = (() => {
+    const box = document.createElement('div');
+    box.style.cssText = 'position:absolute;visibility:hidden;width:100px;justify-items:center';
+    box.innerHTML = '<div style="width:10px;height:1px"></div>';
+    document.body.append(box);
+    const yes = box.firstChild.getBoundingClientRect().left - box.getBoundingClientRect().left > 1;
+    box.remove();
+    return yes;
+  })();
+
+  // 조사 고르기. 숫자는 한자음으로 읽어요(0 영, 1 일, 3 삼, 6 육, 7 칠, 8 팔은 받침이 있어요).
+  const pmBatchim = (word) => {
+    const last = word.at(-1);
+    if (/\d/.test(last)) return '013678'.includes(last);
+    if (/[가-힣]/.test(last)) return (last.charCodeAt(0) - 0xac00) % 28 > 0;
+    return /(col|wrap|full|between|hidden|block|transition)$/.test(word); // 콜 랩 풀 비트윈 히든 블록 트랜지션
+  };
+  const pmJosa = (word, withBatchim, without) => word + (pmBatchim(word) ? withBatchim : without);
+  const pmName = (name, withBatchim, without) => `<code>${name}</code>${pmBatchim(name) ? withBatchim : without}`;
+
+  // 클래스가 딸린 곳. 이름이 -로 끝나면 그렇게 시작하는 클래스 전부예요.
+  const PM_ON = {
+    flex: ['flex-col', 'flex-row', 'flex-wrap'],
+    grid: ['justify-items-center', 'grid-cols-'],
+    box: ['gap-', 'justify-center', 'justify-between', 'items-center'],
+    inFlex: ['shrink-0', 'flex-1'],
+    inGrid: ['justify-self-start', 'col-span-', 'col-start-', 'row-span-', 'row-start-'],
+    inBox: ['min-w-0'],
+  };
+  const pmOn = (base) => Object.keys(PM_ON).find((where) => PM_ON[where].some((p) => (p.endsWith('-') ? base.startsWith(p) : base === p)));
+  // 넓을 때(lg:) 같은 속성을 덮어쓰는 클래스
+  const PM_OVER = {
+    'flex-col': ['lg:flex-row', '방향을 가로로 덮어쓰고 있어요', '그보다 좁을 때의 방향이에요'],
+    'gap-3': ['lg:gap-6', '간격을 덮어쓰고 있어요', '그보다 좁을 때의 간격이에요'],
+    'hidden': ['lg:flex', '숨김을 풀고 있어요', '그보다 좁을 때 숨기는 역할이에요'],
+  };
+
+  // 눌렀는데 그대로인 이유. 클래스가 켜진 상태에서 살펴봐요. 그대로라는 건 켜든 끄든 모습이 같다는 뜻이에요.
+  function pmWhy(stage, toggle) {
+    const wasOn = pmIsOn(toggle);
+    pmFlip(toggle, true);
+    const found = pmReasons(stage, toggle.els[0], toggle.name);
+    pmFlip(toggle, wasOn);
+    return found;
+  }
+  function pmReasons(stage, el, name) {
+    const parent = el.parentElement;
+    const base = name.replace(/^lg:/, '');
+    const own = (x) => pmClasses.get(x) || [];
+    const has = (x, c) => x.classList.contains(c);
+    const off = (x, c) => own(x).includes(c) && !has(x, c); // 코드에는 있는데 지금 꺼진 클래스
+    const css = (x) => getComputedStyle(x);
+    const rect = (x) => x.getBoundingClientRect();
+    const width = (x) => rect(x).width;
+    const inner = (x) => x.clientWidth - parseFloat(css(x).paddingLeft) - parseFloat(css(x).paddingRight);
+    const kids = [...el.children].filter((k) => css(k).display !== 'none'); // 보이는 자식만
+    const lines = (side) => new Set(kids.map((k) => Math.round(rect(k)[side]))).size;
+    const lgOn = inner(stage) >= 520;
+    const who = (x, fallback) => pmRoles.get(x) || fallback;
+    const self = `이 요소(<code>&lt;${el.localName}&gt;</code>)`;
+    // 가운데로 옮길 때 움직이는 거리는 남는 폭의 절반이에요. 남는 폭이 4px보다 작으면 옮겨도 눈에 안 보여요.
+    const fills = (x) => inner(x.parentElement) - width(x) < 2 * PM_SEEN;
+    const all = (x) => (width(x) >= inner(x.parentElement) - 0.5 ? '다' : '거의 다'); // 1~2px 모자라게 채운 경우
+    const whyFills = (x, whose) => (off(x, 'max-w-80') ? ` ${whose}<code>max-w-80</code>이 꺼져 있어서 폭에 제한이 없어요.`
+      : inner(x.parentElement) <= 320.5 ? ' 부모가 20rem(320px)보다 좁아서 그래요.' : ' 부모 폭이 20rem(320px)과 거의 같아서 그래요.');
+    // 왜 flex나 grid가 아닌지: 클래스가 꺼져 있거나, lg:라서 아직 적용 전이거나
+    const layoutOff = (x) => {
+      const c = own(x).find((n) => /^(lg:)?(flex|grid)$/.test(n));
+      if (!c) return 'flex나 grid가 아니에요';
+      if (!has(x, c)) return `${pmName(c, '이', '가')} 꺼져 있어요`;
+      return c.startsWith('lg:') && !lgOn ? `${pmName(c, '이', '가')} 아직 적용되지 않아요(부모 폭이 520px보다 좁아요)` : `${pmName(c, '이', '가')} 적용되지 않는 상태예요`;
+    };
+    const gapCls = own(el).find((c) => c.startsWith('gap-'));
+    const noGap = !gapCls || !has(el, gapCls);
+    const gapSaid = gapCls ? ` 지금은 ${pmName(gapCls, '이', '가')} 꺼져 있어요.` : ' 지금은 위아래 간격을 주는 클래스가 없어요.';
+    const out = [];
+    const say = (id, html, show) => out.push({ id, html, show });
+
+    // 1) 이 클래스가 애초에 적용되지 않는 상황
+    if (css(el).display === 'none' && !['hidden', 'flex', 'grid', 'inline-block'].includes(base)) {
+      const hider = has(el, 'lg:hidden') && lgOn ? 'lg:hidden' : 'hidden';
+      say('not-shown', `이 요소가 지금 화면에 없어요(${pmName(hider, '이', '가')} 숨기고 있어요). 보이지 않는 요소는 클래스를 바꿔도 달라질 게 없어요.`);
+      return out;
+    }
+    if (name.startsWith('lg:') && !lgOn) say('lg-off', '이 모형에서 <code>lg:</code>가 붙은 클래스는 부모 폭이 520px 이상일 때만 적용돼요. 지금은 그보다 좁아요.');
+    const where = pmOn(base);
+    const isBox = (x) => ['flex', 'grid'].includes(css(x).display);
+    if (where === 'flex' && css(el).display !== 'flex') {
+      say('needs-flex', `${pmName(name, '은', '는')} flex에 딸린 설정이라서 <code>flex</code>가 있어야 동작해요. 지금은 같은 요소의 ${layoutOff(el)}.`);
+    } else if (where === 'grid' && css(el).display !== 'grid' && !(base === 'justify-items-center' && pmBlockJustify)) {
+      say('needs-grid', `${pmName(name, '은', '는')} grid에 딸린 설정이라서 <code>grid</code>가 있어야 동작해요. 지금은 같은 요소의 ${layoutOff(el)}.`);
+    } else if (where === 'box' && !isBox(el)) {
+      say('needs-flex-or-grid', `${pmName(name, '은', '는')} flex나 grid에 딸린 설정이에요. 지금은 같은 요소의 ${layoutOff(el)}.`);
+    } else if (where === 'inFlex' && css(parent).display !== 'flex') {
+      say('needs-flex-parent', `${pmName(name, '은', '는')} flex의 자식일 때만 동작해요. 지금은 부모의 ${layoutOff(parent)}.`);
+    } else if (where === 'inGrid' && css(parent).display !== 'grid' && !(pmBlockJustify && base === 'justify-self-start' && css(el).display !== 'inline')) {
+      say('needs-grid-parent', `${pmName(name, '은', '는')} grid의 자식일 때만 동작해요. 지금은 부모의 ${layoutOff(parent)}.`);
+    } else if (where === 'inBox' && !isBox(parent)) {
+      say('needs-flex-parent', `<code>min-w-0</code>이 푸는 하한(내용보다 좁아지지 않기)은 flex나 grid의 자식에게만 있어요. 지금은 부모의 ${layoutOff(parent)}. 그래서 하한 자체가 없어요.`);
+    }
+    if (out.length) return out;
+
+    // 2) 넓을 때의 클래스가 같은 속성을 덮어쓰는 상황
+    const over = PM_OVER[name];
+    if (over && has(el, over[0]) && lgOn) {
+      say('overridden', `지금은 부모 폭이 520px 이상이라 ${pmName(over[0], '이', '가')} ${over[1]}. ${pmName(name, '은', '는')} ${over[2]}.`);
+      return out;
+    }
+
+    // 3) 적용은 되지만 지금 상태에서는 결과가 같은 상황
+    if (name === 'grid' && own(el).includes('justify-items-center')) {
+      if (!has(el, 'justify-items-center')) {
+        say('grid-no-center', '열을 따로 나누지 않은 grid는 자식을 블록 요소일 때와 같은 자리에 같은 폭으로 놓아요. 지금은 가운데로 모으는 <code>justify-items-center</code>가 꺼져 있어서, <code>grid</code>가 있어도 없어도 같은 모습이에요.');
+      } else if (fills(kids[0])) {
+        say('child-fills', `지금은 자식이 부모 폭을 ${all(kids[0])} 채우고 있어요. 가운데로 모을 남는 폭이 없어서, <code>grid</code>가 있어도 없어도 같은 모습이에요.` + whyFills(kids[0], '자식의 '));
+      } else if (pmBlockJustify) {
+        say('block-justify', '지금 쓰는 브라우저는 <code>justify-items-center</code>를 grid가 아닌 보통 블록 요소에도 적용해요. 그래서 <code>grid</code>를 꺼도 자식이 가운데에 그대로 있어요. 최근에 생긴 동작이라 브라우저에 따라 안 될 수 있으니, 실제 코드에서는 <code>grid</code>와 같이 써요.');
+      }
+    } else if (name === 'grid') {
+      const cols = own(el).find((c) => c.includes('grid-cols-'));
+      if (noGap && lines('left') === 1 && lines('top') === kids.length) {
+        const span = cols && has(el, cols) && kids.some((k) => own(k).some((c) => c.startsWith('col-span-') && has(k, c)));
+        say('grid-like-block', (span ? '자식마다 열을 전부 가로질러 차지하는 grid는' : '열이 하나인 grid는') + ' 자식을 위에서 아래로 쌓아요. 블록 요소가 원래 쌓이는 모습과 같아서, 눈에 보이는 차이는 간격뿐이에요.' + gapSaid
+          + (!cols || span ? '' : !has(el, cols) ? ` 열을 나누는 <code>${cols}</code>도 꺼져 있어요.`
+            : cols.startsWith('lg:') ? ` <code>${cols}</code>는 부모 폭이 520px 이상일 때만 열을 나눠요.`
+              : ' 부모가 좁아서 7rem(112px)짜리 열이 하나만 들어가요.'));
+      }
+    } else if (name === 'flex' && own(el).includes('justify-center')) {
+      if (fills(kids[0])) {
+        say('child-fills', `지금은 자식이 부모 폭을 ${all(kids[0])} 채우고 있어요. 가운데로 모을 남는 폭이 없어서, <code>flex</code>가 있어도 없어도 같은 모습이에요.` + whyFills(kids[0], '자식의 '));
+      } else if (!has(el, 'justify-center') && has(kids[0], 'w-full')) {
+        say('flex-no-center', '지금은 가운데로 모으는 <code>justify-center</code>가 꺼져 있어요. 자식은 <code>w-full</code>로 자기 폭을 직접 정하고 있어서, flex 안에서도 블록 요소일 때와 같은 자리에 같은 폭으로 놓여요.');
+      }
+    } else if (name === 'flex') {
+      if (css(el).flexDirection === 'column' && noGap) {
+        say('flex-like-block', '세로 방향 flex는 자식을 위에서 아래로 쌓아요. 블록 요소가 원래 쌓이는 모습과 같아서, 눈에 보이는 차이는 간격뿐이에요.' + gapSaid);
+      }
+    } else if (name === 'lg:flex-row') {
+      if (!has(el, 'flex-col')) {
+        say('row-is-default', 'flex의 방향은 기본값이 가로예요. 지금은 <code>flex-col</code>이 꺼져 있어서, <code>lg:flex-row</code>가 없어도 가로로 놓여요.');
+      }
+    } else if (name === 'flex-wrap') {
+      if (lines('top') === 1) {
+        say('fits-one-line', '지금은 상자들이 한 줄에 다 들어가요. <code>flex-wrap</code>은 자리가 모자랄 때만 다음 줄로 넘기니까, 지금은 있어도 없어도 같아요.');
+      }
+    } else if (name.startsWith('grid-cols-[repeat')) {
+      if (lines('left') === 1) {
+        say('one-column', '지금은 부모가 좁아서 7rem(112px)짜리 열이 하나만 들어가요. 열이 하나면 열을 나누지 않은 것과 같은 모습이에요.');
+      }
+    } else if (name.startsWith('grid-cols-[auto')) {
+      const row = kids[0];
+      const lost = off(row, 'grid') ? 'grid' : off(row, 'grid-cols-subgrid') ? 'grid-cols-subgrid' : '';
+      if (lost && has(row, 'col-span-3')) {
+        say('cols-unused', `이 열들은 행이 <code>grid-cols-subgrid</code>로 물려받아야 쓰여요. 지금은 행의 ${pmName(lost, '이', '가')} 꺼져 있어서 아무도 이 열을 쓰지 않아요. 행마다 세 열을 통째로 가로질러 차지하니까, 열을 나누든 안 나누든 행의 폭이 같아요.`);
+      }
+    } else if (name === 'col-span-3') {
+      const cols = own(parent).find((c) => c.includes('grid-cols-'));
+      if (cols && !has(parent, cols)) {
+        say('nothing-to-span', `<code>col-span-3</code>은 행이 부모의 열 세 개를 가로질러 차지하게 해요. 지금은 부모의 <code>${cols}</code>가 꺼져 있어서 나뉜 열이 없어요. 걸치든 안 걸치든 행의 폭이 부모 폭과 같아요.`);
+      }
+    } else if (name === 'grid-cols-subgrid') {
+      if (css(parent).display !== 'grid') {
+        say('subgrid-no-parent', `<code>grid-cols-subgrid</code>는 부모 grid의 열을 물려받는 설정이에요. 지금은 부모의 ${layoutOff(parent)}. 물려받을 열이 없어서, 열을 나누지 않은 grid와 같아요.`);
+      } else if (off(el, 'col-span-3')) {
+        say('subgrid-one-track', '<code>grid-cols-subgrid</code>는 이 행이 차지한 부모의 열을 물려받아요. 지금은 <code>col-span-3</code>이 꺼져 있어서 이 행이 부모의 열 하나만 차지해요. 물려받은 열이 하나라서, 열을 나누지 않은 grid와 같아요.');
+      }
+    } else if (name === 'justify-center' || name === 'justify-items-center') {
+      if (kids[0] && fills(kids[0])) {
+        say('child-fills', (name === 'justify-center'
+          ? `<code>justify-center</code>는 남는 폭을 좌우로 나눠서 자식을 가운데에 놓아요. 지금은 자식이 부모 폭을 ${all(kids[0])} 채우고 있어서 남는 폭이 없어요.`
+          : `<code>justify-items-center</code>는 자식을 칸의 가운데에 놓아요. 지금은 자식이 부모 폭을 ${all(kids[0])} 채우고 있어서 옮길 자리가 없어요.`) + whyFills(kids[0], '자식의 '));
+      }
+    } else if (name === 'justify-between') {
+      if (kids.length <= 1) {
+        say('one-child', '<code>justify-between</code>은 첫 자식을 왼쪽 끝에, 마지막 자식을 오른쪽 끝에 놓아요. 지금은 보이는 자식이 하나뿐이라 왼쪽에 그대로 있어요.');
+      } else if (rect(kids.at(-1)).right >= rect(el).right - PM_SEEN && lines('top') === 1) {
+        say('no-free-space', '<code>justify-between</code>은 남는 폭을 자식들 사이에 넣어요. 지금은 자식들이 부모 폭을 다 채우고 있어서 남는 폭이 없어요.');
+      }
+    } else if (base === 'items-center') {
+      const lead = `${pmName(name, '은', '는')} 같은 줄에 놓인 요소들을 세로로 가운데에 맞춰요.`;
+      if (css(el).display === 'grid' && lines('left') === 1 && lines('top') === kids.length) {
+        say('one-per-row', `${lead} 지금은 한 줄에 요소가 하나씩이라 줄 높이가 그 요소 높이와 같아요. 움직일 자리가 없어요.`);
+      } else {
+        // 가운데로 옮길 때 움직이는 거리는 높이 차이의 절반이에요.
+        const heights = kids.map((k) => rect(k).height);
+        const apart = Math.max(...heights) - Math.min(...heights);
+        if (apart < 2 * PM_SEEN) say('same-height', `${lead} 지금은 그 요소들의 높이가 ${apart < 0.5 ? '모두' : '거의'} 같아서 움직일 자리가 없어요.`);
+      }
+    } else if (base === 'gap-x-6') {
+      if (lines('left') === 1) {
+        say('one-column-gap', `${pmName(name, '은', '는')} 열과 열 사이, 곧 가로 간격이에요. 지금은 열이 하나라서 사이가 없어요.`);
+      }
+    } else if (base.startsWith('gap-')) {
+      if (kids.length <= 1) {
+        say('one-child', `${pmName(name, '은', '는')} 자식과 자식 사이에 간격을 만들어요. 지금은 보이는 자식이 하나뿐이라 사이가 없어요.`);
+      }
+    } else if (name === 'mx-auto') {
+      if (fills(el)) {
+        say('self-fills', `<code>mx-auto</code>는 남는 폭을 좌우 바깥 여백으로 반씩 나눠서 상자를 가운데에 놓아요. 지금은 상자가 부모 폭을 ${all(el)} 채우고 있어서 나눌 남는 폭이 없어요.` + whyFills(el, ''));
+      }
+    } else if (name === 'w-full') {
+      if (css(parent).display === 'block') {
+        say('block-fills', `블록 요소는 원래 부모 폭을 다 채워요. 지금은 부모의 ${layoutOff(parent)}. 그래서 이 요소가 그냥 블록이고, <code>w-full</code>이 없어도 같은 폭이에요.`);
+      } else if (css(parent).display === 'grid' && !has(parent, 'justify-items-center')) {
+        say('grid-stretches', 'grid의 자식은 기본값이 칸을 꽉 채우기예요. 지금은 부모의 <code>justify-items-center</code>가 꺼져 있어서, <code>w-full</code>이 없어도 칸을 채워요. 가운데 정렬을 켜면 자식이 내용 폭으로 줄어들기 때문에 <code>w-full</code>이 필요해져요.');
+      }
+    } else if (name === 'max-w-80') {
+      if (inner(parent) <= 320.5) {
+        say('narrower-than-max', '지금은 부모가 20rem(320px)보다 좁아요. 상자가 최대 폭에 닿지 않아서 <code>max-w-80</code>이 있어도 없어도 같아요.');
+      } else if (inner(parent) < 320 + PM_SEEN) {
+        say('about-max', '지금은 부모 폭이 20rem(320px)과 거의 같아요. 최대 폭에 걸려도 줄어드는 폭이 1px 안팎이라 눈에 안 보여요.');
+      } else if (width(el) < 319.5) {
+        say('content-sized', '지금은 상자가 내용만큼만 차지하고 있어요. 20rem(320px)보다 작아서 최대 폭에 닿지 않아요.' + (off(el, 'w-full') ? ' <code>w-full</code>이 꺼져 있어서 그래요.' : ''));
+      }
+    } else if (/^w-\d+$/.test(name)) {
+      const px = Number(name.slice(2)) * 4;
+      if (css(el).display === 'inline') {
+        say('inline-no-size', `${self}는 글자처럼 줄 안에 놓이는 요소(inline)라서 폭을 줘도 적용되지 않아요. 지금은 부모의 ${layoutOff(parent)}. flex나 grid의 자식이 되면 폭을 가질 수 있어요.`);
+      } else if (css(parent).display === 'flex' && width(el) < px - 0.5) {
+        const me = who(el, '이 요소');
+        say('squeezed', `지금은 ${pmJosa(me, '이', '가')} 눌려서 ${pmName(name, '의', '의')} ${px}px을 지키지 못하고 있어요. <code>shrink-0</code>이 꺼져 있어서 폭이 모자란 만큼 줄어들었고, 그렇게 정해진 폭은 ${pmName(name, '이', '가')} 없을 때와 같아요.`);
+      }
+    } else if (/^mb-\d+$/.test(name)) {
+      if (css(el).display === 'inline') {
+        say('inline-no-size', `${self}는 글자처럼 줄 안에 놓이는 요소(inline)라서 위아래 바깥 여백을 줘도 적용되지 않아요.` + (off(el, 'inline-block') ? ' <code>inline-block</code>이 꺼져 있어서 그래요.' : ''));
+      }
+    } else if (name === 'text-right') {
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      const pad = parseFloat(css(el).paddingLeft) + parseFloat(css(el).paddingRight) + parseFloat(css(el).borderLeftWidth) + parseFloat(css(el).borderRightWidth);
+      if (range.getBoundingClientRect().width >= width(el) - pad - 1) {
+        const w = own(el).find((c) => /^w-\d+$/.test(c));
+        say('no-room-to-align', '<code>text-right</code>는 상자 안에서 글자를 오른쪽 끝에 붙여요. 지금은 상자 폭이 글자 폭과 같아서 밀 자리가 없어요.' + (w && !has(el, w) ? ` ${pmName(w, '이', '가')} 꺼져 있어서 상자가 글자만큼만 차지해요.` : ''));
+      }
+    } else if (name === 'shrink-0') {
+      const mate = [...parent.children].find((x) => x !== el && own(x).includes('flex-1'));
+      const over = Math.max(...[...parent.children].map((x) => rect(x).right)) - rect(parent).right;
+      const lead = '<code>shrink-0</code>은 폭이 모자랄 때 "나는 안 줄어들겠다"는 표시예요. ';
+      const me = who(el, '이 요소');
+      // 내용보다 좁아질 수는 없어요. 가장 긴 낱말 폭을 재려고 잠깐 폭을 바꿨다가 되돌려요.
+      el.style.cssText = 'width:min-content;flex:none';
+      const least = width(el);
+      el.removeAttribute('style');
+      if (width(el) <= least + 0.5) {
+        say('at-minimum', lead + `지금은 ${pmJosa(me, '이', '가')} 이미 자기 내용만큼의 폭이라 더 줄어들 수 없어요. 그래서 있어도 없어도 같아요.`);
+      } else if (over <= 0.5) {
+        const other = mate && who(mate, '옆의 요소');
+        say('nothing-to-shrink', lead + (mate && has(mate, 'flex-1') && has(mate, 'min-w-0')
+          ? `지금은 ${pmJosa(other, '이', '가')} <code>flex-1</code>(출발 폭 0)과 <code>min-w-0</code>(하한 없음)을 갖고 있어서, 부모가 좁아져도 ${pmJosa(other, '이', '가')} 전부 양보해요. ${pmJosa(me, '이', '가')} 줄어들 차례가 오지 않아요.`
+          : rect(parent).right > rect(stage).right - 11 ? '지금은 부모가 자식들을 다 담을 만큼 넓어져서, 그 안에서는 아무도 줄어들 필요가 없어요. 대신 부모가 통째로 점선 밖으로 넘쳐 있어요.'
+            : '지금은 부모 폭이 넉넉해서 아무도 줄어들 필요가 없어요.'));
+      } else if (over < PM_SEEN + 0.5) {
+        say('barely-short', lead + `지금은 모자란 폭이 2px도 안 돼서, ${pmJosa(me, '이', '가')} 그만큼 줄어들어도 눈에 안 보여요.`);
+      }
+    } else if (name === 'min-w-0') {
+      say('above-minimum', '<code>min-w-0</code>은 자리가 모자라서 상자가 내용보다 좁아져야 할 때만 차이가 나요. 지금은 상자가 그 안의 가장 긴 낱말보다 좁아질 일이 없어요.'
+        + (stage.dataset.pm === 'switcher-f' ? ' 이 모형은 글자가 짧아서 부모 폭을 줄여도 차이가 안 보여요. 긴 낱말이 들어 있는 Sidebar의 flex 모형에서 볼 수 있어요.' : ''));
+    } else if (name === 'flex-1') {
+      const over = Math.max(...[...parent.children].map((x) => rect(x).right)) > rect(parent).right + 0.5;
+      // 내용이 원래 차지하려는 폭. 재려고 잠깐 폭을 바꿨다가 되돌려요.
+      const had = width(el);
+      el.style.cssText = 'width:max-content;flex:none';
+      const wants = width(el);
+      el.removeAttribute('style');
+      if (over || had >= wants - 0.5) {
+        say('no-free-space', '<code>flex-1</code>은 남는 폭을 가져가는 클래스예요. 지금은 폭이 모자라서 가져갈 남는 폭이 없어요.' + (over ? ' 자식들이 부모 밖으로 넘치고 있어요.' : ''));
+      } else {
+        say('content-already-fills', `지금은 ${who(el, '이 요소')}의 내용이 길어서, <code>flex-1</code>이 없어도 남는 폭을 다 채워요. <code>flex-1</code>은 내용이 짧아도 남는 폭을 가져가게 하는 클래스라서, 내용이 짧을 때 차이가 나요.`,
+          { when: '내용이 짧을 때', tweak: (copy) => { copy.textContent = '짧은 글'; } });
+      }
+    } else if (name === 'lg:flex-1') {
+      if (css(parent).flexDirection === 'column') {
+        say('column-no-free-space', '지금은 방향이 세로예요. <code>flex-1</code>은 방향을 따라 남는 공간을 나눠 갖는데, 세로로는 부모 높이가 내용만큼이라 남는 공간이 없어요.');
+      }
+    } else if (name === 'wrap-break-word') {
+      say('word-fits', '<code>wrap-break-word</code>는 줄바꿈할 곳이 없는 낱말이 상자보다 길 때만 그 낱말을 중간에서 끊어요. 지금은 가장 긴 낱말이 상자 안에 다 들어가서 끊을 일이 없어요.');
+    } else if (name === 'lg:col-start-2') {
+      if (!has(el, 'lg:row-start-1')) {
+        say('auto-placed', '지금은 이 클래스가 없어도 요약 상자가 2열에 놓여요. HTML에서 제목 바로 다음 자식이라, 자동 배치가 제목 옆 칸인 1행 2열에 놓기 때문이에요. <code>lg:row-start-1</code>이 켜져 있으면 요약 상자가 먼저 1열을 차지하기 때문에 <code>lg:col-start-2</code>가 필요해져요.');
+      }
+    } else if (name === 'lg:row-span-2') {
+      if (new Set([...parent.children].map((x) => Math.round(rect(x).left))).size === 1) {
+        say('span-alone', '<code>lg:row-span-2</code>는 요약 상자를 두 행에 걸치게 해요. 지금은 열이 하나뿐이라 요약 상자 옆에 놓인 요소가 없어요. 걸친 두 행의 높이를 요약 상자 혼자 정하니까, 걸치지 않은 것과 같은 모습이에요.');
+      }
+    } else if (name === 'lg:row-start-1') {
+      if (has(el, 'lg:col-start-2')) {
+        say('auto-placed', '지금은 이 클래스가 없어도 요약 상자가 첫 행에 놓여요. HTML에서 제목 바로 다음에 있고 2열의 첫 행이 비어 있어서, 자동 배치가 거기에 놓기 때문이에요. <code>lg:row-start-1</code>은 HTML 순서가 바뀌어도 첫 행에 붙여 두는 안전장치예요.');
+      }
+    } else if (name === 'content-center') {
+      const spare = rect(el).height - kids.reduce((sum, k) => sum + rect(k).height, 0);
+      if (spare < 2 * PM_SEEN) {
+        say('no-spare-height', '<code>content-center</code>는 남는 높이를 위아래로 나눠서 내용을 세로 가운데에 놓아요. 지금은 <code>h-32</code>가 꺼져 있어서 상자 높이가 내용 높이와 같아요. 나눌 남는 높이가 없어요.');
+      } else {
+        say('block-align-unsupported', '<code>content-center</code>를 보통 블록 요소에 쓰는 건 2024년부터 지원되기 시작한 동작이에요. 지금 쓰는 브라우저는 아직 지원하지 않아서, 있어도 없어도 내용이 위쪽에 붙어 있어요. 이런 브라우저까지 맞추려면 부모에 <code>grid</code>를 같이 써요.');
+      }
+    } else if (name === 'overflow-x-auto') {
+      if (el.scrollWidth <= el.clientWidth + 1) {
+        say('nothing-overflows', '<code>overflow-x-auto</code>는 내용이 가로로 넘칠 때만 스크롤을 만들어요. 지금은 자식들이 부모 폭 안에 다 들어가 있어서 넘치는 것이 없어요.');
+      }
+    } else if (name === 'pointer-coarse:min-h-12') {
+      if (!matchMedia('(pointer: coarse)').matches) {
+        say('not-coarse', '<code>pointer-coarse:</code>가 붙은 클래스는 손가락으로 누르는 기기에서만 적용돼요. 지금 기기는 마우스처럼 정밀한 포인터를 쓰고 있어요. 폰에서 열면 버튼 높이가 48px 이상이 돼요.');
+      }
+    }
+    if (!out.length) say('unknown', '지금 상태에서는 이 클래스가 있어도 없어도 요소의 크기와 위치가 같아요.');
+    return out;
+  }
+
+  // 모양이 아니라 동작을 바꾸는 클래스. 눌러도 모형은 그대로라서, 지금 어떻게 동작하는지를 적어요.
+  const pmNoHover = () => (matchMedia('(hover: hover)').matches ? '' : ' 다만 지금 기기는 호버가 안 되는 기기라서, 켜져 있어도 적용되지 않아요.');
+  function pmSnapSaid(on, stage) {
+    const box = stage.firstElementChild;
+    const card = box.firstElementChild;
+    const lead = '이 클래스는 모양이 아니라 스크롤이 멈추는 자리를 정해요. ';
+    if (getComputedStyle(box).overflowX === 'visible') return lead + '지금은 <code>overflow-x-auto</code>가 꺼져 있어서 가로 스크롤 자체가 안 돼요.';
+    if (box.scrollWidth <= box.clientWidth) return lead + '지금은 가로로 넘치는 카드가 없어서 스크롤할 것이 없어요.';
+    if (!box.classList.contains('snap-x')) return lead + '지금은 <code>snap-x</code>가 꺼져 있어서, 카드를 옆으로 넘기다 손을 떼면 아무 데서나 멈춰요.';
+    if (!card.classList.contains('snap-start')) return lead + '지금은 카드의 <code>snap-start</code>가 꺼져 있어서 멈출 자리가 정해져 있지 않아요. 아무 데서나 멈춰요.';
+    return lead + (box.classList.contains('snap-mandatory')
+      ? '지금은 어디서 손을 떼도 가장 가까운 카드의 시작점에 맞춰 멈춰요. 카드를 옆으로 넘겨 보세요.'
+      : '지금은 <code>snap-mandatory</code>가 꺼져 있어서, 카드의 시작점 가까이에서 손을 뗐을 때만 거기에 맞춰 멈춰요.');
+  }
+  const PM_ACTS = {
+    'transition': (on) => `이 클래스는 모양이 아니라 바뀌는 속도를 정해요. 지금 버튼에 마우스를 올리거나 눌러 보면 ${on ? '0.15초에 걸쳐 부드럽게 바뀌어요' : '중간 과정 없이 한 번에 바뀌어요'}.`,
+    'hover:-translate-y-1': (on) => `이 클래스는 마우스를 올렸을 때만 적용돼요. 지금 올려 보면 버튼이 ${on ? '4px 위로 떠올라요' : '위로 떠오르지 않아요'}.` + pmNoHover(),
+    'hover:shadow-lg': (on) => `이 클래스는 마우스를 올렸을 때만 적용돼요. 지금 올려 보면 버튼에 그림자가 ${on ? '생겨요' : '생기지 않아요'}.` + pmNoHover(),
+    'focus-visible:-translate-y-1': (on) => `이 클래스는 탭 키로 버튼에 초점이 갔을 때만 적용돼요. 지금 탭 키로 가 보면 버튼이 ${on ? '4px 위로 떠올라요' : '위로 떠오르지 않아요'}.`,
+    'active:scale-95': (on) => `이 클래스는 버튼을 누르고 있는 동안만 적용돼요. 지금 누르고 있어 보면 버튼이 ${on ? '95% 크기로 작아져요' : '작아지지 않아요'}.`,
+    'snap-x': pmSnapSaid,
+    'snap-mandatory': pmSnapSaid,
+    'snap-start': pmSnapSaid,
+  };
+
+  // 눌러서 모형이 달라졌을 때, 무엇이 왜 달라졌는지. 헷갈리기 쉬운 클래스만 적어요. 문장은 눌러서 생긴 결과를 재서 골라요.
+  function pmChange(stage, toggle) {
+    const { name } = toggle;
+    const el = toggle.els[0];
+    const isOn = pmIsOn(toggle);
+    const parent = el.parentElement;
+    const rect = (x) => x.getBoundingClientRect();
+    const width = (x) => Math.round(rect(x).width);
+    const sticksOut = (x) => rect(x).right > rect(x.parentElement).right + 1; // 상자가 부모 밖으로
+    const spills = (x) => x.scrollWidth > x.clientWidth + 1; // 글자가 상자 밖으로
+    const who = (x, fallback) => pmRoles.get(x) || fallback;
+    // 방금 누르기 전의 값
+    const was = (read) => {
+      pmFlip(toggle);
+      const value = read();
+      pmFlip(toggle);
+      return value;
+    };
+    if (name === 'wrap-break-word') {
+      if (was(() => spills(el)) === spills(el)) return '';
+      return isOn
+        ? '긴 낱말이 상자 폭에 맞게 중간에서 끊겨서 상자 안에 들어왔어요. <code>wrap-break-word</code>는 줄바꿈할 곳이 없는 낱말이 넘칠 때만 그 낱말을 끊어요.'
+        : '긴 낱말이 상자 밖으로 삐져나왔어요. 띄어쓰기 없는 낱말은 줄바꿈할 곳이 없어서, 상자가 낱말보다 좁으면 그대로 넘쳐요.';
+    }
+    if (name === 'min-w-0' && getComputedStyle(parent).display === 'flex' && el.previousElementSibling) {
+      const side = el.previousElementSibling;
+      const sideWas = was(() => width(side));
+      const me = who(el, '이') + ' 상자가';
+      if (!isOn) {
+        return `${me} 그 안의 가장 긴 낱말보다 좁아질 수 없게 됐어요. 그래서 상자가 넓어졌어요.`
+          + (sticksOut(el) ? ' 자리가 모자라서 부모(점선) 밖으로 넘쳐요.' : '')
+          + (width(side) < sideWas - 1 ? ` 모자란 폭만큼 ${pmJosa(who(side, '옆의 요소'), '이', '가')} 눌렸어요(${sideWas}px → ${width(side)}px).` : '');
+      }
+      return `${me} 내용보다 좁아질 수 있게 돼서, 남은 폭에 맞게 줄어들었어요.`
+        + (spills(el) ? ' 대신 줄바꿈할 곳이 없는 긴 낱말은 상자 밖으로 삐져나와요. 이건 <code>wrap-break-word</code>가 막아요.' : '');
+    }
+    if (name === 'shrink-0') {
+      const widthWas = was(() => width(el));
+      if (width(el) === widthWas) return '';
+      const me = who(el, '이 요소');
+      const out = [...parent.children].some(sticksOut);
+      return isOn
+        ? `${pmJosa(me, '이', '가')} 다시 자기 폭을 지켜요(${widthWas}px → ${width(el)}px).` + (out ? ' 대신 자리가 모자라서 부모(점선) 밖으로 넘쳐요.' : ' 모자란 폭은 옆의 요소가 줄어들어서 메워요.')
+        : `${pmJosa(me, '도', '도')} 줄어들 수 있게 됐어요. 폭이 모자란 만큼 눌렸어요(${widthWas}px → ${width(el)}px).`;
+    }
+    return '';
+  }
+
+  // 차이를 볼 수 있는 가장 가까운 방법. 짐작하지 않고 실제로 해 본 것만 알려 줘요: 부모 폭만 → 다른 클래스 하나만 → 둘 다.
+  function pmHint(stage, toggle) {
+    const slider = stage.closest('td, .demo').querySelector('input[type="range"]');
+    const WIDTHS = slider ? [[slider.min, '부모 폭을 끝까지 줄인', '부모 폭을 끝까지 줄였을 때'], [slider.max, '부모 폭을 끝까지 넓힌', '부모 폭을 끝까지 넓혔을 때']] : [];
+    // 알려 줄 만한 차이는 4px 이상만 쳐요.
+    const test = (px) => {
+      const keep = stage.style.width;
+      if (px) stage.style.width = px + 'px';
+      const yes = pmEffect(stage, toggle) >= 4;
+      stage.style.width = keep;
+      return yes;
+    };
+    for (const [px, say, when] of WIDTHS) {
+      if (test(px)) return { px, when, html: `${say} 다음 다시 눌러 보면 차이가 보여요.` };
+    }
+    // 다른 클래스 하나를 바꾸면 되는 경우. 꺼 둔 것을 다시 켜는 쪽, 부모 폭은 그대로 두는 쪽을 먼저 권해요.
+    const all = pmToggles.get(stage);
+    const ways = [];
+    for (const [px, say, when] of [[0, '', ''], ...WIDTHS]) {
+      for (const other of all) {
+        if (other === toggle) continue;
+        const isOn = pmIsOn(other);
+        pmFlip(other);
+        if (test(px)) {
+          const twice = all.filter((o) => o.name === other.name).length > 1; // 코드에 두 번 나오는 이름은 몇째 줄인지 붙이고 뒤로 미뤄요
+          ways.push({ px, other, cost: (twice ? 4 : 0) + (isOn ? 2 : 0) + (px ? 1 : 0),
+            when: `${twice ? `코드 ${other.line}번째 줄의 ` : ''}${pmName(other.name, '을', '를')} ${px ? (isOn ? '끄고 ' : '켜고 ') + when : (isOn ? '껐을 때' : '켰을 때')}`,
+            html: `먼저 ${twice ? `코드 ${other.line}번째 줄의 ` : ''}${pmName(other.name, '을', '를')} ${px ? (isOn ? '끄고' : '켜고') + ' ' + say : (isOn ? '끈' : '켠')} 다음 다시 눌러 보면 차이가 보여요.` });
+        }
+        pmFlip(other);
+      }
+    }
+    if (ways.length) return ways.sort((x, y) => x.cost - y.cost)[0];
+    return { html: '' };
+  }
+
+  // 눌렀는데 그대로였던 클래스가 지금도 모형을 안 바꾸면 이유를 적어요. 부모 폭이 달라질 때도 다시 불러서,
+  // 차이가 나는 폭에서는 숨기고 다시 그대로인 폭으로 돌아오면 보여 줘요. 무엇을 기억할지는 누를 때만 바뀌어요.
+  function pmExplain(stage) {
+    const out = pmPanel(stage).querySelector('.pm-why');
+    const last = pmLast.get(stage);
+    if (!last || pmEffect(stage, last) >= PM_SEEN) {
+      out.innerHTML = '';
+      return;
+    }
+    const head = `<b>${pmName(last.name, '을', '를')} ${pmIsOn(last) ? '켰는데' : '껐는데'} 모형이 그대로예요.</b> `;
+    if (PM_ACTS[last.name]) {
+      out.innerHTML = head + PM_ACTS[last.name](pmIsOn(last), stage);
+      return;
+    }
+    const reasons = pmWhy(stage, last);
+    const hint = pmHint(stage, last);
+    out.innerHTML = head + reasons.map((r) => r.html).join(' 게다가 ') + (hint.html && '<br>' + hint.html);
+    pmShow(stage, last, out, reasons.find((r) => r.show)?.show || hint);
+  }
+  // 말로만 하면 떠올리기 어려우니, 차이가 나는 경우를 실제로 그려서 이유 아래에 붙여요.
+  // 지금 모형을 그대로 베낀 다음 조건(부모 폭, 다른 클래스, 내용)을 바꾸고, 이 클래스가 있을 때와 없을 때를 나란히 보여 줘요.
+  function pmShow(stage, toggle, out, how) {
+    if (!how.when) return;
+    const all = [...stage.querySelectorAll('*')];
+    const spots = (t) => t.els.map((el) => all.indexOf(el));
+    const draw = (on) => {
+      const copy = document.createElement('div');
+      copy.className = 'stage cq pm-stage pm-copy';
+      copy.style.width = how.px ? how.px + 'px' : stage.style.width;
+      copy.append(stage.firstElementChild.cloneNode(true));
+      const made = [...copy.querySelectorAll('*')];
+      if (how.other) spots(how.other).forEach((i) => made[i].classList.toggle(how.other.name));
+      spots(toggle).forEach((i) => made[i].classList.toggle(toggle.name, on));
+      if (how.tweak) spots(toggle).forEach((i) => how.tweak(made[i]));
+      const figure = document.createElement('figure');
+      figure.innerHTML = `<figcaption>${pmName(toggle.name, '이', '가')} ${on ? '있을 때' : '없을 때'}</figcaption>`;
+      figure.append(copy);
+      return figure;
+    };
+    const shows = document.createElement('div');
+    shows.className = 'pm-shows';
+    shows.innerHTML = `<p>${how.when}는 이렇게 달라져요.</p>`;
+    shows.append(draw(true), draw(false));
+    out.append(shows);
+    // 이유 상자가 좁아서 그린 것끼리 차이가 안 나면 보여 주지 않아요.
+    const [a, b] = [...shows.querySelectorAll('.pm-copy')].map(pmBox);
+    if (pmMoved(a, b) < 4) shows.remove();
+  }
+  document.querySelectorAll('.pm-stage').forEach((stage) => new ResizeObserver(() => pmExplain(stage)).observe(stage));
+
+  // 막대 행. 세 행은 글자만 다르고 클래스가 같아서, 코드에는 첫 행만 적고 클래스를 누르면 세 행이 같이 바뀌어요.
+  const BAR_ROWS = [['여성시대', '92%', 'f92'], ['더쿠', '64%', 'f64'], ['FM코리아', '8%', 'f8']];
+  const barRows = (li, label, track, num) => ({ tag: 'li', c: li, each: BAR_ROWS, n: '세 행이 같은 클래스예요', k: (row) => [
+    { tag: 'span', c: label, t: row[0], as: '라벨', ref: 'label' },
+    { c: track, v: 'track ' + row[2], n: '막대', as: '막대' },
+    { tag: 'span', c: num, t: row[1], v: 'num', as: '숫자' },
+  ] });
+  const BAR = {
+    'm-auto': {
+      kind: 'bad',
+      note: '라벨과 숫자의 글자 수가 달라서 막대의 시작점과 끝점이 행마다 달라요. flex는 행끼리 서로의 폭을 모르기 때문이에요. 위 숫자도 행마다 달라요.',
+      tree: { tag: 'ul', c: 'grid gap-3', v: 'bars', k: [barRows('flex items-center gap-3', '', 'flex-1', '')] },
+    },
+    'm-fixed': {
+      kind: 'good',
+      note: `폭을 고정하면 flex도 정렬돼요. 다만 자식 3개에 클래스를 따로 달아야 해요. 막대 자리에 글자가 들어가는 구조라면 <code>shrink-0</code>과 <code>min-w-0</code>도 필요해져요. 그 경우는 ${ref('practice')}의 Sidebar에서 볼 수 있어요.`,
+      tree: { tag: 'ul', c: 'grid gap-3', v: 'bars', k: [barRows('flex items-center gap-3', 'w-24', 'flex-1', 'w-12 text-right')] },
+    },
+    'm-grid': {
+      kind: 'good',
+      note: '화면은 "flex (폭 고정)"과 같아요. 달라진 건 코드예요. 세 열의 폭이 부모 한 줄에 모여 있어서 고칠 곳이 한 곳이에요.',
+      tree: { tag: 'ul', c: 'grid gap-3', v: 'bars', k: [barRows('grid grid-cols-[6rem_1fr_3rem] items-center gap-3', '', '', 'text-right')] },
+    },
+    'm-sub': {
+      kind: 'good',
+      note: '폭을 정하지 않았는데도 맞아요. 모든 행이 부모의 열을 함께 쓰기 때문이에요. 첫 라벨을 길게 바꾸면 세 행의 막대가 같이 밀려요. flex로는 못 하는 일이에요.',
+      tree: { tag: 'ul', c: 'grid grid-cols-[auto_1fr_auto] gap-3', v: 'bars', k: [barRows('col-span-3 grid grid-cols-subgrid items-center', '', '', 'text-right')] },
+    },
+  };
+  let barRefs;
+  function barLabel() {
+    barRefs.label.els[0].textContent = barRefs.label.text.data = $('barLabel').value;
+  }
+  function barMeasure() {
+    $('barMeas').textContent = [...$('barStage').querySelectorAll('li')].map((li) => {
+      const [lab, track, num] = [...li.children].map((el) => String(Math.round(el.getBoundingClientRect().width)).padStart(3));
+      return `라벨 ${lab}px · 막대 ${track}px · 숫자 ${num}px`;
+    }).join('\n');
+  }
+  seg('barSeg', (v) => {
+    barRefs = pmMount($('barStage'), BAR[v].tree);
+    barLabel();
+    note('barNote', BAR[v].kind, BAR[v].note);
+    barMeasure();
+  });
+  $('barLabel').addEventListener('input', () => { barLabel(); pmExplain($('barStage')); barMeasure(); });
+  $('barStage').addEventListener('pm:change', barMeasure);
+  widthSlider('barW', 'barStage');
+  new ResizeObserver(barMeasure).observe($('barStage'));
+
+  // 태그
+  const TAGS = ['CSS', '타입스크립트', '접근성', '반응형 레이아웃', 'a11y', '디자인 토큰', '테일윈드'].map((t) => ({ tag: 'li', t, v: 'blk' }));
+  const TAG = {
+    't-flex': ['good', '태그마다 자기 글자만큼만 차지하고 자리가 없으면 다음 줄로 넘어가요. 폭을 줄여도 그대로 잘 흘러요.', 'flex flex-wrap gap-2'],
+    't-grid3': ['bad', '모든 칸이 같은 폭이라 "CSS"는 빈 공간이 남고 "반응형 레이아웃"은 좁아요. 폭을 줄이면 긴 태그가 두 줄로 꺾이고, 더 줄이면 "타입스크립트"처럼 띄어쓰기 없는 태그는 글자가 칸 밖으로 삐져나와요.', 'grid grid-cols-3 gap-2'],
+    't-auto': ['bad', '<code>auto-fit</code>으로 열 개수는 자동이 되지만 칸 폭은 여전히 같아요. 카드 목록에는 좋고 길이가 제각각인 태그에는 안 맞아요.', 'grid grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] gap-2'],
+  };
+  seg('tagSeg', (v) => {
+    pmMount($('tagStage'), { tag: 'ul', c: TAG[v][2], k: TAGS });
+    note('tagNote', TAG[v][0], TAG[v][1]);
+  });
+  widthSlider('tagW', 'tagStage');
+
+  // 묶음 유무. 아래 "간격을 누가 갖나"와 같은 내용물을 써요.
+  const heroTitle = (c) => ({ tag: 'h1', c, t: '첫마디가 반응을 정해요', v: 'h' });
+  const heroText = (c) => ({ tag: 'p', c, t: '커뮤니티별로 어떤 제목이 통하는지 미리 확인해요.', v: 'd' });
+  const heroButton = (c, n) => ({ tag: 'a', c, t: '시작하기', v: 'cta', n });
+  const heroCard = { tag: 'figure', t: '카드 (서비스 화면 예시)', v: 'fig' };
+  const HERO = {
+    flat: {
+      kind: 'bad',
+      note: `자식 4개가 형제라서 2열이 되는 순간 제목|설명 / 버튼|카드로 흩어져요. grid가 바로 아래 자식을 순서대로 칸에 넣기 때문이에요. 자식마다 위치를 지정해서 고칠 수는 있지만(${ref('mismatch')}의 방법 1), 요소가 하나 추가될 때마다 다시 손봐야 해요.`,
+      tree: { c: 'grid gap-3 lg:grid-cols-2 lg:items-center', k: [heroTitle(), heroText(), heroButton('justify-self-start'), heroCard] },
+    },
+    grouped: {
+      kind: 'good',
+      note: '파란 점선이 묶음이에요. 부모가 보는 자식은 2개뿐이라 "왼쪽 글, 오른쪽 카드"가 한 줄로 끝나요. 좁을 때는 같은 구조가 그대로 세로로 쌓여요.',
+      tree: { c: 'grid gap-3 lg:grid-cols-2 lg:items-center', k: [
+        { c: 'grid gap-2', v: 'grp', n: '묶음', k: [heroTitle(), heroText(), heroButton('justify-self-start')] },
+        heroCard,
+      ] },
+    },
+  };
+  seg('heroSeg', (v) => {
+    pmMount($('heroStage'), HERO[v].tree);
+    note('heroNote', HERO[v].kind, HERO[v].note);
+  });
+  widthSlider('heroW', 'heroStage');
+  new ResizeObserver(() => {
+    $('heroBadge').textContent = isWide('heroStage') ? '데스크톱 배치 (2열)' : '모바일 배치 (1열)';
+  }).observe($('heroStage'));
+
+  // 간격으로 묶음 찾기: 최소와 최대의 중간보다 넓은 간격을 경계로 봄
+  const SP_NAMES = ['제목', '설명', '버튼', '카드 제목', '카드 내용', '출처'];
+  const spGaps = [8, 8, 32, 8, 8];
+  function spRender() {
+    const min = Math.min(...spGaps), max = Math.max(...spGaps);
+    const isEdge = (g) => max > min && g > (min + max) / 2;
+    const groups = [[0]];
+    spGaps.forEach((g, i) => (isEdge(g) ? groups.push([i + 1]) : groups.at(-1).push(i + 1)));
+    const marked = groups.length > 1;
+    $('sp').innerHTML = groups.map((grp) =>
+      `<div class="spg${marked ? ' on' : ''}" style="margin-top:${grp[0] ? spGaps[grp[0] - 1] : 0}px">` +
+      grp.map((i, k) => `<div class="blk" style="margin-top:${k ? spGaps[i - 1] : 0}px">${SP_NAMES[i]}</div>`).join('') +
+      '</div>').join('');
+    $('spCtl').innerHTML = spGaps.map((g, i) =>
+      `<li><span>${SP_NAMES[i]} ↔ ${SP_NAMES[i + 1]}</span><button class="plain" type="button" data-i="${i}">${g}px</button></li>`).join('');
+    if (marked) {
+      const edges = spGaps.filter(isEdge).join(', ');
+      note('spNote', 'good', `간격 ${edges}px가 주변보다 넓어요. 거기가 경계라서 묶음이 ${groups.length}개예요.`);
+    } else {
+      note('spNote', 'bad', '간격이 모두 같아서 간격만으로는 묶음을 알 수 없어요. 이럴 때는 의미로 묶어요.');
+    }
+  }
+  $('spCtl').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    const i = Number(b.dataset.i);
+    spGaps[i] = { 8: 16, 16: 32, 32: 8 }[spGaps[i]];
+    spRender();
+  });
+  spRender();
+
+  // div 지워 보기
+  const dtBox = (kids) => ({ c: 'grid gap-2', k: kids });
+  const dtTitle = (t) => ({ tag: 'h3', t, v: 'strong' });
+  const dtLine = (t) => ({ tag: 'p', t });
+  const dtPair = [{ tag: 'span', t: '여성시대' }, { tag: 'span', t: '92%' }];
+  const DT = {
+    a: {
+      on: dtBox([dtTitle('제목'), { v: 'grp', n: '확인하려는 div', k: [dtLine('설명 문단이에요.')] }, dtLine('버튼')]),
+      off: dtBox([dtTitle('제목'), dtLine('설명 문단이에요.'), dtLine('버튼')]),
+      gone: ['good', '아무것도 달라지지 않았어요. 필요 없는 div였으니 지워요.'],
+    },
+    b: {
+      on: dtBox([dtTitle('반응 지수'), { c: 'flex justify-between', v: 'grp', n: '확인하려는 div', k: dtPair }, dtLine('출처 문구')]),
+      off: dtBox([dtTitle('반응 지수'), ...dtPair, dtLine('출처 문구')]),
+      gone: ['bad', '이름과 숫자가 세로로 쌓였어요. 둘을 한 줄에 놓던 div라서 필요해요.'],
+    },
+  };
+  let dtCase, dtGone = false;
+  function dtRender() {
+    pmMount($('dtStage'), DT[dtCase][dtGone ? 'off' : 'on']);
+    $('dtBtn').textContent = dtGone ? 'div 되돌리기' : 'div 지우기';
+    if (dtGone) note('dtNote', ...DT[dtCase].gone);
+    else note('dtNote', '', '파란 점선이 확인하려는 div예요. 지워 보세요.');
+  }
+  seg('dtSeg', (v) => { dtCase = v; dtGone = false; dtRender(); });
+  $('dtBtn').addEventListener('click', () => { dtGone = !dtGone; dtRender(); });
+
+  // 작업 순서
+  const STEPS = [
+    { cls: '', note: '두 시안을 나란히 놓아요. 아직 아무것도 쓰지 않아요.' },
+    { cls: 'show-d', note: '좌우로 갈라지는 지점은 데스크톱에서 가장 잘 보여요. 갈라지는 두 덩어리에 상자를 그려요.' },
+    { cls: 'show-d show-m', note: `같은 상자를 모바일에 그려 봐요. 상자 안 요소들이 붙어 있고 순서가 같으면 그대로 써요. 안 맞으면 ${ref('mismatch')}의 방법이 필요해요.` },
+    { cls: 'show-d show-m', note: '상자대로 HTML을 써요. 클래스는 아직 없어요.',
+      code: '<div>            ← 두 상자의 공통 부모\n  <div>          ← 상자 1\n    <h1>제목</h1>\n    <p>설명</p>\n    <a>버튼</a>\n  </div>\n  <figure>카드</figure>   ← 상자 2\n</div>' },
+    { cls: 'show-d show-m', note: '모바일 스타일을 먼저 쓰고 <code>lg:</code>를 더해요. 데스크톱 작업은 부모 한 줄에 클래스를 추가하는 일로 끝나요.',
+      code: '<div class="grid gap-8 lg:grid-cols-2 lg:items-center">\n  <div class="grid gap-4">\n    <h1>제목</h1>\n    <p>설명</p>\n    <a>버튼</a>\n  </div>\n  <figure>카드</figure>\n</div>' },
+  ];
+  seg('stepSeg', (v) => {
+    const s = STEPS[v];
+    $('wf').className = 'wf ' + s.cls;
+    note('stepNote', '', s.note);
+    $('stepCode').textContent = s.code || '';
+  });
+
+  // 간격을 누가 갖나
+  const GAP = {
+    mg: {
+      kind: 'bad',
+      note: '좁을 때는 멀쩡해요. 넓어지면 버튼의 아래 여백이 상자 안에 남아서 글 묶음이 카드보다 위로 치우쳐요. 고치려면 <code>lg:mb-0</code>으로 여백을 하나씩 지워야 해요.',
+      tree: { c: 'grid lg:grid-cols-2 lg:items-center lg:gap-x-6', k: [
+        { v: 'grp', k: [heroTitle('mb-2'), heroText('mb-2'), heroButton('mb-7 inline-block', '카드와의 간격을 버튼이 갖고 있어요')] },
+        heroCard,
+      ] },
+    },
+    gp: {
+      kind: 'good',
+      note: '간격이 부모에 있어서 묶음 가장자리에 여백이 없어요. 넓어져도 상자가 내용에 딱 맞고 세로 가운데 정렬이 그대로 맞아요.',
+      tree: { c: 'grid gap-3 lg:grid-cols-2 lg:items-center lg:gap-6', k: [
+        { c: 'grid gap-2', v: 'grp', k: [heroTitle(), heroText(), heroButton('justify-self-start')] },
+        heroCard,
+      ] },
+    },
+  };
+  seg('gapSeg', (v) => {
+    pmMount($('gapStage'), GAP[v].tree);
+    note('gapNote', GAP[v].kind, GAP[v].note);
+  });
+  widthSlider('gapW', 'gapStage');
+
+  // 기본형 모형
+  const SITES = ['여성시대', '더쿠', 'FM코리아', '인스티즈', '디시인사이드', '뽐뿌'].map((t) => ({ t }));
+  const three = [{ t: '제목' }, { t: '설명' }, { t: '버튼' }];
+  const cen = (c) => ({ c, v: 'cen', k: [{ t: '내용' }] });
+  // 긴 본문은 줄바꿈되지만 그 안의 영문 낱말은 줄바꿈할 곳이 없어요(wrap-break-word가 있어야 끊겨요). 마침표나 하이픈이 들어가면 브라우저에 따라 거기서 끊기니 글자만 써요. 부모 폭을 줄이면 min-w-0과 shrink-0의 차이가 보여요.
+  const REST = '나머지 전부. 긴 본문은 띄어쓰기마다 줄바꿈돼서 상자 폭에 맞게 접혀요. 하지만 reactionScoreByAge 같은 띄어쓰기 없는 긴 낱말은 줄바꿈할 곳이 없어요.';
+  const PM = {
+    'stack-g': { c: 'grid gap-2', k: three },
+    'stack-f': { c: 'flex flex-col gap-2', k: three },
+    'cluster-f': { c: 'flex flex-wrap gap-2', k: SITES },
+    'cluster-g': { c: 'grid grid-cols-[repeat(auto-fit,minmax(7rem,1fr))] gap-2', k: SITES },
+    'switcher-g': { c: 'grid gap-2 lg:grid-cols-2', k: [{ t: '글' }, { t: '카드' }] },
+    'switcher-f': { c: 'flex flex-col gap-2 lg:flex-row', k: [{ t: '글', c: 'min-w-0 lg:flex-1' }, { t: '카드', c: 'min-w-0 lg:flex-1' }] },
+    'center-m': cen('mx-auto max-w-80 px-4'),
+    'center-f': { c: 'flex justify-center', k: [cen('w-full max-w-80 px-4')] },
+    'center-g': { c: 'grid justify-items-center', k: [cen('w-full max-w-80 px-4')] },
+    'center-b': { c: 'h-32 content-center', k: [cen('mx-auto max-w-80 px-4')] },
+    'sidebar-g': { c: 'grid grid-cols-[8rem_minmax(0,1fr)] gap-2', k: [{ t: '고정 폭' }, { t: REST, c: 'wrap-break-word' }] },
+    'sidebar-f': { c: 'flex gap-2', k: [{ t: '고정 폭', c: 'w-32 shrink-0', as: '사이드바' }, { t: REST, c: 'min-w-0 flex-1 wrap-break-word', as: '본문' }] },
+  };
+  document.querySelectorAll('.pm-stage[data-pm]').forEach((stage) => pmMount(stage, PM[stage.dataset.pm]));
+
+  // 기본형 모형: 이름마다 슬라이더가 하나씩 있고, 같은 칸 안의 모형들 부모 폭을 같이 바꿔요.
+  document.querySelectorAll('.pmW').forEach((slider) => {
+    const apply = () => slider.closest('td').querySelectorAll('.pm-stage').forEach((el) => { el.style.width = slider.value + 'px'; });
+    slider.addEventListener('input', apply);
+    apply();
+  });
+
+  // 상자가 안 맞을 때: 세 가지 방법
+  const ROWS = [['여성시대', 92], ['더쿠', 64], ['FM코리아', 8]];
+  const TABLE = '<table class="mini"><tr><th>커뮤니티</th><th>반응 지수</th></tr>' +
+    ROWS.map(([c, s]) => `<tr><td>${c}</td><td>${s}%</td></tr>`).join('') + '</table>';
+  const CARDS = '<ul class="minicards">' +
+    ROWS.map(([c, s]) => `<li><b>${c}</b><span>${s}%</span></li>`).join('') + '</ul>';
+  const S3 = {
+    css: {
+      note: '요소는 그대로고 요약 상자의 자리만 옮겨요. 좁을 때는 제목과 본문 사이에 있고 넓을 때는 오른쪽 열로 빠져요.',
+      tree: { c: 'grid gap-3 lg:grid-cols-[1fr_10rem]', k: [
+        { tag: 'h1', t: '제목', v: 'h' },
+        { tag: 'aside', c: 'lg:col-start-2 lg:row-span-2 lg:row-start-1', t: '요약 상자', v: 'as' },
+        { tag: 'p', t: '본문이 여기에 이어져요.' },
+      ] },
+    },
+    hide: {
+      note: '햄버거 버튼과 가로 메뉴가 둘 다 HTML에 있고 폭에 따라 하나만 보여요.',
+      tree: { tag: 'header', c: 'flex items-center justify-between', k: [
+        { tag: 'b', t: '첫마디' },
+        { tag: 'button', c: 'lg:hidden', t: '☰', v: 'btn' },
+        { tag: 'nav', c: 'hidden gap-4 lg:flex', k: [{ tag: 'a', t: '기능' }, { tag: 'a', t: '요금' }, { tag: 'a', t: '로그인' }] },
+      ] },
+    },
+    js: {
+      note: '좁으면 카드, 넓으면 표를 그려요. 한쪽만 HTML에 존재하고 데이터(<code>rows</code>)는 하나예요.',
+      code: "const isDesktop = useMediaQuery('(min-width: 1024px)');\nreturn isDesktop\n  ? <ReactionTable rows={rows} />\n  : <ReactionCards rows={rows} />;",
+    },
+  };
+  let s3Mode, s3Wide;
+  function s3Render() {
+    const wide = isWide('s3Stage');
+    $('s3Badge').textContent = s3Mode === 'js'
+      ? (wide ? '넓음 → 표만 그려짐' : '좁음 → 카드만 그려짐')
+      : (wide ? '넓음' : '좁음');
+    // 방법 1·2는 CSS가 알아서 바꿔요. 방법 3만 폭이 경계를 넘을 때 JS가 다시 그려요.
+    if (s3Mode !== 'js' || wide === s3Wide) return;
+    s3Wide = wide;
+    pmMount($('s3Stage'), { raw: wide ? TABLE : CARDS, code: S3.js.code });
+  }
+  seg('s3Seg', (v) => {
+    s3Mode = v;
+    s3Wide = null;
+    if (v !== 'js') pmMount($('s3Stage'), S3[v].tree);
+    s3Render();
+    note('s3Note', '', S3[v].note);
+  });
+  widthSlider('s3W', 's3Stage');
+  new ResizeObserver(s3Render).observe($('s3Stage'));
+
+  // 호버와 터치: 지금 기기의 입력 장치
+  const mqHover = matchMedia('(hover: hover)');
+  const mqFine = matchMedia('(pointer: fine)');
+  const mqCoarse = matchMedia('(pointer: coarse)');
+  function showDevice() {
+    const pointer = mqFine.matches ? '정밀함 (마우스)' : mqCoarse.matches ? '뭉툭함 (손가락)' : '없음';
+    $('devOut').innerHTML = `호버: <b>${mqHover.matches ? '됨' : '안 됨'}</b> · 포인터: <b>${pointer}</b>`;
+  }
+  [mqHover, mqFine, mqCoarse].forEach((mq) => mq.addEventListener('change', showDevice));
+  showDevice();
+
+  // 호버와 터치: 버튼 하나, 좌우 넘김
+  pmMount($('fxStage'), { tag: 'button', t: '올리거나, 탭 키로 이동하거나, 눌러 보세요', v: 'fx',
+    c: 'transition hover:-translate-y-1 hover:shadow-lg focus-visible:-translate-y-1 active:scale-95 pointer-coarse:min-h-12',
+    cn: {
+      'hover:-translate-y-1': '호버가 되는 기기에서만',
+      'focus-visible:-translate-y-1': '키보드도 같은 효과',
+      'active:scale-95': '누르는 동안',
+      'pointer-coarse:min-h-12': '손가락이면 크게',
+    } });
+  pmMount($('snapStage'), { c: 'flex snap-x snap-mandatory gap-2.5 overflow-x-auto', v: 'snapbox', k: [
+    { c: 'w-[70%] shrink-0 snap-start', each: [1, 2, 3, 4], t: String, v: 'snapcard', as: '카드', n: '카드 4장이 같은 클래스예요' },
+  ] });
+
+  // 목록과 상세 (예시 데이터)
+  const MD = [
+    ['여성시대', '반응 지수 92%. 이 화면에 상세 내용이 들어가요.'],
+    ['더쿠', '반응 지수 64%. 이 화면에 상세 내용이 들어가요.'],
+    ['FM코리아', '반응 지수 8%. 이 화면에 상세 내용이 들어가요.'],
+  ];
+  MD.forEach(([name, text]) => {
+    const li = document.createElement('li');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'plain';
+    b.textContent = name;
+    b.addEventListener('click', () => {
+      $('mdList').querySelectorAll('button').forEach((x) => x.setAttribute('aria-current', String(x === b)));
+      $('mdText').textContent = name + ' — ' + text;
+      $('md').classList.add('has-sel');
+    });
+    li.append(b);
+    $('mdList').append(li);
+  });
+  $('mdBack').addEventListener('click', () => $('md').classList.remove('has-sel'));
+  widthSlider('mdW', 'mdStage');
+</script>
+</body>
+</html>
