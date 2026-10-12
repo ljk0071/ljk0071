@@ -1,0 +1,1470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>세션 인증 설계서</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+:root{color-scheme:light}[hidden]{display:none!important}img{max-width:100%}body{margin:0}
+/* Layout: 한 줄 설계 문서. 상단에 결론과 필터, 그 아래 8단계 + 관리자 + 기록이 순서대로 흐르고, 단계마다 설명 → 근거 표 → 직접 해보는 데모 순 */
+:root{
+  --bg:#F3F5F6; --surface:#FFFFFF; --sunken:#E9EDF0;
+  --ink:#13202A; --ink-2:#44535F; --ink-3:#6B7985;
+  --line:#D5DCE1; --line-2:#BCC6CE;
+  --accent:#0C6B66; --accent-ink:#FFFFFF; --accent-soft:#DCEFEC;
+  --must:#B3262F; --must-soft:#FBE6E7;
+  --rec:#8A5600; --rec-soft:#FCEFD3;
+  --opt:#37588F; --opt-soft:#E2E9F5;
+  --ok:#1E7440; --ok-soft:#DFF2E5;
+  --code-bg:#EDF1F3; --code-ink:#1B2B36;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E151A; --surface:#151F26; --sunken:#1C2831;
+    --ink:#E4EAEE; --ink-2:#AAB6BF; --ink-3:#7F8C96;
+    --line:#26333C; --line-2:#36444F;
+    --accent:#4FC3B8; --accent-ink:#04201D; --accent-soft:#12332F;
+    --must:#FF8A93; --must-soft:#3A191D;
+    --rec:#F0B65A; --rec-soft:#382A12;
+    --opt:#9DB6E8; --opt-soft:#1C283D;
+    --ok:#73D49A; --ok-soft:#14321F;
+    --code-bg:#0B1216; --code-ink:#D5DEE4;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E151A; --surface:#151F26; --sunken:#1C2831;
+  --ink:#E4EAEE; --ink-2:#AAB6BF; --ink-3:#7F8C96;
+  --line:#26333C; --line-2:#36444F;
+  --accent:#4FC3B8; --accent-ink:#04201D; --accent-soft:#12332F;
+  --must:#FF8A93; --must-soft:#3A191D;
+  --rec:#F0B65A; --rec-soft:#382A12;
+  --opt:#9DB6E8; --opt-soft:#1C283D;
+  --ok:#73D49A; --ok-soft:#14321F;
+  --code-bg:#0B1216; --code-ink:#D5DEE4;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:72px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.75;-webkit-font-smoothing:antialiased}
+.wrap{max-width:1040px;margin:0 auto;padding-inline:20px;padding-block:28px 80px}
+h1,h2,h3{text-wrap:balance;line-height:1.3;margin:0}
+h1{font-size:32px;font-weight:700;letter-spacing:-0.01em}
+h2{font-size:24px;font-weight:700}
+h3{font-size:17px;font-weight:600}
+p{margin:0}
+a{color:var(--accent)}
+code,.mono{font-family:var(--f-mono);font-size:0.9em}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}
+
+/* header */
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:0.08em;color:var(--ink-3)}
+.hero{display:grid;gap:14px;padding-block:8px 24px}
+.lead{max-width:68ch;color:var(--ink-2);font-size:16px}
+.premise{display:flex;flex-wrap:wrap;gap:8px}
+.premise span{font-size:13px;padding:3px 10px;border:1px solid var(--line-2);border-radius:999px;color:var(--ink-2);background:var(--surface)}
+
+.summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-block:8px 28px}
+.summary > div{background:var(--surface);padding:18px 20px;min-width:0}
+.summary h3{font-size:15px;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.summary ul{margin:0;padding-left:18px;color:var(--ink-2);font-size:14px;display:grid;gap:4px}
+.tag{font-family:var(--f-mono);font-size:11px;letter-spacing:0.04em;padding:1px 7px;border-radius:4px;background:var(--sunken);color:var(--ink-2);white-space:nowrap}
+
+/* legend + filters */
+.controls{display:grid;gap:14px;padding:18px 20px;border:1px solid var(--line);border-radius:12px;background:var(--surface);margin-bottom:20px}
+.legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px}
+.legend div{display:flex;gap:10px;align-items:flex-start;font-size:13px;color:var(--ink-2)}
+.filters{display:flex;flex-wrap:wrap;gap:18px;align-items:center;border-top:1px solid var(--line);padding-top:14px}
+.filters .group{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.filters .label{font-size:13px;color:var(--ink-3);margin-right:4px}
+.chip{font:inherit;font-size:13px;padding:4px 12px;border-radius:999px;border:1px solid var(--line-2);background:transparent;color:var(--ink-2);cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.count{font-size:13px;color:var(--ink-3);margin-left:auto;font-variant-numeric:tabular-nums}
+
+/* grade pills */
+.g{display:inline-flex;align-items:center;font-size:12px;font-weight:600;padding:2px 9px;border-radius:999px;white-space:nowrap}
+.g-must{background:var(--must-soft);color:var(--must)}
+.g-rec{background:var(--rec-soft);color:var(--rec)}
+.g-opt{background:var(--opt-soft);color:var(--opt)}
+.gnote{display:block;font-size:11.5px;color:var(--ink-3);margin-top:4px;white-space:normal}
+
+/* stage nav */
+.stagenav{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);border-bottom:1px solid var(--line);margin-inline:-20px;padding-inline:20px}
+.stagenav ol{list-style:none;margin:0;padding:10px 0;display:flex;gap:6px;overflow-x:auto;scrollbar-width:thin}
+.stagenav a{display:flex;gap:6px;align-items:center;text-decoration:none;color:var(--ink-2);font-size:13px;padding:5px 11px;border-radius:8px;white-space:nowrap;border:1px solid transparent}
+.stagenav a .n{font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+.stagenav a:hover{background:var(--sunken)}
+.stagenav a.active{border-color:var(--line-2);background:var(--surface);color:var(--ink)}
+
+/* stage */
+.stage{padding-block:44px 8px;border-bottom:1px solid var(--line);display:grid;gap:18px}
+.stage-head{display:grid;grid-template-columns:auto 1fr;gap:4px 16px;align-items:baseline}
+.stage-no{font-family:var(--f-mono);font-size:28px;font-weight:500;color:var(--accent);line-height:1;grid-row:span 2}
+.stage-sub{color:var(--ink-3);font-size:14px}
+.prose{display:grid;gap:12px;max-width:72ch;color:var(--ink-2)}
+.prose strong{color:var(--ink);font-weight:600}
+.callout{border:1px solid var(--line-2);border-radius:10px;padding:12px 16px;font-size:14px;color:var(--ink-2);background:var(--surface);max-width:72ch}
+
+/* req table */
+.tbl{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+.tbl table{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
+.tbl th{text-align:left;font-weight:600;font-size:12.5px;color:var(--ink-3);padding:10px 14px;border-bottom:1px solid var(--line);background:var(--sunken)}
+.tbl td{padding:12px 14px;border-bottom:1px solid var(--line);vertical-align:top;color:var(--ink-2)}
+.tbl tr:last-child td{border-bottom:0}
+.tbl td.item{color:var(--ink);font-weight:600;width:18%}
+.tbl td.who{width:9%}
+.tbl td.refs{width:22%}
+.tbl td.grade{width:13%}
+.who-tag{font-size:12px;padding:1px 8px;border-radius:4px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap}
+.refs a,.refs span.r{display:inline-block;font-family:var(--f-mono);font-size:12px;padding:1px 7px;margin:0 4px 4px 0;border-radius:4px;background:var(--sunken);color:var(--ink);text-decoration:none;white-space:nowrap}
+.refs a:hover{background:var(--accent-soft);color:var(--accent)}
+.tbl tr[hidden]{display:none}
+.empty-row td{color:var(--ink-3);font-style:italic}
+
+/* demo */
+.demo{border:1px solid var(--line-2);border-radius:14px;background:var(--surface);overflow:hidden}
+.demo-head{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:baseline;padding:14px 18px;border-bottom:1px solid var(--line);background:var(--sunken)}
+.demo-head .eyebrow{color:var(--accent)}
+.demo-body{padding:18px;display:grid;gap:16px}
+.demo-body > p{color:var(--ink-2);font-size:14px;max-width:72ch}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.field{display:grid;gap:6px;min-width:0}
+.field label,.flabel{font-size:13px;color:var(--ink-3)}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+input[type="text"],input[type="password"],input[type="number"],select,textarea{font:inherit;font-size:14px;color:var(--ink);background:var(--bg);border:1px solid var(--line-2);border-radius:8px;padding:8px 10px;width:100%;min-width:0}
+textarea{font-family:var(--f-mono);font-size:13px;min-height:96px;resize:vertical}
+input[type="range"]{width:100%;accent-color:var(--accent)}
+input[type="checkbox"],input[type="radio"]{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.check{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink-2);cursor:pointer}
+.btn{font:inherit;font-size:14px;padding:7px 14px;border-radius:8px;border:1px solid var(--line-2);background:var(--surface);color:var(--ink);cursor:pointer}
+.btn:hover{background:var(--sunken)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.primary:hover{filter:brightness(1.06)}
+.btn.small{font-size:13px;padding:4px 10px}
+.out{border:1px solid var(--line);border-radius:10px;padding:14px 16px;background:var(--bg);display:grid;gap:10px;min-width:0}
+.checks{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.checks li{display:grid;grid-template-columns:22px 1fr;gap:8px;font-size:14px;color:var(--ink-2)}
+.checks li b{color:var(--ink);font-weight:600}
+.ic{width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin-top:2px}
+.ic.ok{background:var(--ok-soft);color:var(--ok)}
+.ic.bad{background:var(--must-soft);color:var(--must)}
+.ic.warn{background:var(--rec-soft);color:var(--rec)}
+.ic.info{background:var(--opt-soft);color:var(--opt)}
+.verdict{display:inline-flex;gap:8px;align-items:center;font-weight:600;font-size:14px;padding:5px 12px;border-radius:8px;width:fit-content}
+.verdict.ok{background:var(--ok-soft);color:var(--ok)}
+.verdict.bad{background:var(--must-soft);color:var(--must)}
+.verdict.warn{background:var(--rec-soft);color:var(--rec)}
+.kv{display:grid;grid-template-columns:max-content 1fr;gap:6px 14px;font-size:14px}
+.kv dt{color:var(--ink-3)}
+.kv dd{margin:0;min-width:0;overflow-wrap:anywhere;color:var(--ink)}
+.kv dd.mono{font-size:12.5px}
+.bar{height:8px;border-radius:999px;background:var(--sunken);overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:999px;transition:width .2s}
+.bar.danger > i{background:var(--must)}
+@media (prefers-reduced-motion: reduce){.bar > i{transition:none}}
+.mini{font-size:13px;color:var(--ink-3)}
+.code{margin:0;overflow-x:auto;background:var(--code-bg);color:var(--code-ink);border-radius:10px;padding:14px 16px;font-family:var(--f-mono);font-size:12.5px;line-height:1.65;border:1px solid var(--line)}
+.code .c{color:var(--ink-3)}
+.split{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+.split > *{min-width:0}
+.cmp{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px}
+.cmp th,.cmp td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.cmp th{font-size:12.5px;color:var(--ink-3);font-weight:600}
+.scroll{overflow-x:auto}
+.devices{list-style:none;margin:0;padding:0;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.devices li{display:flex;flex-wrap:wrap;gap:8px 12px;align-items:center;padding:12px 14px;border-bottom:1px solid var(--line);background:var(--surface)}
+.devices li:last-child{border-bottom:0}
+.devices .name{font-weight:600;color:var(--ink)}
+.devices .meta{font-size:13px;color:var(--ink-3)}
+.devices .grow{flex:1;min-width:160px}
+.devices li.gone{background:var(--bg)}
+.devices li.gone .name{text-decoration:line-through;color:var(--ink-3)}
+.steps{display:grid;gap:8px;counter-reset:st;list-style:none;margin:0;padding:0}
+.steps li{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:start;font-size:14px;color:var(--ink-2)}
+.steps li::before{counter-increment:st;content:counter(st);font-family:var(--f-mono);font-size:12px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line-2);display:inline-flex;align-items:center;justify-content:center;color:var(--ink-3)}
+.logtbl{width:100%;border-collapse:collapse;font-size:13px;min-width:760px}
+.logtbl th,.logtbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.logtbl th{font-size:12px;color:var(--ink-3);font-weight:600;background:var(--sunken)}
+.logtbl td.t{font-family:var(--f-mono);font-size:12px;white-space:nowrap;color:var(--ink-3)}
+.logtbl .sample{font-size:11px;color:var(--ink-3);border:1px solid var(--line-2);border-radius:4px;padding:0 5px;margin-left:6px}
+.res-ok{color:var(--ok);font-weight:600}
+.res-bad{color:var(--must);font-weight:600}
+.res-warn{color:var(--rec);font-weight:600}
+
+/* refs */
+.refs-list{display:grid;gap:0;border:1px solid var(--line);border-radius:12px;background:var(--surface);overflow:hidden}
+.ref{display:grid;grid-template-columns:minmax(150px,220px) 1fr;gap:6px 22px;padding:18px 20px;border-bottom:1px solid var(--line)}
+.ref:last-child{border-bottom:0}
+.ref:target{background:var(--accent-soft)}
+.ref h3{font-size:15px}
+.ref .kind{font-size:12px;color:var(--ink-3);margin-top:4px}
+.ref dl{margin:0;display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;font-size:14px;color:var(--ink-2)}
+.ref dt{color:var(--ink-3)}
+.ref dd{margin:0;min-width:0}
+@media (max-width:640px){
+  h1{font-size:26px}
+  .ref{grid-template-columns:1fr}
+  .stage-no{font-size:22px}
+  .kv{grid-template-columns:1fr}
+  .kv dt{margin-top:4px}
+}
+footer{padding-top:32px;color:var(--ink-3);font-size:13px;display:grid;gap:8px;max-width:72ch}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<header class="hero">
+  <span class="eyebrow">설계 문서 · 2026년 10월 12일 기준</span>
+  <h1>세션 인증 설계서</h1>
+  <p class="lead">아이디와 비밀번호로 로그인하고, 서버가 세션을 관리하는 구조입니다. 브라우저는 세션 ID를 쿠키로, 앱은 Authorization 헤더로 보냅니다. 만료, 폐기, 인가 같은 서버 규칙은 둘이 똑같습니다. 일반 사용자는 MFA 없이 쓰고, 관리자에게는 법이 요구하는 조건을 더합니다. 각 항목에 근거 문서 번호와 등급을 붙였고, 단계마다 직접 조작해 볼 수 있는 데모가 있습니다.</p>
+  <div class="premise" aria-label="전제">
+    <span>Spring Boot 4 + Kotlin</span><span>WAS 2대 + PostgreSQL</span><span>OAuth 미사용 (1st-party)</span><span>브라우저 쿠키 · 앱 헤더</span><span>일반 사용자 MFA 없음</span>
+  </div>
+</header>
+
+<section class="summary" aria-label="한눈에 보는 결론">
+  <div>
+    <h3><span class="tag">브라우저</span>쿠키로 운반</h3>
+    <ul>
+      <li><code>__Host-</code> 쿠키에 Secure, HttpOnly, SameSite=Strict</li>
+      <li>CSRF는 Origin 검사와 고정 커스텀 헤더</li>
+      <li>nonce 기반 CSP로 XSS 실행 차단</li>
+      <li>선택: DBSC로 기기 바인딩</li>
+    </ul>
+  </div>
+  <div>
+    <h3><span class="tag">앱</span>헤더로 운반</h3>
+    <ul>
+      <li>비밀번호는 네이티브 화면에서 입력</li>
+      <li>세션 ID는 Keychain, Keystore에 보관</li>
+      <li>Authorization 헤더로 전송, 쿠키 저장 끔</li>
+      <li>선택: DPoP로 기기 바인딩</li>
+    </ul>
+  </div>
+  <div>
+    <h3><span class="tag">서버 공통</span>같은 세션 테이블</h3>
+    <ul>
+      <li>256비트 세션 ID, 저장소에는 해시만</li>
+      <li>로그인과 재인증마다 새 ID</li>
+      <li>무활동 1시간, 최대 24시간 (관리자 15분, 4시간)</li>
+      <li>객체 단위 인가, 비밀번호 변경 시 다른 세션 폐기</li>
+    </ul>
+  </div>
+</section>
+
+<section class="controls" aria-label="등급 설명과 필터">
+  <div class="legend">
+    <div><span class="g g-must">필수</span><span>법(고시)이나 표준의 최소 수준. ASVS L1, NIST의 SHALL, RFC의 MUST.</span></div>
+    <div><span class="g g-rec">권장</span><span>표준의 권장 수준. ASVS L2, NIST의 SHOULD, RFC의 SHOULD, OWASP 우선 권고.</span></div>
+    <div><span class="g g-opt">선택</span><span>"보안 최우선" 결정에 따라 우리가 더 얹은 것. ASVS L3 포함.</span></div>
+  </div>
+  <div class="filters">
+    <div class="group" role="group" aria-label="등급 필터">
+      <span class="label">등급</span>
+      <button type="button" class="chip" data-grade="must" aria-pressed="true">필수</button>
+      <button type="button" class="chip" data-grade="rec" aria-pressed="true">권장</button>
+      <button type="button" class="chip" data-grade="opt" aria-pressed="true">선택</button>
+    </div>
+    <div class="group" role="group" aria-label="대상 필터">
+      <span class="label">대상</span>
+      <button type="button" class="chip" data-client="all" aria-pressed="true">전체</button>
+      <button type="button" class="chip" data-client="browser" aria-pressed="false">브라우저</button>
+      <button type="button" class="chip" data-client="app" aria-pressed="false">앱</button>
+    </div>
+    <span class="count" id="rowCount"></span>
+  </div>
+</section>
+
+<nav class="stagenav" aria-label="단계 이동">
+  <ol>
+    <li><a href="#s1"><span class="n">01</span>로그인 시도</a></li>
+    <li><a href="#s2"><span class="n">02</span>자격 증명 검증</a></li>
+    <li><a href="#s3"><span class="n">03</span>세션 발급</a></li>
+    <li><a href="#s4"><span class="n">04</span>세션 전달</a></li>
+    <li><a href="#s5"><span class="n">05</span>요청마다 확인</a></li>
+    <li><a href="#s6"><span class="n">06</span>인가</a></li>
+    <li><a href="#s7"><span class="n">07</span>재인증</a></li>
+    <li><a href="#s8"><span class="n">08</span>종료와 폐기</a></li>
+    <li><a href="#admin"><span class="n">+</span>관리자</a></li>
+    <li><a href="#log"><span class="n">+</span>기록</a></li>
+    <li><a href="#refs"><span class="n">§</span>근거 문서</a></li>
+  </ol>
+</nav>
+
+<!-- ===================== 1 ===================== -->
+<section class="stage" id="s1">
+  <div class="stage-head"><span class="stage-no">01</span><h2>로그인 시도</h2><span class="stage-sub">입력 화면과 비밀번호 규칙</span></div>
+  <div class="prose">
+    <p>MFA를 쓰지 않으면 비밀번호가 계정을 지키는 유일한 관문입니다. 그래서 NIST SP 800-63B-4는 비밀번호를 <strong>단독으로 쓸 때 최소 15자</strong>를 요구하고, MFA와 함께 쓸 때만 8자까지 허용합니다. OWASP ASVS 6.2.1은 아직 "8자 이상, 15자 강력 권장"이라 우리는 더 엄격한 NIST 쪽을 따릅니다.</p>
+    <p>대신 대문자, 숫자, 특수문자를 섞으라는 <strong>조합 규칙과 주기적 변경 강제는 금지</strong>됐습니다. 사람들은 이런 규칙에 Password1!, Password2!처럼 예측 가능한 변형으로 대응합니다. 강도를 만드는 건 길이이고, 약한 비밀번호는 유출 목록과 흔한 비밀번호 목록으로 걸러냅니다. 서비스 이름이나 아이디가 들어간 비밀번호도 막습니다.</p>
+    <p>최대 길이는 "64자 이상 허용"이 기준입니다. 이 숫자는 NIST 지침 작성에 참여한 Jim Fenton이 "패스프레이즈를 막지 않으면서 많은 화면에 한 줄로 들어가는 길이"라는 사용성 이유로 제시한 값입니다. 그렇다고 무한정 받으면 느린 해시 계산으로 서버 CPU를 소모시키는 공격이 가능해서, 우리는 128자를 상한으로 둡니다.</p>
+    <p>앱은 비밀번호를 <strong>네이티브 화면</strong>에서 받습니다. WebView 안의 웹 페이지는 앱이 들여다보고 조작할 수 있고, 사용자는 그 화면이 진짜인지 주소창으로 확인할 수 없습니다. RFC 8252 §8.12가 OAuth 맥락에서 이 위험을 다루고, OAuth를 쓰지 않는 우리도 같은 원칙을 따릅니다.</p>
+  </div>
+  <div class="tbl" data-stage="s1"></div>
+
+  <div class="demo" id="demo-pw">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>비밀번호 정책 검사기</h3></div>
+    <div class="demo-body">
+      <p>가입이나 비밀번호 변경 때 서버가 하는 검사를 그대로 흉내 냅니다. 입력값은 이 페이지 안에서만 계산되고 어디로도 전송되지 않습니다. 예시 계정은 아이디 <code>minsu</code>, 서비스 이름 <code>ourshop</code>입니다.</p>
+      <div class="row">
+        <button type="button" class="btn small" data-pw="password1234567">흔한 비밀번호</button>
+        <button type="button" class="btn small" data-pw="Qw!8xZ#2">짧은 복잡한 비밀번호</button>
+        <button type="button" class="btn small" data-pw="correct horse battery staple">영문 패스프레이즈</button>
+        <button type="button" class="btn small" data-pw="봄비 내리는 오후 창가에 앉아 따뜻한 커피 한잔을 마신다">긴 한글 패스프레이즈</button>
+        <button type="button" class="btn small" data-pw="minsu-ourshop-2026!">아이디 포함</button>
+      </div>
+      <div class="field">
+        <label for="pw">새 비밀번호</label>
+        <div class="row" style="flex-wrap:nowrap">
+          <input id="pw" type="password" autocomplete="new-password" value="봄비 내리는 오후 커피 한잔">
+          <button type="button" class="btn small" id="pwShow" aria-pressed="false">보기</button>
+        </div>
+      </div>
+      <div class="out" id="pwOut" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 2 ===================== -->
+<section class="stage" id="s2">
+  <div class="stage-head"><span class="stage-no">02</span><h2>자격 증명 검증</h2><span class="stage-sub">서버가 비밀번호를 확인하는 순간</span></div>
+  <div class="prose">
+    <p>서버가 막아야 할 공격은 두 가지입니다. 로그인 창에 비밀번호를 계속 넣어 보는 <strong>온라인 추측</strong>, 그리고 DB가 유출됐을 때 해시를 내 컴퓨터에서 깨 보는 <strong>오프라인 공격</strong>입니다.</p>
+    <p>온라인 추측은 실패 시도 제한으로 막습니다. 계정 하나에 실패가 쌓이면 응답을 점점 늦추고, 일정 횟수를 넘으면 잠시 잠급니다. 그런데 유출된 아이디·비밀번호 목록으로 계정마다 한 번씩만 시도하는 <strong>크리덴셜 스터핑</strong>은 계정 단위 제한에 걸리지 않습니다. 그래서 IP 단위 제한과 "한 IP가 여러 계정에 실패" 탐지를 함께 둡니다. 한국 고시 제5조도 인증에 일정 횟수 실패하면 접근을 제한하라고 요구합니다.</p>
+    <p>오프라인 공격은 <strong>느린 해시</strong>로 막습니다. SHA-256 같은 빠른 해시는 GPU로 초당 수십억 번 계산할 수 있어 비밀번호 저장에 쓰면 안 됩니다. OWASP는 Argon2id를 1순위로, bcrypt를 작업 계수 10 이상의 허용 선택지로 둡니다. 고시 제7조는 알고리즘을 지정하지 않고 일방향 암호화만 요구하므로 둘 다 법적 요건은 채웁니다.</p>
+    <p>bcrypt를 쓴다면 <strong>앞 72바이트만 읽는다</strong>는 점을 처리해야 합니다. 한글은 UTF-8에서 한 글자가 3바이트라 한글 24자 정도만 넘어도 뒷부분이 조용히 버려집니다. 72바이트를 넘는 입력을 거부하거나, HMAC으로 먼저 줄인 뒤 bcrypt에 넣습니다. Argon2id에는 이 제한이 없습니다.</p>
+    <p>실패 메시지는 "아이디 또는 비밀번호가 올바르지 않습니다" 하나로 통일합니다. 어느 쪽이 틀렸는지 알려주면 공격자가 가입된 아이디 목록을 만들 수 있습니다. MFA가 없는 대신, 처음 보는 기기에서 로그인하면 이메일로 알려 사용자가 탈취를 빨리 알아채게 합니다.</p>
+  </div>
+  <div class="tbl" data-stage="s2"></div>
+
+  <div class="demo" id="demo-rate">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>로그인 시도 제한 시뮬레이터</h3></div>
+    <div class="demo-body">
+      <p>정책: 같은 계정에 3번째 실패부터 응답을 1초, 2초, 4초로 늦추고, 5번 실패하면 15분 잠급니다. 같은 IP가 10분 안에 서로 다른 계정 10개 이상에 실패하면 그 IP를 막습니다. 시계는 버튼으로 빨리 돌릴 수 있습니다.</p>
+      <div class="row">
+        <button type="button" class="btn" id="rtWrong">minsu로 틀린 비밀번호 시도</button>
+        <button type="button" class="btn" id="rtRight">minsu로 맞는 비밀번호 시도</button>
+        <button type="button" class="btn" id="rtStuff">크리덴셜 스터핑 (IP 1개, 계정 20개)</button>
+        <button type="button" class="btn small" id="rtTime">시간 +5분</button>
+        <button type="button" class="btn small" id="rtReset">초기화</button>
+      </div>
+      <div class="out" id="rtOut" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="demo" id="demo-hash">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>빠른 해시와 느린 해시</h3></div>
+    <div class="demo-body">
+      <p>이 브라우저의 WebCrypto로 실제 계산 시간을 잽니다. WebCrypto에는 Argon2id와 bcrypt가 없어서, 같은 "느린 해시" 계열인 PBKDF2-SHA256을 OWASP의 FIPS 환경 권장값인 600,000회로 대신 측정합니다. 핵심은 "한 번 확인하는 데 드는 시간"이 공격자에게는 "한 번 추측하는 데 드는 시간"이라는 점입니다.</p>
+      <div class="row">
+        <button type="button" class="btn primary" id="hashRun">측정 시작</button>
+        <span class="mini" id="hashStatus">PBKDF2 측정은 기기에 따라 0.1~1초쯤 걸립니다.</span>
+      </div>
+      <div class="out" id="hashOut" aria-live="polite"><p class="mini">아직 측정하지 않았습니다.</p></div>
+    </div>
+  </div>
+
+  <pre class="code" aria-label="Kotlin 예시"><span class="c">// Spring Security: Argon2id (Bouncy Castle 의존성 필요)</span>
+@Bean
+fun passwordEncoder(): PasswordEncoder =
+    Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8()
+
+<span class="c">// bcrypt를 쓴다면 72바이트 초과 입력은 거부</span>
+fun validateForBcrypt(raw: String) =
+    require(raw.toByteArray(Charsets.UTF_8).size &lt;= 72) { "비밀번호가 너무 깁니다" }</pre>
+</section>
+
+<!-- ===================== 3 ===================== -->
+<section class="stage" id="s3">
+  <div class="stage-head"><span class="stage-no">03</span><h2>세션 발급</h2><span class="stage-sub">인증 상태를 만드는 순간</span></div>
+  <div class="prose">
+    <p>비밀번호가 맞으면 서버는 세션을 만들고 세션 ID를 발급합니다. 이후의 모든 요청은 이 ID 하나로 "로그인한 그 사람"임을 증명하니, <strong>세션 ID는 비밀번호와 같은 무게의 비밀</strong>입니다.</p>
+    <p>RFC 10017 §7.1은 프론트와 API가 같은 도메인에 있는 1st-party 서비스라면 OAuth 토큰 대신 <strong>서버 측 쿠키 세션</strong>으로 인증 상태를 관리해도 된다고 명시합니다. 외부 클라이언트가 없으니 우리는 이 구조를 씁니다. 앱도 같은 세션 ID를 쓰고, 운반 방법만 다릅니다.</p>
+    <p>세션 ID는 추측할 수 없어야 합니다. ASVS 7.2.3은 CSPRNG(암호학적으로 안전한 난수 생성기)로 만들고 <strong>128비트 이상</strong>의 엔트로피를 가지라고 요구합니다. 우리는 256비트를 씁니다. 아래 계산기에서 보듯 128비트도 추측이 사실상 불가능해서, 256비트는 "비용이 거의 0이라 여유를 둔" 선택입니다. 참고로 Spring Session의 기본 ID는 UUID라 실제 랜덤 비트가 122비트이고, 엄밀히는 128비트 요건에 조금 못 미칩니다.</p>
+    <p>로그인할 때마다 <strong>새 ID를 발급</strong>하는 것(ASVS 7.2.4)은 세션 고정 공격을 막습니다. 공격자가 자기가 아는 세션 ID를 피해자 브라우저에 미리 심어 두고, 피해자가 그 ID인 채로 로그인하기를 기다리는 공격입니다.</p>
+    <p>서버 저장소에는 세션 ID 원문 대신 <strong>SHA-256 해시</strong>를 저장합니다. 표준의 필수 항목은 아니고 결정문 조건 ①로 우리가 정한 심층 방어입니다. DB 백업이나 Redis 덤프가 유출돼도 그 안의 값으로는 로그인할 수 없습니다. 256비트 랜덤 값이라 느린 해시나 salt는 필요 없습니다.</p>
+  </div>
+  <div class="tbl" data-stage="s3"></div>
+
+  <div class="demo" id="demo-sid">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>세션 ID 생성기와 추측 계산기</h3></div>
+    <div class="demo-body">
+      <p>이 브라우저의 CSPRNG(<code>crypto.getRandomValues</code>)로 실제 세션 ID를 만듭니다. 서버 Kotlin의 <code>SecureRandom</code>과 같은 역할입니다. 왼쪽 값은 클라이언트에 주는 원문, 아래 해시는 DB에 저장되는 값입니다.</p>
+      <div class="row" role="radiogroup" aria-label="세션 ID 크기">
+        <label class="check"><input type="radio" name="sidBits" id="sidB122" value="uuid"> UUID v4 (122비트)</label>
+        <label class="check"><input type="radio" name="sidBits" id="sidB128" value="128"> 128비트</label>
+        <label class="check"><input type="radio" name="sidBits" id="sidB256" value="256" checked> 256비트 (우리 선택)</label>
+        <button type="button" class="btn primary" id="sidGen">새로 생성</button>
+      </div>
+      <div class="out">
+        <dl class="kv" id="sidOut"></dl>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label for="calcS">동시에 살아 있는 세션 수</label>
+          <input id="calcS" type="number" min="1" step="1" value="1000000">
+        </div>
+        <div class="field">
+          <label for="calcR">공격자의 초당 추측 횟수</label>
+          <select id="calcR">
+            <option value="1000">1,000회 (레이트 리밋이 걸린 현실)</option>
+            <option value="1000000">100만 회</option>
+            <option value="1000000000" selected>10억 회 (극단적 가정)</option>
+            <option value="1000000000000">1조 회 (비현실적 가정)</option>
+          </select>
+        </div>
+      </div>
+      <div class="out scroll" id="calcOut" aria-live="polite"></div>
+      <p class="mini">계산식: 아무 세션 하나라도 맞힐 때까지의 평균 시간 = 2<sup>비트</sup> ÷ (세션 수 × 초당 추측) ÷ 2. 우주의 나이는 약 1.38 × 10<sup>10</sup>년입니다.</p>
+    </div>
+  </div>
+
+  <div class="demo" id="demo-fix">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>세션 고정 공격 재현</h3></div>
+    <div class="demo-body">
+      <p>세 단계를 순서대로 눌러 보세요. "로그인 시 새 ID 발급"을 끄면 공격이 성공하고, 켜면 실패합니다. 실제로는 <code>__Host-</code> 쿠키가 하위 도메인에서 쿠키를 심는 것도 막고, 로그인 전에는 세션을 만들지 않으므로(결정문 ③) 공격 면 자체가 좁습니다. 이 데모는 그중 마지막 방어선만 보여줍니다.</p>
+      <label class="check"><input type="checkbox" id="fixRotate" checked> 로그인 시 새 세션 ID 발급 (ASVS 7.2.4)</label>
+      <div class="row">
+        <button type="button" class="btn" id="fix1">1. 공격자가 자기 세션 ID를 피해자 브라우저에 심음</button>
+        <button type="button" class="btn" id="fix2">2. 피해자(민수)가 로그인</button>
+        <button type="button" class="btn" id="fix3">3. 공격자가 심어 둔 ID로 접속</button>
+        <button type="button" class="btn small" id="fixReset">초기화</button>
+      </div>
+      <div class="out" id="fixOut" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <pre class="code" aria-label="Kotlin 예시"><span class="c">// 256비트 세션 ID 생성과 저장용 해시</span>
+private val rng = SecureRandom()
+
+fun newSessionId(bytes: Int = 32): String {
+    val buf = ByteArray(bytes).also { rng.nextBytes(it) }
+    return Base64.getUrlEncoder().withoutPadding().encodeToString(buf)  <span class="c">// 43자</span>
+}
+
+fun storageKey(raw: String): String =
+    HexFormat.of().formatHex(
+        MessageDigest.getInstance("SHA-256").digest(raw.toByteArray())
+    )</pre>
+</section>
+
+<!-- ===================== 4 ===================== -->
+<section class="stage" id="s4">
+  <div class="stage-head"><span class="stage-no">04</span><h2>세션 전달</h2><span class="stage-sub">세션 ID를 클라이언트에 맡기는 방법</span></div>
+  <div class="prose">
+    <p>발급한 세션 ID를 클라이언트가 보관하고 요청마다 다시 보내야 합니다. 브라우저와 앱은 <strong>이 보관과 운반 방법만 다르고</strong>, 서버가 하는 일은 같습니다.</p>
+    <p>브라우저는 쿠키를 씁니다. 쿠키는 브라우저가 자동으로 붙여 보내서 편하지만, 그 자동성 때문에 공격 표면도 생깁니다. RFC 10017 §6.1.3.2는 세션 쿠키에 <strong>Secure와 HttpOnly를 반드시(MUST)</strong> 켜고, SameSite=Strict, Path=/, Domain 미지정, 접두어 사용을 <strong>권장(SHOULD)</strong>합니다. 각 속성이 무엇을 막는지는 아래 실험실에서 하나씩 꺼 보며 확인할 수 있습니다.</p>
+    <p><code>__Host-</code> 접두어는 이름이 아니라 <strong>브라우저가 강제하는 규칙</strong>입니다. 이름이 <code>__Host-</code>로 시작하면 브라우저는 Secure가 있고, Path=/이고, Domain이 없을 때만 쿠키를 저장합니다. 그래서 이벤트용 <code>promo.example.com</code> 같은 하위 도메인이 뚫려도 공격자가 우리 세션 쿠키를 덮어쓰거나 심을 수 없습니다. RFC 10017은 더 새로운 <code>__Host-Http-</code> 접두어도 예로 들지만, 브라우저 지원 범위를 따로 확인해야 해서 지금은 <code>__Host-</code>를 씁니다.</p>
+    <p>앱은 로그인 응답 본문으로 세션 ID를 받아 iOS Keychain이나 Android Keystore로 보호한 저장소에 두고, 요청마다 <strong>Authorization 헤더</strong>에 직접 붙입니다. 앱 코드가 명시적으로 붙이니 다른 사이트가 위조 요청을 만들 수 없고, CSRF 방어가 필요 없습니다. 대신 HTTP 클라이언트의 쿠키 저장을 꺼서, 앱 쪽에 쿠키로도 인증되는 경로가 생기지 않게 합니다.</p>
+  </div>
+  <div class="tbl" data-stage="s4"></div>
+
+  <div class="demo" id="demo-cookie">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>쿠키 속성 실험실</h3></div>
+    <div class="demo-body">
+      <p>처음 상태가 우리 설정입니다. 속성을 하나씩 꺼 보면서 어떤 공격이 열리는지 보세요. 브라우저가 아예 저장을 거부하는 조합도 표시합니다.</p>
+      <div class="grid2">
+        <div class="field">
+          <span class="flabel">속성</span>
+          <label class="check"><input type="checkbox" id="ckHost" checked> <code>__Host-</code> 접두어</label>
+          <label class="check"><input type="checkbox" id="ckSecure" checked> Secure</label>
+          <label class="check"><input type="checkbox" id="ckHttp" checked> HttpOnly</label>
+          <label class="check"><input type="checkbox" id="ckDomain"> Domain=example.com 지정</label>
+          <label class="check"><input type="checkbox" id="ckMaxAge"> Max-Age=604800 (7일 영구 쿠키)</label>
+        </div>
+        <div class="field">
+          <label for="ckSame">SameSite</label>
+          <select id="ckSame"><option>Strict</option><option>Lax</option><option>None</option></select>
+          <label for="ckPath">Path</label>
+          <select id="ckPath"><option value="/">/</option><option value="/app">/app</option></select>
+        </div>
+      </div>
+      <div class="out" id="ckOut" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="split">
+    <pre class="code" aria-label="Kotlin 예시"><span class="c">// Spring Session 쿠키 설정</span>
+@Bean
+fun cookieSerializer() = DefaultCookieSerializer().apply {
+    setCookieName("__Host-SID")
+    setUseSecureCookie(true)
+    setUseHttpOnlyCookie(true)
+    setSameSite("Strict")
+    setCookiePath("/")
+    <span class="c">// setDomainName은 호출하지 않음</span>
+}</pre>
+    <pre class="code" aria-label="앱 요청 예시"><span class="c"># 앱: 로그인 응답 본문으로 받은 값을</span>
+<span class="c"># Keychain/Keystore에 두고 매 요청 헤더에</span>
+GET /api/orders HTTP/1.1
+Host: api.example.com
+Authorization: Session Kx8Qm2…(43자)
+
+<span class="c"># iOS: httpShouldSetCookies = false</span>
+<span class="c"># Android OkHttp: CookieJar.NO_COOKIES (기본값)</span></pre>
+  </div>
+</section>
+
+<!-- ===================== 5 ===================== -->
+<section class="stage" id="s5">
+  <div class="stage-head"><span class="stage-no">05</span><h2>요청마다 인증 확인</h2><span class="stage-sub">로그인 이후의 모든 요청</span></div>
+  <div class="prose">
+    <p>로그인 이후 모든 요청에서 서버는 세 가지를 확인합니다. <strong>세션이 살아 있는가</strong>, <strong>이 요청을 정말 사용자가 보냈는가</strong>, 그리고 선택적으로 <strong>세션을 처음 받은 그 기기에서 왔는가</strong>입니다.</p>
+    <p>세션이 살아 있는지는 시계 두 개로 판단합니다. <strong>무활동 타임아웃</strong>은 마지막 요청 이후 경과 시간이고, <strong>절대 만료</strong>는 로그인 시점부터의 총 시간입니다. 활동이 계속돼도 절대 만료가 오면 다시 로그인해야 합니다. 비밀번호만 쓰는 수준(NIST AAL1)에서 NIST의 최소선은 30일 이내 재인증이지만, 보안 우선이라 일반 사용자는 무활동 1시간에 최대 24시간으로 잡습니다. ASVS 7.1.1은 이 값과 NIST에서 벗어나는 이유를 문서로 남기라고 합니다.</p>
+    <p>브라우저 요청은 <strong>CSRF</strong>를 막아야 합니다. 쿠키가 자동으로 붙기 때문에, 공격 사이트가 사용자의 브라우저를 빌려 우리 서버로 요청을 보낼 수 있습니다. RFC 10017 §6.1.3.3은 SameSite=Strict를 기본으로 두되, 같은 사이트의 다른 하위 도메인에서 오는 공격에는 그것만으로 부족하니 CORS와 고정 커스텀 헤더를 함께 쓰라고 합니다. 커스텀 헤더가 붙은 교차 출처 요청은 브라우저가 항상 사전 확인(preflight)을 하므로, 서버가 허락하지 않으면 요청이 아예 나가지 않습니다.</p>
+    <p><strong>XSS는 이 모든 방어를 우회</strong>합니다. 악성 스크립트가 우리 페이지 안에서 실행되면 사용자와 똑같이 요청을 보낼 수 있고, 이건 어떤 인증 방식도 막지 못합니다(RFC 10017 §5). 그래서 nonce 기반 CSP와 SRI로 XSS가 실행되는 것 자체를 막는 데 집중합니다.</p>
+    <p>기기 바인딩은 선택입니다. 브라우저는 DBSC로 5분짜리 단기 쿠키를 보안 칩 키 서명으로만 갱신하고, 앱은 DPoP(RFC 9449)로 요청마다 서명을 붙입니다. 둘 다 "세션 ID를 훔쳐 다른 기기에서 쓰는 것"을 막지만, 감염된 기기 안에서의 악용은 막지 못합니다. 보안 칩이 없는 기기에서 DBSC는 오류 없이 일반 쿠키로 동작합니다.</p>
+  </div>
+  <div class="tbl" data-stage="s5"></div>
+
+  <div class="demo" id="demo-timeout">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>만료 시계</h3></div>
+    <div class="demo-body">
+      <p>로그인 후 흐른 시간과 마지막 요청 후 흐른 시간을 움직여 보세요. 두 시계 중 하나라도 한도에 닿으면 세션이 끝납니다.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="toRole">사용자 종류</label>
+          <select id="toRole"><option value="user">일반 사용자 (무활동 60분, 최대 24시간)</option><option value="admin">관리자 (무활동 15분, 최대 4시간)</option></select>
+        </div>
+        <div class="field">
+          <label for="toAge">로그인 후 경과: <b id="toAgeV"></b></label>
+          <input id="toAge" type="range" min="0" max="30" step="0.25" value="3">
+          <label for="toIdle">마지막 요청 후 경과: <b id="toIdleV"></b></label>
+          <input id="toIdle" type="range" min="0" max="120" step="1" value="10">
+        </div>
+      </div>
+      <div class="out" id="toOut" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="demo" id="demo-csrf">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>CSRF 요청 판정기</h3></div>
+    <div class="demo-body">
+      <p>요청이 어디서 왔고 무엇을 하려는지 고르면, 브라우저와 서버의 방어층을 차례로 통과시켜 결과를 보여줍니다. 우리 서버의 커스텀 헤더 규칙은 <code>X-Client: web</code>입니다.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="csOrigin">요청 출발지</label>
+          <select id="csOrigin">
+            <option value="own">우리 웹 (https://shop.example.com)</option>
+            <option value="sub">탈취된 우리 하위 도메인 (https://promo.example.com)</option>
+            <option value="evil">공격 사이트 (https://evil.example)</option>
+            <option value="app">우리 앱</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="csMethod">요청</label>
+          <select id="csMethod">
+            <option value="GET">GET /api/orders (조회)</option>
+            <option value="POST" selected>POST /api/address (배송지 변경)</option>
+            <option value="DELETE">DELETE /api/account (탈퇴)</option>
+          </select>
+          <label class="check"><input type="checkbox" id="csHeader" checked> 요청에 <code>X-Client: web</code> 헤더를 붙임</label>
+        </div>
+      </div>
+      <div class="out" id="csOut" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <div class="demo" id="demo-bind">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>기기 바인딩이 막는 것과 못 막는 것</h3></div>
+    <div class="demo-body">
+      <p>앱의 DPoP 기준입니다. 브라우저 DBSC도 원리는 같고, 서명을 단기 쿠키 갱신 때만 한다는 점이 다릅니다.</p>
+      <label class="check"><input type="checkbox" id="bdOn" checked> 기기 바인딩 사용 (보안 칩 키 + DPoP)</label>
+      <div class="row">
+        <button type="button" class="btn" data-bind="normal">정상 기기에서 요청</button>
+        <button type="button" class="btn" data-bind="stolen">훔친 세션 ID를 공격자 PC에서 사용</button>
+        <button type="button" class="btn" data-bind="replay">가로챈 요청을 그대로 재전송</button>
+        <button type="button" class="btn" data-bind="malware">감염된 피해자 기기 안에서 요청</button>
+      </div>
+      <div class="out" id="bdOut" aria-live="polite"><p class="mini">시나리오를 골라 보세요.</p></div>
+      <pre class="code" aria-label="DPoP proof 예시"><span class="c">// DPoP 헤더에 담기는 proof (JWT, 요청마다 새로 서명)</span>
+{ "typ": "dpop+jwt", "alg": "ES256",
+  "jwk": { <span class="c">/* 보안 칩 키의 공개키. 서버는 이 지문(jkt)을 세션에 저장 */</span> } }
+.
+{ "htm": "POST",                              <span class="c">// 이 메서드에만 유효</span>
+  "htu": "https://api.example.com/address",   <span class="c">// 이 URL에만 유효</span>
+  "iat": 1791789000,                          <span class="c">// 발급 시각 (±30초)</span>
+  "jti": "d3b0c7e2-…",                        <span class="c">// 1회용 ID, 재사용 거부</span>
+  "nonce": "srv-node2-…",                     <span class="c">// 서버가 준 값</span>
+  "ath": "fUHyO2r2Z3DZ53EsNrWBb0xWXoaNy59IiKCAqksmQEo" } <span class="c">// 세션 ID의 해시</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 6 ===================== -->
+<section class="stage" id="s6">
+  <div class="stage-head"><span class="stage-no">06</span><h2>인가</h2><span class="stage-sub">이 사용자가 이 데이터에 접근해도 되는가</span></div>
+  <div class="prose">
+    <p>인증이 "당신이 누구인가"라면, 인가는 <strong>"당신이 이걸 해도 되는가"</strong>입니다. 실제 사고는 인증보다 인가에서 더 자주 납니다. OWASP API Security Top 10에서도 객체 단위 인가 실패(BOLA)가 1위입니다.</p>
+    <p>인가는 세 층으로 나눠 봅니다. <strong>기능 단위</strong>(ASVS 8.2.1)는 "일반 사용자가 관리자 API를 부를 수 있나", <strong>객체 단위</strong>(8.2.2)는 "민수가 지영의 주문을 볼 수 있나", <strong>필드 단위</strong>(8.2.3)는 "민수가 자기 프로필을 고치면서 role까지 바꿀 수 있나"입니다. 셋 다 서버에서 검사해야 합니다(8.3.1). 프론트에서 버튼을 숨겨도 공격자는 API를 직접 호출합니다.</p>
+    <p>객체 단위는 <strong>조회 조건에 항상 소유자를 넣는 것</strong>으로 막습니다. 남의 주문 ID가 들어오면 403이 아니라 404를 돌려줘서, 그 주문이 존재한다는 사실도 숨깁니다.</p>
+    <p>필드 단위는 <strong>요청 DTO와 엔티티를 분리</strong>해서 막습니다. 요청 JSON을 엔티티에 그대로 바인딩하면, 클라이언트가 보내면 안 되는 필드까지 덮어써집니다(Mass Assignment).</p>
+    <p>세션 방식의 장점이 여기서도 드러납니다. 권한을 요청마다 DB에서 읽거나 변경 시 세션을 갱신하면 <strong>권한 박탈이 즉시 반영</strong>됩니다(ASVS 8.3.2). JWT라면 토큰이 만료될 때까지 옛 권한이 남습니다.</p>
+  </div>
+  <div class="tbl" data-stage="s6"></div>
+
+  <div class="demo" id="demo-idor">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>남의 주문 보기 (IDOR)</h3></div>
+    <div class="demo-body">
+      <p>로그인한 사람은 민수(user 1001)입니다. 주문 5001은 민수의 것, 5002는 지영(user 1002)의 것입니다. 서버 구현을 바꿔 가며 <code>GET /api/orders/{id}</code>를 보내 보세요.</p>
+      <div class="grid2">
+        <div class="field">
+          <span class="flabel">서버 구현</span>
+          <label class="check"><input type="radio" name="idImpl" id="idUnsafe" value="unsafe"> <code>findById(id)</code></label>
+          <label class="check"><input type="radio" name="idImpl" id="idSafe" value="safe" checked> <code>findByIdAndUserId(id, me)</code></label>
+        </div>
+        <div class="field">
+          <label for="idOrder">요청할 주문</label>
+          <select id="idOrder"><option value="5001">5001 (민수의 주문)</option><option value="5002" selected>5002 (지영의 주문)</option><option value="9999">9999 (없는 주문)</option></select>
+          <button type="button" class="btn primary" id="idSend">요청 보내기</button>
+        </div>
+      </div>
+      <div class="out" id="idOut" aria-live="polite"><p class="mini">요청을 보내 보세요.</p></div>
+    </div>
+  </div>
+
+  <div class="demo" id="demo-mass">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>필드 덮어쓰기 (Mass Assignment)</h3></div>
+    <div class="demo-body">
+      <p>민수가 닉네임만 바꾸는 화면에서, 요청 본문에 몰래 <code>role</code>과 <code>point</code>를 끼워 넣었습니다. <code>PATCH /api/me</code> 처리 방식을 바꿔 가며 결과를 보세요.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="maBody">요청 본문 (JSON)</label>
+          <textarea id="maBody" spellcheck="false">{
+  "nickname": "민수짱",
+  "role": "ADMIN",
+  "point": 999999
+}</textarea>
+        </div>
+        <div class="field">
+          <span class="flabel">서버 처리 방식</span>
+          <label class="check"><input type="radio" name="maMode" id="maEntity" value="entity"> 요청을 엔티티에 그대로 바인딩</label>
+          <label class="check"><input type="radio" name="maMode" id="maDto" value="dto" checked> 요청 DTO(nickname만)로 받아 옮김</label>
+          <button type="button" class="btn primary" id="maSend">요청 보내기</button>
+        </div>
+      </div>
+      <div class="out" id="maOut" aria-live="polite"><p class="mini">요청을 보내 보세요.</p></div>
+    </div>
+  </div>
+
+  <pre class="code" aria-label="Kotlin 예시"><span class="c">// 객체 단위: 조회 조건에 항상 소유자</span>
+interface OrderRepository : JpaRepository&lt;Order, Long&gt; {
+    fun findByIdAndUserId(id: Long, userId: Long): Order?
+}
+
+@GetMapping("/api/orders/{id}")
+fun get(@PathVariable id: Long, @AuthenticationPrincipal me: LoginUser) =
+    orders.findByIdAndUserId(id, me.id) ?: throw NotFoundException()  <span class="c">// 403 아닌 404</span>
+
+<span class="c">// 필드 단위: 바꿔도 되는 필드만 가진 요청 DTO</span>
+data class UpdateProfileRequest(val nickname: String)</pre>
+</section>
+
+<!-- ===================== 7 ===================== -->
+<section class="stage" id="s7">
+  <div class="stage-head"><span class="stage-no">07</span><h2>민감 작업 재인증</h2><span class="stage-sub">이미 로그인했어도 한 번 더</span></div>
+  <div class="prose">
+    <p>로그인한 세션이라도, 그 세션을 <strong>지금 누가 쓰고 있는지는 확신할 수 없습니다</strong>. 자리를 비운 PC, 탈취된 쿠키, XSS 모두 "로그인한 상태"로 요청을 보냅니다. 그래서 피해가 큰 작업 직전에는 비밀번호를 한 번 더 받습니다.</p>
+    <p>ASVS 7.5.1은 이메일, 전화번호, 비밀번호처럼 <strong>계정 복구에 쓰이는 정보</strong>를 바꾸기 전에 재인증을 요구합니다. 이 정보가 바뀌면 공격자가 계정을 영구히 가져갈 수 있기 때문입니다. 7.5.3(L3)은 결제 같은 고위험 작업 전 추가 확인을 요구합니다. MFA가 없으니 재인증 수단은 비밀번호입니다.</p>
+    <p>세션에 마지막 인증 시각(<code>auth_time</code>)을 두고, 민감 작업이 오면 그 시각이 5분 이내인지 봅니다. 오래됐으면 비밀번호를 다시 받고, 성공하면 <code>auth_time</code>을 갱신하면서 <strong>세션 ID도 새로 발급</strong>합니다(7.2.4). 재인증 전의 ID가 어딘가 새어 나갔더라도, 그 ID로는 높아진 신뢰를 쓸 수 없게 하기 위해서입니다.</p>
+    <p>이메일로 계정을 복구한 직후는 특히 위험합니다. 이메일 계정이 뚫렸다면 공격자가 복구했을 수 있으니, 복구 후 전체 세션을 폐기하고, 24~72시간 동안 민감 작업을 막고, 기존 이메일로 알립니다(결정문 ⑫).</p>
+  </div>
+  <div class="tbl" data-stage="s7"></div>
+
+  <div class="demo" id="demo-reauth">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>재인증 흐름</h3></div>
+    <div class="demo-body">
+      <p>정책: 이메일과 비밀번호 변경은 마지막 인증이 5분을 넘었으면 재인증, 결제는 매번 재인증, 주문 조회는 재인증 없음. 데모 비밀번호는 <code>demo</code>입니다.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="raAct">하려는 작업</label>
+          <select id="raAct">
+            <option value="email">이메일 변경</option>
+            <option value="pw">비밀번호 변경</option>
+            <option value="pay">결제</option>
+            <option value="view">주문 내역 조회</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="raAge">마지막 인증 후 경과: <b id="raAgeV"></b></label>
+          <input id="raAge" type="range" min="0" max="120" step="1" value="40">
+        </div>
+      </div>
+      <div class="row"><button type="button" class="btn primary" id="raRun">실행</button></div>
+      <div class="out" id="raOut" aria-live="polite"></div>
+      <div class="row" id="raPrompt" hidden>
+        <label for="raPw" class="flabel">비밀번호를 다시 입력하세요</label>
+        <input id="raPw" type="password" autocomplete="current-password" style="max-width:220px">
+        <button type="button" class="btn primary" id="raConfirm">확인</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 8 ===================== -->
+<section class="stage" id="s8">
+  <div class="stage-head"><span class="stage-no">08</span><h2>세션 종료와 폐기</h2><span class="stage-sub">끝내야 할 때 확실히 끝내기</span></div>
+  <div class="prose">
+    <p>세션 방식을 고른 가장 큰 이유가 여기 있습니다. 서버가 세션 행을 지우는 순간 <strong>그 세션은 바로 끝납니다</strong>. 다음 요청부터 조회 단계에서 막히고, 기다릴 만료 시간이 없습니다.</p>
+    <p>종료가 필요한 순간은 정해져 있습니다. <strong>로그아웃</strong>(ASVS 7.4.1)은 그 세션 하나, <strong>계정 정지나 삭제</strong>(7.4.2)는 그 사용자의 모든 세션, <strong>비밀번호 변경</strong>(7.4.3)은 지금 쓰는 세션을 뺀 나머지입니다. 브라우저와 앱의 세션이 같은 테이블에 있으니 한 번의 삭제로 전부 끝납니다.</p>
+    <p>사용자가 <strong>로그인된 기기 목록</strong>을 보고 직접 끊을 수 있어야 합니다(7.5.2). MFA가 없는 구조에서 모르는 기기를 발견하는 거의 유일한 창구입니다. 운영자는 특정 사용자나 전체 사용자의 세션을 끊을 수 있어야 합니다(7.4.5).</p>
+    <p>앱은 로그아웃할 때 서버 세션 삭제와 함께 <strong>기기 저장소의 세션 ID도 지웁니다</strong>. 서버 쪽만 지우면 기기에 죽은 ID가 남고, 기기 쪽만 지우면 서버에 살아 있는 세션이 남습니다.</p>
+  </div>
+  <div class="tbl" data-stage="s8"></div>
+
+  <div class="demo" id="demo-dev">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>로그인된 기기 관리</h3></div>
+    <div class="demo-body">
+      <p>민수의 계정에 브라우저 세션 2개, 앱 세션 2개가 있습니다. 각 버튼이 실행하는 쿼리도 함께 보여줍니다. 7단계에서 비밀번호 변경을 하면 여기에도 반영됩니다.</p>
+      <ul class="devices" id="devList"></ul>
+      <div class="row">
+        <button type="button" class="btn" id="devLogout">이 기기에서 로그아웃</button>
+        <button type="button" class="btn" id="devOthers">다른 기기 모두 로그아웃</button>
+        <button type="button" class="btn" id="devPw">비밀번호 변경</button>
+        <button type="button" class="btn" id="devSuspend">운영자: 계정 정지</button>
+        <button type="button" class="btn small" id="devReset">초기화</button>
+      </div>
+      <pre class="code" id="devSql" aria-live="polite"><span class="c">-- 실행된 쿼리가 여기 표시됩니다</span></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== admin ===================== -->
+<section class="stage" id="admin">
+  <div class="stage-head"><span class="stage-no">+</span><h2>관리자 추가 조건</h2><span class="stage-sub">전 단계에 걸쳐 붙는 규칙</span></div>
+  <div class="prose">
+    <p>관리자는 다른 사용자의 개인정보를 열람하니, 관리자 계정 하나가 뚫리면 피해 범위가 전체 회원입니다. 그래서 일반 사용자 규칙 위에 <strong>법적 의무</strong>와 우리 선택을 더 얹습니다.</p>
+    <p>개인정보의 안전성 확보조치 기준(고시) 제6조 ②는 정당한 접근 권한자(정보주체 제외)가 <strong>외부에서</strong> 개인정보처리시스템에 접속할 때 인증서, 보안토큰, 일회용 비밀번호 같은 <strong>안전한 인증수단</strong>을 적용하라고 요구합니다. VPN 같은 안전한 접속수단으로 대신할 수 있다는 단서는 <strong>이용자가 아닌</strong> 정보주체의 개인정보를 처리하는 시스템에만 해당합니다. 우리 회원은 "이용자"이므로 VPN만으로는 부족합니다.</p>
+    <p>그래서 관리자에게 MFA를 쓰지 않으려면 <strong>사무실 내부망에서만 접속</strong>하게 해야 합니다. 외부 접속을 허용한다면 OTP나 보안키가 필요합니다.</p>
+    <p><strong>무활동 자동 차단</strong>(제6조 ④)은 외부와 내부를 가리지 않고 적용됩니다. 법은 시간을 정하지 않으며, 우리는 NIST AAL3와 PCI DSS를 참고해 15분으로 정했습니다. 관리자 화면은 IP 허용 목록으로 막고 인터넷에 공개하지 않습니다(제6조 ①, ISMS-P 2.6.3).</p>
+  </div>
+  <div class="callout">이 내용은 법률 자문이 아닙니다. 실제 적용 전에는 개인정보보호위원회의 고시 해설서나 전문가 확인이 필요합니다.</div>
+  <div class="tbl" data-stage="admin"></div>
+
+  <div class="demo" id="demo-admin">
+    <div class="demo-head"><span class="eyebrow">직접 해보기</span><h3>관리자 접속 판정기</h3></div>
+    <div class="demo-body">
+      <p>관리자의 접속 조건을 고르면, 법적 요건과 우리 규칙을 순서대로 적용해 허용 여부를 판정합니다.</p>
+      <div class="grid2">
+        <div class="field">
+          <label for="adWhere">접속 위치</label>
+          <select id="adWhere">
+            <option value="office">사무실 내부망</option>
+            <option value="vpn">외부에서 VPN으로 접속</option>
+            <option value="internet">외부 인터넷 (VPN 없음)</option>
+          </select>
+          <label class="check"><input type="checkbox" id="adIp" checked> 접속 IP가 허용 목록에 있음</label>
+          <label class="check"><input type="checkbox" id="adStrong"> OTP나 보안키로 추가 인증함</label>
+        </div>
+        <div class="field">
+          <label for="adClient">클라이언트</label>
+          <select id="adClient"><option value="browser">브라우저</option><option value="app">앱</option></select>
+          <label class="check"><input type="checkbox" id="adBind" checked> <span id="adBindLabel">DBSC 바인딩 등록 완료</span></label>
+          <label for="adIdle">마지막 활동 후 경과: <b id="adIdleV"></b></label>
+          <input id="adIdle" type="range" min="0" max="60" step="1" value="5">
+        </div>
+      </div>
+      <div class="out" id="adOut" aria-live="polite"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== log ===================== -->
+<section class="stage" id="log">
+  <div class="stage-head"><span class="stage-no">+</span><h2>기록</h2><span class="stage-sub">누가 무엇을 했는지 남기기</span></div>
+  <div class="prose">
+    <p>기록은 사고를 막지는 못하지만, 사고가 났을 때 무엇이 일어났는지 알 수 있는 유일한 수단이고 <strong>보호 조치를 했다는 법적 증거</strong>입니다.</p>
+    <p>고시는 접속기록을 <strong>계정, 접속일시, 접속지 정보, 처리한 정보주체 정보, 수행 업무</strong> 등을 전자적으로 기록한 것으로 정의하고, 보관과 정기 점검을 요구합니다. 관리자가 어떤 회원의 정보를 언제 봤는지가 남아야 합니다. 보관 기간과 점검 주기는 고시 원문에서 확인하세요.</p>
+    <p>이와 별도로 로그인 실패, 세션 폐기, 재인증, 권한 변경 같은 <strong>보안 이벤트</strong>를 남겨 이상 징후를 찾습니다(ASVS V16). 비밀번호와 세션 ID 원문은 절대 로그에 남기지 않습니다. 세션은 해시 앞부분만 남깁니다.</p>
+    <p>아래 표는 이 페이지의 데모에서 일어난 일이 실제로 어떻게 기록되는지 보여줍니다. 위의 데모를 조작하면 행이 추가됩니다.</p>
+  </div>
+  <div class="tbl" data-stage="log"></div>
+  <div class="demo">
+    <div class="demo-head"><span class="eyebrow">실시간</span><h3>보안 이벤트와 접속기록</h3><button type="button" class="btn small" id="logClear" style="margin-left:auto">데모 기록 지우기</button></div>
+    <div class="demo-body">
+      <div class="scroll"><table class="logtbl"><thead><tr><th>시각</th><th>계정</th><th>접속지</th><th>수행 업무</th><th>대상</th><th>결과</th></tr></thead><tbody id="logBody"></tbody></table></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== refs ===================== -->
+<section class="stage" id="refs" style="border-bottom:0">
+  <div class="stage-head"><span class="stage-no">§</span><h2>근거 문서</h2><span class="stage-sub">표의 번호가 가리키는 문서들</span></div>
+  <div class="prose"><p>표의 근거 칩을 누르면 여기로 옵니다. 각 문서가 누가 만든 것인지, 무엇을 다루는지, 의무인지 권고인지, 우리와 어떤 관계인지 정리했습니다.</p></div>
+  <div class="refs-list">
+    <div class="ref" id="ref-rfc10017"><div><h3>RFC 10017</h3><div class="kind">IETF 모범 사례 · 2026년 8월</div></div>
+      <dl><dt>다루는 것</dt><dd>브라우저에서 도는 웹앱이 로그인 상태와 토큰을 다루는 방법. "페이지에 악성 JS가 실행되면 무엇을 뺏기나"를 위협 모델로 놓고 구성 방식 세 가지를 보안 순으로 비교합니다.</dd>
+      <dt>핵심</dt><dd>업무용, 민감한 앱, 개인정보를 다루는 앱에는 브라우저에 토큰을 두지 않는 BFF를 강하게 권장합니다. §7.1은 같은 도메인의 1st-party 앱이라면 OAuth 없이 서버 쿠키 세션으로 충분하다고 봅니다. §6.1.3.2는 쿠키 속성, §6.1.3.3은 CSRF 방어, §5는 XSS 위협을 다룹니다.</dd>
+      <dt>우리와</dt><dd>브라우저를 쿠키 세션으로 가는 결정의 직접 근거입니다.</dd></dl></div>
+    <div class="ref" id="ref-rfc6265bis"><div><h3>RFC 6265bis</h3><div class="kind">IETF 쿠키 표준 개정판</div></div>
+      <dl><dt>다루는 것</dt><dd>2011년 쿠키 표준(RFC 6265)을 고친 개정판. SameSite 속성과 <code>__Host-</code>, <code>__Secure-</code> 접두어가 여기서 정의됩니다. 최종 RFC 번호 부여 여부는 따로 확인이 필요하지만 주요 브라우저는 이미 구현했습니다.</dd>
+      <dt>우리와</dt><dd>세션 쿠키 설정의 기술 근거입니다.</dd></dl></div>
+    <div class="ref" id="ref-rfc9449"><div><h3>RFC 9449 (DPoP)</h3><div class="kind">IETF 표준 · 2023년</div></div>
+      <dl><dt>다루는 것</dt><dd>토큰을 클라이언트의 개인키에 묶어, 토큰을 훔쳐도 키가 없으면 못 쓰게 하는 방법. 요청마다 서명한 proof를 붙입니다. §4.3이 서버의 proof 검증 절차입니다. OAuth 확장이지만 불투명 토큰(우리의 세션 ID)에도 쓸 수 있습니다.</dd>
+      <dt>우리와</dt><dd>앱 세션을 기기 보안 칩 키에 묶는 선택적 강화 수단. 관리자 앱 접속에는 필수로 둡니다.</dd></dl></div>
+    <div class="ref" id="ref-rfc8252"><div><h3>RFC 8252</h3><div class="kind">IETF 모범 사례 · 2017년</div></div>
+      <dl><dt>다루는 것</dt><dd>모바일·데스크톱 앱이 OAuth로 로그인할 때 앱 안 WebView가 아니라 시스템 브라우저를 쓰라는 규칙. §8.12가 내장 WebView의 위험을 설명합니다.</dd>
+      <dt>우리와</dt><dd>OAuth를 쓰지 않으니 직접 대상은 아니고, "WebView에서 비밀번호를 받지 않는다"는 원칙만 따릅니다.</dd></dl></div>
+    <div class="ref" id="ref-asvs"><div><h3>OWASP ASVS 5.0</h3><div class="kind">OWASP 검증 기준 · 약 350개 요구사항</div></div>
+      <dl><dt>다루는 것</dt><dd>웹 애플리케이션과 API의 보안 요구사항 전체를 17개 장으로 정리한 체크리스트. 인증(V6), 세션 관리(V7), 인가(V8), 로깅(V16) 등이 있고 항목마다 "7.2.4" 같은 번호가 붙습니다. L1은 모든 앱, L2는 대부분 앱, L3는 고가치 앱 기준입니다.</dd>
+      <dt>성격</dt><dd>법적 의무는 없지만 보안 감사, 취약점 진단, 납품 계약에서 가장 많이 인용됩니다.</dd>
+      <dt>우리와</dt><dd>세션과 인가 설계의 가장 구체적인 근거. L2를 목표로 하고 관리자 기능은 일부 L3를 적용합니다.</dd></dl></div>
+    <div class="ref" id="ref-masvs"><div><h3>OWASP MASVS</h3><div class="kind">OWASP 모바일 검증 기준 · v2.1</div></div>
+      <dl><dt>다루는 것</dt><dd>모바일 앱 보안. 저장소(STORAGE), 암호화, 인증(AUTH), 네트워크, 플랫폼 연동(PLATFORM, WebView 포함), 코드 품질, 변조 방지, 프라이버시 8개 그룹. 테스트 방법은 짝 문서 MASTG에 있습니다.</dd>
+      <dt>우리와</dt><dd>앱에서 세션 ID를 Keychain/Keystore에 두고, 로그아웃 시 기기와 서버 양쪽에서 지우는 근거입니다.</dd></dl></div>
+    <div class="ref" id="ref-owasp-pw"><div><h3>OWASP Password Storage Cheat Sheet</h3><div class="kind">OWASP 실무 지침</div></div>
+      <dl><dt>다루는 것</dt><dd>비밀번호 저장 방법. Argon2id(1순위), scrypt, bcrypt(작업 계수 10 이상, 72바이트 제한), PBKDF2(FIPS 환경, 600,000회) 순으로 권합니다. SHA-256 같은 빠른 해시는 부적합하다고 명시합니다.</dd>
+      <dt>우리와</dt><dd>해시 알고리즘 선택의 근거입니다.</dd></dl></div>
+    <div class="ref" id="ref-nist"><div><h3>NIST SP 800-63B-4</h3><div class="kind">미국 표준기술연구소 · 2025년 확정</div></div>
+      <dl><dt>다루는 것</dt><dd>디지털 인증 지침. 비밀번호 규칙(3.1.1.2: 단독 사용 15자, 64자 이상 허용, 조합 규칙과 주기 변경 금지, 유출 목록 대조, 시도 제한), 인증 보증 수준 AAL1~3, 등급별 세션 타임아웃, 패스키 같은 피싱 저항 인증.</dd>
+      <dt>성격</dt><dd>미 연방기관에는 의무, 민간에서는 세계적 사실상 기준. ASVS의 세션 요구사항도 상당 부분 이 문서를 따릅니다.</dd>
+      <dt>우리와</dt><dd>비밀번호 정책과 타임아웃 수치의 근거입니다.</dd></dl></div>
+    <div class="ref" id="ref-gosi"><div><h3>개인정보의 안전성 확보조치 기준</h3><div class="kind">개인정보보호위원회 고시 · 법적 의무</div></div>
+      <dl><dt>다루는 것</dt><dd>개인정보보호법 제29조를 근거로 한 기술적·관리적 보호조치의 세부 기준. 접근 권한 관리(제5조), 접근 통제(제6조: IP 제한, 외부 접속 시 안전한 인증수단, 무활동 자동 차단), 암호화(제7조), 접속기록 보관과 점검(제8조) 등. 2025년 10월 31일 개정판이 시행됐습니다.</dd>
+      <dt>성격</dt><dd>유출 사고 시 과징금과 손해배상 판단의 핵심. 일반 사용자(정보주체)는 외부 접속 안전한 인증수단 의무에서 제외됩니다.</dd>
+      <dt>우리와</dt><dd>관리자 기능에 직접 적용됩니다. 조항 번호는 2023년 고시 구조 기준이라 개정판 원문과 대조가 필요합니다.</dd></dl></div>
+    <div class="ref" id="ref-ismsp"><div><h3>ISMS-P</h3><div class="kind">KISA·개인정보위 인증 기준</div></div>
+      <dl><dt>다루는 것</dt><dd>정보보호 및 개인정보보호 관리체계 인증. 계정 관리(2.5.x), 응용프로그램 접근(2.6.3: 세션 자동 차단, 동시 세션 제한, 관리자 페이지 노출 금지), 로그 관리(2.9.4) 등.</dd>
+      <dt>성격</dt><dd>일정 규모 이상 사업자는 의무, 그 외에는 선택.</dd>
+      <dt>우리와</dt><dd>지금은 의무가 아니지만, 고시를 실무적으로 지키는 방법의 참고 기준입니다.</dd></dl></div>
+    <div class="ref" id="ref-dbsc"><div><h3>W3C DBSC</h3><div class="kind">W3C 초안 · Chrome 출시</div></div>
+      <dl><dt>다루는 것</dt><dd>브라우저가 세션 쿠키를 기기의 보안 칩 키에 묶는 기능. 쿠키를 5분 같은 단기로 두고 키 서명으로만 갱신해, 쿠키를 훔쳐 가는 인포스틸러를 무력화합니다. Chrome(Windows)에서 시작했고 Safari, Firefox는 검토 단계라 Baseline이 아닙니다.</dd>
+      <dt>우리와</dt><dd>일반 사용자는 지원 브라우저에서만 켜지는 덤, 관리자 브라우저 접속에는 필수입니다.</dd></dl></div>
+    <div class="ref" id="ref-decision"><div><h3>세션 결정문</h3><div class="kind">이 프로젝트의 내부 결정</div></div>
+      <dl><dt>다루는 것</dt><dd>"보안 최우선이면 JWT+DPoP 대신 서버 세션을 쓴다"는 결정과 그 조건 ①~⑮. 예: ① 세션 ID 해시 저장, ③ <code>__Host-</code> 쿠키와 Origin 검사, 익명 세션 미생성, ⑫ 이메일 복구 후 전체 폐기와 쿨다운, ⑮ 관리자 기기 바인딩 필수.</dd>
+      <dt>우리와</dt><dd>표에서 "선택" 등급의 출처입니다.</dd></dl></div>
+  </div>
+  <footer>
+    <p>번호 확인 상태: ASVS 5.0과 RFC 10017의 번호는 원문으로 확인했습니다. 고시 조항, ISMS-P 세부 번호, NIST 세션 관리 장의 절 번호는 원문 대조가 필요합니다.</p>
+    <p>이 페이지의 데모는 모두 브라우저 안에서만 동작하는 시뮬레이션이며, 입력값을 어디로도 보내지 않습니다.</p>
+  </footer>
+</section>
+
+</div>
+
+<script>
+(function(){
+"use strict";
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));
+const fmt = n => Number(n).toLocaleString("ko-KR");
+
+/* ---------------- requirement rows ---------------- */
+const ROWS = [
+ {s:"s1", item:"비밀번호 입력 받기", detail:"붙여넣기와 비밀번호 관리자 자동 입력을 막지 않습니다. \"보기\" 버튼으로 오타를 줄입니다.", c:"both", refs:["NIST 3.1.1.2"], g:"rec"},
+ {s:"s1", item:"앱 입력 화면", detail:"네이티브 화면에서 받고, WebView에서는 비밀번호를 받지 않습니다.", c:"app", refs:["RFC 8252 §8.12","MASVS-PLATFORM-2"], g:"rec"},
+ {s:"s1", item:"브라우저 입력 화면", detail:"HTTPS 전용. 로그인 페이지의 외부 스크립트를 최소화합니다.", c:"browser", refs:["RFC 10017 §5"], g:"rec"},
+ {s:"s1", item:"비밀번호 규칙", detail:"비밀번호만 쓰면 최소 15자, 64자 이상 허용(우리 상한 128자). 조합 규칙과 주기적 변경 강제는 두지 않습니다.", c:"both", refs:["NIST 3.1.1.2","ASVS 6.2.1"], g:"must", gn:"필수 8자 · 권장 15자"},
+ {s:"s1", item:"약한 비밀번호 차단", detail:"가입과 변경 때 유출 목록, 흔한 비밀번호, 서비스 이름이나 아이디가 든 비밀번호를 거부합니다.", c:"both", refs:["NIST 3.1.1.2"], g:"must"},
+
+ {s:"s2", item:"실패 시도 제한", detail:"계정별·IP별 실패 횟수 제한과 점증 지연. 한 IP가 여러 계정에 실패하는 크리덴셜 스터핑을 탐지합니다.", c:"both", refs:["NIST 3.1.1.2","고시 제5조","ISMS-P 2.5.3"], g:"must"},
+ {s:"s2", item:"비밀번호 저장", detail:"salt를 넣은 느린 해시. Argon2id 1순위, bcrypt는 작업 계수 10 이상에 72바이트 제한 처리.", c:"both", refs:["OWASP Password Storage","NIST 3.1.1.2","고시 제7조"], g:"must", gn:"필수 느린 해시 · 권장 Argon2id"},
+ {s:"s2", item:"실패 메시지", detail:"아이디와 비밀번호 중 어느 쪽이 틀렸는지 알려주지 않습니다.", c:"both", refs:["ASVS V6"], g:"rec"},
+ {s:"s2", item:"새 기기 로그인 알림", detail:"처음 보는 기기나 지역이면 이메일로 알립니다. MFA가 없는 대신 탈취를 빨리 알아채게 합니다.", c:"both", refs:["실무 관행"], g:"opt"},
+
+ {s:"s3", item:"OAuth 대신 서버 세션", detail:"같은 도메인의 1st-party 서비스라 서버 측 세션으로 인증 상태를 관리합니다.", c:"both", refs:["RFC 10017 §7.1"], g:"rec"},
+ {s:"s3", item:"세션 ID 생성", detail:"CSPRNG로 128비트 이상. 우리는 256비트(32바이트, base64url 43자).", c:"both", refs:["ASVS 7.2.3"], g:"must", gn:"필수 128비트 · 선택 256비트"},
+ {s:"s3", item:"로그인 시 새 ID", detail:"로그인과 재인증마다 새 세션 ID를 발급하고 이전 ID는 폐기합니다.", c:"both", refs:["ASVS 7.2.4"], g:"must"},
+ {s:"s3", item:"해시로 저장", detail:"DB나 Redis에는 세션 ID의 SHA-256만 저장합니다.", c:"both", refs:["결정문 ①"], g:"opt"},
+ {s:"s3", item:"세션 정보", detail:"user_id, 역할, 클라이언트 종류, auth_time, 마지막 활동, 절대 만료 시각을 함께 저장합니다.", c:"both", refs:["ASVS 7.1"], g:"rec"},
+ {s:"s3", item:"동시 세션 정책", detail:"계정당 허용 세션 수와 초과 시 동작을 정하고 문서화합니다.", c:"both", refs:["ASVS 7.1.2","ISMS-P 2.6.3"], g:"rec"},
+
+ {s:"s4", item:"운반 방법", detail:"Set-Cookie 헤더로 전달하고, 이후 브라우저가 자동으로 붙여 보냅니다.", c:"browser", refs:["RFC 10017 §6.1.3.2"], g:"must"},
+ {s:"s4", item:"운반 방법", detail:"로그인 응답 본문으로 전달하고, 이후 앱이 Authorization 헤더에 붙입니다.", c:"app", refs:["MASVS-AUTH-1"], g:"must"},
+ {s:"s4", item:"Secure, HttpOnly", detail:"HTTPS로만 전송하고, JavaScript가 읽지 못하게 합니다.", c:"browser", refs:["RFC 10017 §6.1.3.2"], g:"must", gn:"RFC의 MUST"},
+ {s:"s4", item:"SameSite, Path, Domain, 접두어", detail:"SameSite=Strict, Path=/, Domain 미지정, __Host- 접두어.", c:"browser", refs:["RFC 10017 §6.1.3.2","RFC 6265bis"], g:"rec", gn:"RFC의 SHOULD"},
+ {s:"s4", item:"저장 위치", detail:"브라우저 쿠키 저장소. 페이지 스크립트는 접근할 수 없습니다.", c:"browser", refs:["RFC 10017 §6.1.3.2"], g:"must"},
+ {s:"s4", item:"저장 위치", detail:"iOS Keychain(ThisDeviceOnly), Android Keystore 키로 암호화. 백업 대상에서 제외합니다.", c:"app", refs:["MASVS-STORAGE-1"], g:"must"},
+ {s:"s4", item:"쿠키 저장 끄기", detail:"앱의 HTTP 클라이언트가 Set-Cookie를 저장하지 않게 해서 쿠키 인증 경로를 없앱니다.", c:"app", refs:["설계 규칙"], g:"rec"},
+
+ {s:"s5", item:"서버에서 검증", detail:"세션 ID를 해시해 저장소를 조회합니다. 모든 판단은 백엔드에서 합니다.", c:"both", refs:["ASVS 7.2.1"], g:"must"},
+ {s:"s5", item:"무활동 타임아웃", detail:"일반 사용자 1시간, 관리자 15분.", c:"both", refs:["ASVS 7.3.1","NIST 세션 관리"], g:"rec"},
+ {s:"s5", item:"절대 만료", detail:"일반 사용자 24시간, 관리자 4시간. 비밀번호만 쓰는 AAL1의 NIST 최소선은 30일 이내입니다.", c:"both", refs:["ASVS 7.3.2","NIST AAL1"], g:"rec"},
+ {s:"s5", item:"수치 문서화", detail:"타임아웃 값과 NIST에서 벗어나는 이유를 문서로 남깁니다.", c:"both", refs:["ASVS 7.1.1"], g:"rec"},
+ {s:"s5", item:"CSRF 방어", detail:"SameSite=Strict에 더해 Origin과 Sec-Fetch-Site 검사, 모든 API에 고정 커스텀 헤더 요구.", c:"browser", refs:["RFC 10017 §6.1.3.3","ASVS V3"], g:"must", gn:"필수 방어 · 권장 방식"},
+ {s:"s5", item:"XSS 예방", detail:"nonce 기반 CSP, SRI, 외부 스크립트 최소화.", c:"browser", refs:["RFC 10017 §5"], g:"rec"},
+ {s:"s5", item:"WebSocket", detail:"핸드셰이크 요청의 Origin을 검사합니다. 세션이 폐기되면 서버가 연결을 끊습니다.", c:"browser", refs:["ASVS V3","결정문 ③"], g:"rec"},
+ {s:"s5", item:"앱 전송", detail:"Authorization 헤더로 보냅니다. 헤더 체인은 쿠키를 받지 않습니다.", c:"app", refs:["설계 규칙"], g:"must"},
+ {s:"s5", item:"기기 바인딩", detail:"DBSC. 5분짜리 단기 쿠키를 보안 칩 키 서명으로만 갱신합니다.", c:"browser", refs:["W3C DBSC"], g:"opt"},
+ {s:"s5", item:"기기 바인딩", detail:"DPoP. 요청마다 서명한 proof를 붙이고 서버는 jkt, 서명, ath, nonce, jti를 확인합니다.", c:"app", refs:["RFC 9449 §4.3"], g:"opt"},
+
+ {s:"s6", item:"인가 규칙 문서화", detail:"역할별, 리소스별 권한표를 만듭니다.", c:"both", refs:["ASVS 8.1.1"], g:"must"},
+ {s:"s6", item:"기능 단위", detail:"권한 있는 사용자만 그 API를 호출합니다.", c:"both", refs:["ASVS 8.2.1"], g:"must"},
+ {s:"s6", item:"객체 단위", detail:"ID만 바꿔 남의 데이터를 보는 것(IDOR, BOLA)을 막습니다. 조회 조건에 항상 소유자를 넣습니다.", c:"both", refs:["ASVS 8.2.2"], g:"must"},
+ {s:"s6", item:"필드 단위", detail:"role, point 같은 필드를 사용자가 바꾸지 못하게 요청 DTO와 엔티티를 분리합니다.", c:"both", refs:["ASVS 8.2.3"], g:"rec"},
+ {s:"s6", item:"서버에서 강제", detail:"프론트의 버튼 숨김이나 비활성화에 의존하지 않습니다.", c:"both", refs:["ASVS 8.3.1"], g:"must"},
+ {s:"s6", item:"권한 변경 즉시 반영", detail:"요청마다 DB의 권한을 읽거나, 변경 시 해당 사용자 세션을 갱신합니다.", c:"both", refs:["ASVS 8.3.2"], g:"opt", gn:"ASVS L3"},
+ {s:"s6", item:"최소 권한", detail:"업무에 필요한 만큼만 접근 권한을 줍니다.", c:"both", refs:["고시 제5조","ISMS-P 2.5.1"], g:"must"},
+
+ {s:"s7", item:"복구 정보 변경", detail:"이메일, 전화번호, 비밀번호 변경 전에 비밀번호를 다시 받습니다.", c:"both", refs:["ASVS 7.5.1"], g:"rec"},
+ {s:"s7", item:"고위험 작업", detail:"결제 같은 작업 전에 추가 확인을 받습니다.", c:"both", refs:["ASVS 7.5.3"], g:"opt", gn:"ASVS L3"},
+ {s:"s7", item:"재인증 후 세션 교체", detail:"재인증에 성공하면 세션 ID를 새로 발급합니다.", c:"both", refs:["ASVS 7.2.4"], g:"must"},
+ {s:"s7", item:"계정 복구", detail:"이메일로 복구하면 전체 세션 폐기, 민감 작업 24~72시간 쿨다운, 기존 이메일로 알림.", c:"both", refs:["결정문 ⑫"], g:"opt"},
+
+ {s:"s8", item:"로그아웃", detail:"서버에서 세션을 삭제합니다. 앱은 기기 저장소에서도 지웁니다.", c:"both", refs:["ASVS 7.4.1","MASVS-AUTH-1"], g:"must"},
+ {s:"s8", item:"계정 정지, 삭제", detail:"해당 사용자의 모든 세션을 종료합니다.", c:"both", refs:["ASVS 7.4.2"], g:"must"},
+ {s:"s8", item:"비밀번호 변경", detail:"현재 세션을 뺀 나머지 세션을 모두 종료합니다.", c:"both", refs:["ASVS 7.4.3"], g:"rec"},
+ {s:"s8", item:"로그아웃 버튼", detail:"인증이 필요한 모든 화면에서 쉽게 보이게 둡니다.", c:"both", refs:["ASVS 7.4.4"], g:"rec"},
+ {s:"s8", item:"운영자의 강제 종료", detail:"특정 사용자 또는 전체 사용자의 세션을 끊을 수 있습니다.", c:"both", refs:["ASVS 7.4.5"], g:"rec"},
+ {s:"s8", item:"로그인된 기기 목록", detail:"사용자가 자기 세션을 보고 골라서 끊습니다.", c:"both", refs:["ASVS 7.5.2"], g:"rec"},
+
+ {s:"admin", item:"외부 접속", detail:"외부에서 접속하면 OTP, 보안키 같은 안전한 인증수단. 쓰지 않으려면 사무실 내부망 전용.", c:"both", refs:["고시 제6조 ②"], g:"must"},
+ {s:"admin", item:"접근 제한", detail:"관리자 화면은 IP 허용 목록으로 막고 인터넷에 공개하지 않습니다.", c:"both", refs:["고시 제6조 ①","ISMS-P 2.6.3"], g:"must"},
+ {s:"admin", item:"무활동 자동 차단", detail:"내부망에서도 적용됩니다. 시간은 법이 정하지 않으며 우리는 15분.", c:"both", refs:["고시 제6조 ④","ISMS-P 2.6.3"], g:"must", gn:"필수 차단 · 선택 15분"},
+ {s:"admin", item:"다층 확인", detail:"네트워크 위치만 믿지 않고 신원, 기기 상태, 맥락을 함께 봅니다.", c:"both", refs:["ASVS 8.4.2"], g:"opt", gn:"ASVS L3"},
+ {s:"admin", item:"기기 바인딩 강제", detail:"브라우저는 DBSC 미등록이면 거부, 앱은 DPoP와 앱 무결성 증명 필수.", c:"both", refs:["결정문 ⑮"], g:"opt"},
+
+ {s:"log", item:"접속기록 보관", detail:"계정, 접속일시, 접속지, 처리한 정보주체, 수행 업무를 남기고 정기 점검합니다.", c:"both", refs:["고시 제8조","ISMS-P 2.9.4"], g:"must"},
+ {s:"log", item:"보안 이벤트 로그", detail:"로그인 실패, 세션 폐기, 재인증, 권한 변경을 남깁니다. 비밀번호와 세션 ID 원문은 남기지 않습니다.", c:"both", refs:["ASVS V16"], g:"rec"}
+];
+const REF_ANCHORS = [
+ ["RFC 10017","ref-rfc10017"],["RFC 8252","ref-rfc8252"],["RFC 9449","ref-rfc9449"],["RFC 6265bis","ref-rfc6265bis"],
+ ["MASVS","ref-masvs"],["ASVS","ref-asvs"],["NIST","ref-nist"],["고시","ref-gosi"],["ISMS-P","ref-ismsp"],
+ ["OWASP Password","ref-owasp-pw"],["W3C DBSC","ref-dbsc"],["결정문","ref-decision"]
+];
+const G_LABEL = {must:"필수", rec:"권장", opt:"선택"};
+const C_LABEL = {both:"공통", browser:"브라우저", app:"앱"};
+function refChip(r){
+  const hit = REF_ANCHORS.find(([p]) => r.startsWith(p));
+  return hit ? `<a href="#${hit[1]}">${esc(r)}</a>` : `<span class="r">${esc(r)}</span>`;
+}
+function renderTables(){
+  $$(".tbl[data-stage]").forEach(box => {
+    const stage = box.dataset.stage;
+    const rows = ROWS.filter(r => r.s === stage);
+    let html = `<table><thead><tr><th>항목</th><th>상세</th><th>대상</th><th>근거</th><th>등급</th></tr></thead><tbody>`;
+    rows.forEach(r => {
+      html += `<tr data-g="${r.g}" data-c="${r.c}"><td class="item">${esc(r.item)}</td><td>${esc(r.detail)}</td><td class="who"><span class="who-tag">${C_LABEL[r.c]}</span></td><td class="refs">${r.refs.map(refChip).join("")}</td><td class="grade"><span class="g g-${r.g}">${G_LABEL[r.g]}</span>${r.gn ? `<span class="gnote">${esc(r.gn)}</span>` : ""}</td></tr>`;
+    });
+    html += `<tr class="empty-row" hidden><td colspan="5">이 필터에 해당하는 항목이 없습니다.</td></tr></tbody></table>`;
+    box.innerHTML = html;
+  });
+}
+const filt = {grades:new Set(["must","rec","opt"]), client:"all"};
+function applyFilter(){
+  let shown = 0, total = 0;
+  $$(".tbl[data-stage]").forEach(box => {
+    let vis = 0;
+    $$("tr[data-g]", box).forEach(tr => {
+      total++;
+      const okG = filt.grades.has(tr.dataset.g);
+      const c = tr.dataset.c;
+      const okC = filt.client === "all" || c === "both" || c === filt.client;
+      tr.hidden = !(okG && okC);
+      if (!tr.hidden) vis++;
+    });
+    shown += vis;
+    const er = $(".empty-row", box); if (er) er.hidden = vis > 0;
+  });
+  $("#rowCount").textContent = `${shown} / ${total} 항목 표시`;
+}
+$$(".chip[data-grade]").forEach(b => b.addEventListener("click", () => {
+  const g = b.dataset.grade;
+  if (filt.grades.has(g)) { if (filt.grades.size === 1) return; filt.grades.delete(g); } else filt.grades.add(g);
+  b.setAttribute("aria-pressed", filt.grades.has(g) ? "true" : "false");
+  applyFilter();
+}));
+$$(".chip[data-client]").forEach(b => b.addEventListener("click", () => {
+  filt.client = b.dataset.client;
+  $$(".chip[data-client]").forEach(x => x.setAttribute("aria-pressed", x === b ? "true" : "false"));
+  applyFilter();
+}));
+
+/* ---------------- stage nav highlight ---------------- */
+try {
+  const links = $$(".stagenav a");
+  const map = new Map(links.map(a => [a.getAttribute("href").slice(1), a]));
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        links.forEach(a => a.classList.remove("active"));
+        const a = map.get(e.target.id);
+        if (a) { a.classList.add("active"); try { a.scrollIntoView({block:"nearest", inline:"nearest"}); } catch(_){} }
+      }
+    });
+  }, {rootMargin:"-30% 0px -60% 0px"});
+  $$("section.stage").forEach(s => io.observe(s));
+} catch (_) {}
+
+/* ---------------- event log ---------------- */
+const LOG = [];
+const SAMPLE = [
+  {t:"10:02:11", who:"admin.kim", from:"10.0.4.21 (사무실)", act:"회원 정보 열람", target:"user 1002 (지영) 배송지", res:"허용", cls:"ok", sample:true},
+  {t:"09:47:03", who:"minsu", from:"203.0.113.50 · iPhone 앱", act:"로그인 성공 (새 기기, 알림 메일 발송)", target:"세션 #c41f…", res:"성공", cls:"ok", sample:true},
+  {t:"09:31:58", who:"(알 수 없음)", from:"198.51.100.7", act:"로그인 실패 12개 계정", target:"크리덴셜 스터핑 의심", res:"IP 차단", cls:"bad", sample:true}
+];
+function now(){ const d = new Date(); return d.toTimeString().slice(0,8); }
+function log(e){ LOG.unshift(Object.assign({t:now()}, e)); renderLog(); }
+function renderLog(){
+  const rows = LOG.concat(SAMPLE);
+  $("#logBody").innerHTML = rows.map(r => `<tr><td class="t">${esc(r.t)}</td><td>${esc(r.who)}${r.sample ? '<span class="sample">예시</span>' : ""}</td><td>${esc(r.from)}</td><td>${esc(r.act)}</td><td>${esc(r.target)}</td><td class="res-${r.cls}">${esc(r.res)}</td></tr>`).join("");
+}
+$("#logClear").addEventListener("click", () => { LOG.length = 0; renderLog(); });
+
+/* ---------------- crypto helpers ---------------- */
+const hasSubtle = !!(window.crypto && crypto.subtle);
+function randBytes(n){ const b = new Uint8Array(n); crypto.getRandomValues(b); return b; }
+function b64url(bytes){ let s = ""; bytes.forEach(b => s += String.fromCharCode(b)); return btoa(s).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+async function sha256hex(str){
+  if (!hasSubtle) return "(이 환경에서는 WebCrypto를 쓸 수 없어 생략)";
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(d)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
+function uuid4(){
+  if (crypto.randomUUID) return crypto.randomUUID();
+  const b = randBytes(16); b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+  const h = Array.from(b).map(x => x.toString(16).padStart(2,"0")).join("");
+  return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+}
+const newSid = () => b64url(randBytes(32));
+const short = s => s.slice(0,10) + "…";
+
+/* ---------------- 1. password checker ---------------- */
+const BLOCK = new Set(["password","password1","password123","password1234","password12345","password1234567","123456789012345","1234567890123456","qwerty123456789","qwertyuiopasdfg","1q2w3e4r5t6y7u8i","iloveyou12345678","admin123456789","111111111111111","abcdefghijklmno","letmein12345678","asdfghjkl123456","q1w2e3r4t5y6u7i8"]);
+const CONTEXT = ["minsu","ourshop"];
+function checkPw(){
+  const pw = $("#pw").value;
+  const cps = Array.from(pw).length;
+  const bytes = new TextEncoder().encode(pw).length;
+  const norm = pw.toLowerCase().replace(/\s+/g,"");
+  const items = [];
+  if (cps >= 15) items.push(["ok", `<b>길이 ${cps}자</b>: 비밀번호 단독 사용 기준(15자 이상)을 넘습니다.`]);
+  else if (cps >= 8) items.push(["warn", `<b>길이 ${cps}자</b>: ASVS 최소(8자)는 넘지만, 비밀번호만 쓰는 경우의 NIST 기준(15자)에 못 미칩니다.`]);
+  else items.push(["bad", `<b>길이 ${cps}자</b>: 8자 미만이라 어떤 기준으로도 거부됩니다.`]);
+  if (cps > 128) items.push(["bad", `<b>상한 초과</b>: 128자를 넘습니다. 아주 긴 입력은 해시 비용으로 서버를 괴롭히는 데 쓰일 수 있어 거부합니다.`]);
+  else items.push(["ok", `<b>상한 이내</b>: 128자 이하입니다. NIST는 최소 64자까지는 받으라고 합니다.`]);
+  if (BLOCK.has(norm)) items.push(["bad", `<b>흔한 비밀번호</b>: 차단 목록에 있습니다. 실제 서비스에서는 유출 비밀번호 DB와 대조합니다.`]);
+  else items.push(["ok", `<b>차단 목록</b>: 이 데모의 흔한 비밀번호 목록에는 없습니다.`]);
+  const ctx = CONTEXT.filter(w => norm.includes(w));
+  if (ctx.length) items.push(["bad", `<b>문맥 단어 포함</b>: ${ctx.map(esc).join(", ")}가 들어 있습니다. 아이디나 서비스 이름이 든 비밀번호는 추측이 쉽습니다.`]);
+  if (bytes > 72) items.push(["warn", `<b>UTF-8 ${bytes}바이트</b>: bcrypt는 앞 72바이트만 읽습니다. bcrypt라면 거부하거나 HMAC으로 먼저 줄여야 하고, Argon2id라면 문제없습니다.`]);
+  else items.push(["ok", `<b>UTF-8 ${bytes}바이트</b>: bcrypt의 72바이트 한도 안입니다.`]);
+  items.push(["info", `<b>조합 규칙 없음</b>: 대문자나 특수문자가 없어도 감점하지 않습니다. NIST가 조합 규칙을 금지합니다.`]);
+  const bad = items.filter(i => i[0] === "bad").length, warn = items.filter(i => i[0] === "warn").length;
+  const verdict = cps === 0 ? `<span class="verdict warn">입력하세요</span>`
+    : bad ? `<span class="verdict bad">가입 거부 · 문제 ${bad}개</span>`
+    : warn ? `<span class="verdict warn">통과 · 주의 ${warn}개</span>`
+    : `<span class="verdict ok">통과</span>`;
+  const pct = Math.min(100, Math.round(cps / 15 * 100));
+  $("#pwOut").innerHTML = `${verdict}
+    <div class="field"><span class="mini">15자 기준까지 ${Math.min(cps,15)} / 15</span><div class="bar ${cps < 15 ? "danger" : ""}"><i style="width:${pct}%"></i></div></div>
+    <ul class="checks">${items.map(([k,t]) => `<li><span class="ic ${k}">${k==="ok"?"✓":k==="bad"?"✕":k==="warn"?"!":"i"}</span><span>${t}</span></li>`).join("")}</ul>`;
+}
+$("#pw").addEventListener("input", checkPw);
+$$("[data-pw]").forEach(b => b.addEventListener("click", () => { $("#pw").value = b.dataset.pw; checkPw(); }));
+$("#pwShow").addEventListener("click", e => {
+  const inp = $("#pw"); const show = inp.type === "password";
+  inp.type = show ? "text" : "password";
+  e.currentTarget.textContent = show ? "숨기기" : "보기";
+  e.currentTarget.setAttribute("aria-pressed", show ? "true" : "false");
+});
+
+/* ---------------- 2a. rate limit ---------------- */
+const rt = {fails:0, lockedUntil:-1, clock:0, ipBlocked:false, lines:[]};
+function rtLine(kind, text){ rt.lines.unshift([kind, `<span class="mono">T+${rt.clock}분</span> ${text}`]); rt.lines = rt.lines.slice(0,8); }
+function rtRender(){
+  const locked = rt.lockedUntil > rt.clock;
+  const status = locked ? `<span class="verdict bad">minsu 잠금 중 · ${rt.lockedUntil - rt.clock}분 남음</span>`
+    : `<span class="verdict ${rt.fails >= 3 ? "warn" : "ok"}">minsu 연속 실패 ${rt.fails}회</span>`;
+  const ip = rt.ipBlocked ? ` <span class="verdict bad">IP 198.51.100.7 차단됨</span>` : "";
+  $("#rtOut").innerHTML = `<div class="row">${status}${ip}</div>
+    <ul class="checks">${rt.lines.length ? rt.lines.map(([k,t]) => `<li><span class="ic ${k}">${k==="ok"?"✓":k==="bad"?"✕":k==="warn"?"!":"i"}</span><span>${t}</span></li>`).join("") : `<li><span class="ic info">i</span><span>버튼을 눌러 시작하세요.</span></li>`}</ul>`;
+}
+$("#rtWrong").addEventListener("click", () => {
+  if (rt.lockedUntil > rt.clock) { rtLine("bad", `잠금 중이라 비밀번호를 확인하지 않고 거절. 응답: "잠시 후 다시 시도하세요"`); rtRender(); return; }
+  rt.fails++;
+  if (rt.fails >= 5) {
+    rt.lockedUntil = rt.clock + 15;
+    rtLine("bad", `5번째 실패 → 15분 잠금. 응답: "아이디 또는 비밀번호가 올바르지 않습니다"`);
+    log({who:"minsu", from:"203.0.113.50 · Chrome", act:"로그인 5회 실패, 계정 15분 잠금", target:"계정 minsu", res:"잠금", cls:"bad"});
+  } else if (rt.fails >= 3) {
+    const d = Math.pow(2, rt.fails - 3);
+    rtLine("warn", `${rt.fails}번째 실패 → 응답을 ${d}초 늦춤. 응답: "아이디 또는 비밀번호가 올바르지 않습니다"`);
+  } else {
+    rtLine("warn", `${rt.fails}번째 실패. 응답: "아이디 또는 비밀번호가 올바르지 않습니다"`);
+  }
+  rtRender();
+});
+$("#rtRight").addEventListener("click", () => {
+  if (rt.lockedUntil > rt.clock) { rtLine("bad", `맞는 비밀번호여도 잠금 중에는 거절. 공격자가 잠금 중에 정답을 확인할 수 없게 하기 위해서입니다.`); rtRender(); return; }
+  rt.fails = 0;
+  rtLine("ok", `로그인 성공 → 실패 횟수 초기화, 새 세션 발급`);
+  log({who:"minsu", from:"203.0.113.50 · Chrome", act:"로그인 성공", target:"새 세션 발급", res:"성공", cls:"ok"});
+  rtRender();
+});
+$("#rtStuff").addEventListener("click", () => {
+  rtLine("info", `IP 198.51.100.7이 계정 20개에 1번씩 시도. 계정마다 실패 1회라 계정 단위 제한에는 안 걸림`);
+  rt.ipBlocked = true;
+  rtLine("bad", `10분 안에 서로 다른 계정 10개 실패 → IP 단위 차단, 보안 이벤트 기록`);
+  log({who:"(알 수 없음)", from:"198.51.100.7", act:"로그인 실패 10개 이상 계정", target:"크리덴셜 스터핑 의심", res:"IP 차단", cls:"bad"});
+  rtRender();
+});
+$("#rtTime").addEventListener("click", () => { rt.clock += 5; rtLine("info", `시간이 5분 흘렀습니다.`); if (rt.lockedUntil >= 0 && rt.lockedUntil <= rt.clock) { rt.fails = 0; rt.lockedUntil = -1; rtLine("ok", `잠금 해제, 실패 횟수 초기화`); } rtRender(); });
+$("#rtReset").addEventListener("click", () => { Object.assign(rt, {fails:0, lockedUntil:-1, clock:0, ipBlocked:false, lines:[]}); rtRender(); });
+
+/* ---------------- 2b. hash timing ---------------- */
+$("#hashRun").addEventListener("click", async () => {
+  const out = $("#hashOut"), st = $("#hashStatus"), btn = $("#hashRun");
+  if (!hasSubtle) { out.innerHTML = `<p class="mini">이 환경에서는 WebCrypto를 쓸 수 없어 측정할 수 없습니다.</p>`; return; }
+  btn.disabled = true; st.textContent = "측정 중…";
+  try {
+    const enc = new TextEncoder().encode("correct horse battery staple");
+    const N = 2000;
+    let t0 = performance.now();
+    for (let i = 0; i < N; i++) await crypto.subtle.digest("SHA-256", enc);
+    const shaMs = (performance.now() - t0) / N;
+    const key = await crypto.subtle.importKey("raw", enc, "PBKDF2", false, ["deriveBits"]);
+    const salt = randBytes(16);
+    t0 = performance.now();
+    await crypto.subtle.deriveBits({name:"PBKDF2", hash:"SHA-256", salt, iterations:600000}, key, 256);
+    const pbMs = performance.now() - t0;
+    const shaRate = 1000 / shaMs, pbRate = 1000 / pbMs;
+    const ratio = pbMs / shaMs;
+    out.innerHTML = `<div class="scroll"><table class="cmp"><thead><tr><th>방식</th><th>1회 계산</th><th>이 기기 1코어의 초당 추측</th><th>15자 소문자 비밀번호 전수 조사</th></tr></thead><tbody>
+      <tr><td>SHA-256 1회</td><td>${shaMs < 0.01 ? shaMs.toFixed(4) : shaMs.toFixed(3)} ms</td><td>약 ${fmt(Math.round(shaRate))}회</td><td rowspan="2" class="mini">경우의 수 26<sup>15</sup> ≈ 1.7 × 10<sup>21</sup>. 길이가 시간을 압도합니다.</td></tr>
+      <tr><td>PBKDF2 600,000회</td><td>${pbMs.toFixed(0)} ms</td><td>약 ${pbRate >= 10 ? fmt(Math.round(pbRate)) : pbRate.toFixed(1)}회</td></tr>
+      </tbody></table></div>
+      <p>같은 비밀번호를 확인하는 데 느린 해시가 약 <b>${fmt(Math.round(ratio))}배</b> 더 걸렸습니다. 정상 사용자는 로그인할 때 한 번만 기다리면 되지만, DB를 훔친 공격자는 추측마다 이 비용을 냅니다. GPU를 쓰면 SHA-256은 이보다 수천 배 빨라지고, Argon2id는 메모리를 많이 써서 GPU의 이점도 줄입니다.</p>`;
+    st.textContent = "측정 완료. 다시 누르면 새로 잽니다.";
+  } catch (e) {
+    out.innerHTML = `<p class="mini">측정에 실패했습니다: ${esc(e && e.message || e)}</p>`;
+    st.textContent = "";
+  } finally { btn.disabled = false; }
+});
+
+/* ---------------- 3a. session id + calculator ---------------- */
+function sidBits(){ const v = $("input[name=sidBits]:checked").value; return v === "uuid" ? 122 : Number(v); }
+async function sidGen(){
+  const v = $("input[name=sidBits]:checked").value;
+  let raw, note;
+  if (v === "uuid") { raw = uuid4(); note = "UUID 문자열 36자. 128비트 중 6비트는 버전 표시라 실제 랜덤은 122비트입니다."; }
+  else { const n = Number(v) / 8; raw = b64url(randBytes(n)); note = `${n}바이트를 base64url로 인코딩해 ${raw.length}자.`; }
+  const h = await sha256hex(raw);
+  $("#sidOut").innerHTML = `<dt>클라이언트가 받는 값</dt><dd class="mono">${esc(raw)}</dd>
+    <dt>길이</dt><dd>${esc(note)}</dd>
+    <dt>DB에 저장되는 값</dt><dd class="mono">${esc(h)}</dd>
+    <dt>원리</dt><dd>DB가 유출돼도 저장된 해시로는 원문을 되돌릴 수 없어 로그인에 쓸 수 없습니다. 요청이 오면 받은 원문을 다시 해시해 비교합니다.</dd>`;
+  calc();
+}
+function powStr(L){
+  if (L < 3) return fmt(Math.round(Math.pow(10, L) * 10) / 10);
+  const e = Math.floor(L), m = Math.pow(10, L - e);
+  return `${m.toFixed(1)} × 10<sup>${e}</sup>`;
+}
+function calc(){
+  const S = Math.max(1, Number($("#calcS").value) || 1);
+  const R = Number($("#calcR").value);
+  const LOG2 = Math.log10(2), YEAR = Math.log10(31557600), UNIVERSE = Math.log10(1.38e10);
+  const sel = sidBits();
+  const rows = [[122,"UUID v4","ASVS 128비트 요건에 조금 못 미침"],[128,"128비트","ASVS 7.2.3 최소 요건"],[256,"256비트","우리 선택"]].map(([b, name, memo]) => {
+    const L = b * LOG2 - Math.log10(S) - Math.log10(R) - LOG2 - YEAR;
+    const uni = L - UNIVERSE;
+    return `<tr${b === sel ? ' style="background:var(--accent-soft)"' : ""}><td>${name}</td><td>${powStr(b * LOG2)}</td><td>${L < 0 ? "1년 미만" : powStr(L) + "년"}</td><td>${uni > 0 ? "우주 나이의 " + powStr(uni) + "배" : "우주 나이보다 짧음"}</td><td class="mini">${memo}</td></tr>`;
+  }).join("");
+  $("#calcOut").innerHTML = `<table class="cmp"><thead><tr><th>세션 ID</th><th>경우의 수</th><th>하나라도 맞히는 평균 시간</th><th>비교</th><th>비고</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="mini">결론: 128비트만으로도 현실의 어떤 가정에서도 추측이 불가능합니다. 256비트를 고른 이유는 보안 차이가 아니라, 바이트 16개를 더 쓰는 비용이 사실상 0이고 SHA-256 저장값과 크기가 맞기 때문입니다. 128비트로 가도 표준을 충족합니다.</p>`;
+}
+$$("input[name=sidBits]").forEach(r => r.addEventListener("change", sidGen));
+$("#sidGen").addEventListener("click", sidGen);
+$("#calcS").addEventListener("input", calc);
+$("#calcR").addEventListener("change", calc);
+
+/* ---------------- 3b. fixation ---------------- */
+const fx = {planted:null, victimSid:null, step:0, lines:[]};
+function fxRender(){
+  $("#fixOut").innerHTML = `<ul class="checks">${fx.lines.length ? fx.lines.map(([k,t]) => `<li><span class="ic ${k}">${k==="ok"?"✓":k==="bad"?"✕":k==="warn"?"!":"i"}</span><span>${t}</span></li>`).join("") : `<li><span class="ic info">i</span><span>1번부터 순서대로 눌러 보세요.</span></li>`}</ul>`;
+}
+$("#fix1").addEventListener("click", () => {
+  fx.planted = "atk_" + b64url(randBytes(9)); fx.victimSid = fx.planted; fx.step = 1;
+  fx.lines = [["warn", `공격자가 자기가 아는 ID <span class="mono">${esc(fx.planted)}</span>를 피해자 브라우저의 세션 쿠키로 심었습니다.`]];
+  fxRender();
+});
+$("#fix2").addEventListener("click", () => {
+  if (fx.step < 1) { fx.lines.push(["info", "먼저 1번을 누르세요."]); fxRender(); return; }
+  const rotate = $("#fixRotate").checked;
+  if (rotate) {
+    fx.victimSid = newSid();
+    fx.lines.push(["ok", `민수가 로그인 → 서버가 기존 ID를 폐기하고 새 ID <span class="mono">${esc(short(fx.victimSid))}</span>를 발급했습니다.`]);
+  } else {
+    fx.lines.push(["bad", `민수가 로그인 → 서버가 기존 ID를 그대로 쓰면서 그 세션에 "민수로 로그인됨"을 기록했습니다.`]);
+  }
+  fx.step = 2; fxRender();
+});
+$("#fix3").addEventListener("click", () => {
+  if (fx.step < 2) { fx.lines.push(["info", "1번과 2번을 먼저 누르세요."]); fxRender(); return; }
+  const rotate = fx.victimSid !== fx.planted;
+  if (rotate) {
+    fx.lines.push(["ok", `공격자가 <span class="mono">${esc(fx.planted)}</span>로 요청 → 401. 그 ID는 로그인 때 폐기돼 존재하지 않습니다. <b>공격 실패</b>`]);
+    log({who:"(익명)", from:"198.51.100.23", act:"폐기된 세션 ID로 요청", target:"세션 " + fx.planted.slice(0,8) + "…", res:"401 거부", cls:"bad"});
+  } else {
+    fx.lines.push(["bad", `공격자가 <span class="mono">${esc(fx.planted)}</span>로 요청 → 200. 민수로 로그인된 상태입니다. <b>공격 성공</b>`]);
+    log({who:"minsu", from:"198.51.100.23", act:"고정된 세션으로 접근", target:"세션 " + fx.planted.slice(0,8) + "…", res:"허용 (취약)", cls:"warn"});
+  }
+  fx.step = 3; fxRender();
+});
+$("#fixReset").addEventListener("click", () => { Object.assign(fx, {planted:null, victimSid:null, step:0, lines:[]}); fxRender(); });
+$("#fixRotate").addEventListener("change", () => { Object.assign(fx, {planted:null, victimSid:null, step:0, lines:[]}); fxRender(); });
+
+/* ---------------- 4. cookie lab ---------------- */
+function cookieRender(){
+  const host = $("#ckHost").checked, secure = $("#ckSecure").checked, http = $("#ckHttp").checked;
+  const domain = $("#ckDomain").checked, maxAge = $("#ckMaxAge").checked;
+  const same = $("#ckSame").value, path = $("#ckPath").value;
+  const name = (host ? "__Host-" : "") + "SID";
+  const parts = [`${name}=Kx8Qm2t…`];
+  if (secure) parts.push("Secure"); if (http) parts.push("HttpOnly");
+  parts.push(`SameSite=${same}`); parts.push(`Path=${path}`);
+  if (domain) parts.push("Domain=example.com"); if (maxAge) parts.push("Max-Age=604800");
+  const reasons = [];
+  if (host && !secure) reasons.push("__Host- 쿠키는 Secure가 있어야 합니다");
+  if (host && path !== "/") reasons.push("__Host- 쿠키는 Path=/여야 합니다");
+  if (host && domain) reasons.push("__Host- 쿠키는 Domain을 지정할 수 없습니다");
+  if (same === "None" && !secure) reasons.push("SameSite=None은 Secure 없이 쓸 수 없습니다");
+  const rejected = reasons.length > 0;
+  const T = [];
+  if (rejected) {
+    T.push(["bad", `<b>브라우저가 이 쿠키를 저장하지 않습니다</b>: ${reasons.map(esc).join(", ")}. 로그인이 아예 안 되는 장애가 됩니다.`]);
+  } else {
+    T.push(http ? ["ok", `<b>XSS가 쿠키 읽기</b>: 막힘. <code>document.cookie</code>에 보이지 않습니다. 단, XSS가 페이지 안에서 요청을 보내는 것은 못 막습니다.`]
+               : ["bad", `<b>XSS가 쿠키 읽기</b>: 열림. 악성 스크립트가 <code>document.cookie</code>로 세션 ID를 읽어 외부로 보낼 수 있습니다.`]);
+    T.push(secure ? ["ok", `<b>평문 HTTP 노출</b>: 막힘. HTTPS 연결에만 실립니다.`]
+                  : ["bad", `<b>평문 HTTP 노출</b>: 열림. 공용 와이파이 등에서 http:// 요청 하나만 생겨도 세션 ID가 그대로 보입니다.`]);
+    if (same === "Strict") T.push(["ok", `<b>다른 사이트발 요청(CSRF)</b>: 쿠키가 아예 안 붙습니다. 외부 링크로 들어오면 첫 화면만 비로그인으로 보이는 대신 가장 안전합니다.`]);
+    else if (same === "Lax") T.push(["warn", `<b>다른 사이트발 요청(CSRF)</b>: POST는 막히지만, 다른 사이트에서 링크로 이동하는 GET에는 쿠키가 붙습니다. GET으로 상태를 바꾸는 API가 하나라도 있으면 뚫립니다.`]);
+    else T.push(["bad", `<b>다른 사이트발 요청(CSRF)</b>: 모든 교차 사이트 요청에 쿠키가 붙습니다. Origin 검사와 커스텀 헤더만 남은 방어선입니다.`]);
+    T.push(host ? ["ok", `<b>하위 도메인의 쿠키 덮어쓰기</b>: 막힘. promo.example.com이 뚫려도 같은 이름의 쿠키를 심을 수 없습니다.`]
+                : ["warn", `<b>하위 도메인의 쿠키 덮어쓰기</b>: 열림. 뚫린 하위 도메인이 Domain=example.com 쿠키를 심어 세션 고정을 시도할 수 있습니다.`]);
+    T.push(domain ? ["bad", `<b>하위 도메인으로 쿠키 유출</b>: 열림. 모든 *.example.com으로 세션 쿠키가 전송됩니다.`]
+                  : ["ok", `<b>하위 도메인으로 쿠키 유출</b>: 막힘. 이 호스트에만 전송됩니다.`]);
+    T.push(path === "/" ? ["ok", `<b>Path</b>: 사이트 전체에 적용. 경로를 좁혀 다른 쿠키보다 우선시키는 꼼수도 막힙니다.`]
+                        : ["warn", `<b>Path=/app</b>: 경로 밖 API에는 쿠키가 안 붙어 인증이 깨지고, __Host- 접두어도 쓸 수 없습니다.`]);
+    T.push(maxAge ? ["warn", `<b>영구 쿠키</b>: 브라우저를 닫아도 디스크에 7일 남습니다. 인포스틸러가 가져갈 시간이 길어집니다. 만료는 어차피 서버의 절대 만료가 결정합니다.`]
+                  : ["ok", `<b>세션 쿠키</b>: Max-Age가 없어 브라우저 세션 동안만 유지됩니다. 실제 만료는 서버의 타임아웃이 결정합니다.`]);
+  }
+  const verdict = rejected ? `<span class="verdict bad">저장 거부</span>` : T.some(t => t[0] === "bad") ? `<span class="verdict bad">취약</span>` : T.some(t => t[0] === "warn") ? `<span class="verdict warn">주의</span>` : `<span class="verdict ok">권장 설정</span>`;
+  $("#ckOut").innerHTML = `${verdict}<pre class="code">Set-Cookie: ${esc(parts.join("; "))}</pre><ul class="checks">${T.map(([k,t]) => `<li><span class="ic ${k}">${k==="ok"?"✓":k==="bad"?"✕":"!"}</span><span>${t}</span></li>`).join("")}</ul>`;
+}
+["#ckHost","#ckSecure","#ckHttp","#ckDomain","#ckMaxAge","#ckSame","#ckPath"].forEach(id => $(id).addEventListener("change", cookieRender));
+
+/* ---------------- 5a. timeout ---------------- */
+const POLICY = {user:{idle:60, abs:24*60, name:"일반 사용자"}, admin:{idle:15, abs:4*60, name:"관리자"}};
+function hm(min){ min = Math.round(min); const h = Math.floor(min/60), m = min % 60; return h ? (m ? `${h}시간 ${m}분` : `${h}시간`) : `${m}분`; }
+function toRender(){
+  const p = POLICY[$("#toRole").value];
+  const age = Number($("#toAge").value) * 60;
+  let idle = Number($("#toIdle").value);
+  if (idle > age) idle = age;
+  $("#toAgeV").textContent = hm(age); $("#toIdleV").textContent = hm(idle);
+  const absPct = Math.min(100, age / p.abs * 100), idlePct = Math.min(100, idle / p.idle * 100);
+  let v, msg;
+  if (age >= p.abs) { v = `<span class="verdict bad">절대 만료</span>`; msg = `로그인 후 ${hm(p.abs)}이 지나 활동 여부와 관계없이 끝났습니다. 다시 로그인해야 합니다. (ASVS 7.3.2)`; }
+  else if (idle >= p.idle) { v = `<span class="verdict bad">무활동 만료</span>`; msg = `마지막 요청 후 ${hm(p.idle)} 동안 활동이 없어 끝났습니다.${$("#toRole").value === "admin" ? " 관리자는 고시 제6조 ④의 자동 차단에 해당합니다." : ""} (ASVS 7.3.1)`; }
+  else { const left = Math.min(p.abs - age, p.idle - idle); v = `<span class="verdict ok">유효</span>`; msg = `다음 요청이 ${hm(p.idle - idle)} 안에 오면 무활동 시계가 0으로 돌아갑니다. 절대 만료까지는 ${hm(p.abs - age)} 남았습니다. 지금 아무것도 안 하면 ${hm(left)} 뒤 끝납니다.`; }
+  $("#toOut").innerHTML = `${v}<p>${msg}</p>
+    <div class="field"><span class="mini">무활동 ${hm(idle)} / ${hm(p.idle)}</span><div class="bar ${idlePct >= 100 ? "danger" : ""}"><i style="width:${idlePct}%"></i></div></div>
+    <div class="field"><span class="mini">절대 ${hm(age)} / ${hm(p.abs)}</span><div class="bar ${absPct >= 100 ? "danger" : ""}"><i style="width:${absPct}%"></i></div></div>
+    <p class="mini">구현 팁: 요청마다 last_access를 쓰면 DB 쓰기가 요청 수만큼 생깁니다. 1분 이상 지났을 때만 갱신하면 쓰기를 크게 줄이고, 오차는 최대 1분입니다.</p>`;
+}
+["#toRole","#toAge","#toIdle"].forEach(id => $(id).addEventListener("input", toRender));
+
+/* ---------------- 5b. csrf ---------------- */
+function csRender(){
+  const o = $("#csOrigin").value, m = $("#csMethod").value, hdr = $("#csHeader").checked;
+  const unsafe = m !== "GET";
+  const L = []; let result;
+  if (o === "app") {
+    L.push(["ok", `<b>운반</b>: Authorization 헤더. 앱 코드가 직접 붙이므로 다른 사이트가 흉내 낼 수 없습니다.`]);
+    L.push(["info", `<b>CSRF 검사</b>: 해당 없음. 헤더 체인은 쿠키를 아예 받지 않습니다.`]);
+    L.push(["ok", `<b>세션 조회와 인가</b>: 통과.`]);
+    result = ["ok", "처리됨 (200)"];
+  } else if (o === "evil") {
+    L.push(["ok", `<b>브라우저 · SameSite=Strict</b>: 다른 사이트에서 시작된 요청이라 세션 쿠키가 붙지 않습니다.`]);
+    if (hdr) L.push(["ok", `<b>브라우저 · CORS</b>: 커스텀 헤더 때문에 사전 확인 요청이 먼저 나갑니다. 서버가 evil.example을 허락하지 않으므로 본 요청은 아예 나가지 않습니다.`]);
+    else L.push(["ok", `<b>서버 · Origin 검사</b>: Origin이 https://evil.example이라 403. 커스텀 헤더도 없습니다.`]);
+    result = ["bad", hdr ? "브라우저에서 차단" : "차단됨 (쿠키 없음 + 403)"];
+  } else if (o === "sub") {
+    L.push(["warn", `<b>브라우저 · SameSite=Strict</b>: promo.example.com은 "같은 사이트"라 쿠키가 붙습니다. SameSite만으로는 못 막는 경우입니다(RFC 10017 §6.1.3.3.1).`]);
+    if (hdr) L.push(["ok", `<b>브라우저 · CORS</b>: 다른 출처라서 커스텀 헤더가 붙은 요청은 사전 확인을 거칩니다. 서버가 promo 출처를 허락하지 않으므로 본 요청은 나가지 않습니다(§6.1.3.3.2).`]);
+    else L.push(["ok", `<b>서버 · Origin과 커스텀 헤더 검사</b>: Origin이 우리 출처가 아니고 X-Client 헤더도 없어 403.`]);
+    result = ["bad", "차단됨"];
+  } else {
+    L.push(["ok", `<b>브라우저</b>: 같은 출처라 쿠키가 붙고, 커스텀 헤더도 자유롭게 붙일 수 있습니다.`]);
+    if (!unsafe) { L.push(["info", `<b>서버</b>: 조회(GET)는 상태를 바꾸지 않으므로 CSRF 검사 대상이 아닙니다. 그래서 GET으로 상태를 바꾸는 API를 만들면 안 됩니다.`]); result = ["ok", "처리됨 (200)"]; }
+    else {
+      L.push(["ok", `<b>서버 · Origin, Sec-Fetch-Site</b>: https://shop.example.com, same-origin. 통과.`]);
+      if (hdr) { L.push(["ok", `<b>서버 · 커스텀 헤더</b>: X-Client: web 있음. 통과.`]); result = ["ok", "처리됨 (200)"]; }
+      else { L.push(["bad", `<b>서버 · 커스텀 헤더</b>: 없음 → 403. 우리 프론트가 헤더를 빠뜨린 버그로, 테스트에서 잡혀야 합니다.`]); result = ["bad", "거부됨 (403)"]; }
+    }
+  }
+  $("#csOut").innerHTML = `<span class="verdict ${result[0]}">${esc(result[1])}</span><ul class="checks">${L.map(([k,t]) => `<li><span class="ic ${k}">${k==="ok"?"✓":k==="bad"?"✕":k==="warn"?"!":"i"}</span><span>${t}</span></li>`).join("")}</ul>`;
+}
+["#csOrigin","#csMethod","#csHeader"].forEach(id => $(id).addEventListener("change", csRender));
+
+/* ---------------- 5c. binding ---------------- */
+const BIND = {
+  normal:{on:["ok","처리됨 (200)","세션의 jkt와 proof의 공개키가 일치하고, 서명, ath, nonce, jti 모두 정상입니다."], off:["ok","처리됨 (200)","세션 ID만 확인하고 통과합니다."]},
+  stolen:{on:["bad","거부 (401) + 세션 폐기","공격자 PC에는 피해자의 보안 칩 키가 없어 맞는 서명을 만들 수 없습니다. jkt 불일치는 탈취 신호이므로 그 세션을 즉시 폐기하고 보안 이벤트를 남깁니다."], off:["bad","공격 성공 (200)","세션 ID만 있으면 누구든 피해자가 됩니다. 로그, 백업, 기기 저장소 복제 등 어디서 새어 나가든 그대로 쓰입니다."]},
+  replay:{on:["bad","거부 (401)","proof의 jti는 한 번만 쓸 수 있고 nonce와 iat 유효 시간도 짧아, 가로챈 요청을 다시 보내도 받아 주지 않습니다."], off:["bad","공격 성공 (200)","같은 요청을 몇 번이고 다시 보낼 수 있습니다."]},
+  malware:{on:["warn","못 막음 (200)","감염된 기기 안의 악성코드는 정상 앱처럼 보안 칩에 서명을 요청할 수 있습니다. 결정문의 위험 수용 항목입니다. 민감 작업 재인증으로 피해를 줄입니다."], off:["warn","못 막음 (200)","바인딩이 없어도 있어도 결과가 같습니다."]}
+};
+$$("[data-bind]").forEach(b => b.addEventListener("click", () => {
+  const on = $("#bdOn").checked; const r = BIND[b.dataset.bind][on ? "on" : "off"];
+  const cls = r[0] === "ok" ? "ok" : (r[1].indexOf("성공") >= 0 ? "bad" : (r[0] === "warn" ? "warn" : "ok"));
+  $("#bdOut").innerHTML = `<span class="verdict ${cls}">${esc(r[1])}</span><p>${esc(r[2])}</p>`;
+  if (b.dataset.bind === "stolen" && on) log({who:"minsu", from:"198.51.100.40 · 미등록 기기", act:"DPoP 키 불일치, 세션 폐기", target:"세션 #a92e…", res:"401 거부", cls:"bad"});
+}));
+
+/* ---------------- 6a. idor ---------------- */
+const ORDERS = {5001:{id:5001, userId:1001, owner:"민수", item:"무선 키보드", address:"서울시 마포구 ○○로 12", phone:"010-****-1234"}, 5002:{id:5002, userId:1002, owner:"지영", item:"원두 1kg", address:"부산시 해운대구 △△로 88", phone:"010-****-5678"}};
+$("#idSend").addEventListener("click", () => {
+  const impl = $("input[name=idImpl]:checked").value; const id = Number($("#idOrder").value);
+  const o = ORDERS[id]; let v, body, note;
+  if (!o) { v = ["warn","404 Not Found"]; body = `{ "error": "NOT_FOUND" }`; note = "존재하지 않는 주문입니다."; }
+  else if (impl === "unsafe" && o.userId !== 1001) { v = ["bad","200 OK · 남의 개인정보 노출"]; body = JSON.stringify(o, null, 2); note = "로그인만 확인하고 소유자는 확인하지 않아, ID만 바꾸면 남의 주소와 연락처가 보입니다. 주문 ID가 순차 번호면 전체 회원을 훑을 수 있습니다.";
+    log({who:"minsu", from:"203.0.113.50 · Chrome", act:"타인 주문 조회 (취약 구현)", target:"user 1002 주문 5002", res:"노출", cls:"bad"}); }
+  else if (o.userId !== 1001) { v = ["ok","404 Not Found"]; body = `{ "error": "NOT_FOUND" }`; note = "조회 조건에 user_id = 1001이 들어가 결과가 없습니다. 403 대신 404라서 이 주문이 존재한다는 사실도 숨겨집니다.";
+    log({who:"minsu", from:"203.0.113.50 · Chrome", act:"타인 주문 조회 시도", target:"주문 5002", res:"404 차단", cls:"warn"}); }
+  else { v = ["ok","200 OK"]; body = JSON.stringify(o, null, 2); note = "자기 주문이라 정상 응답합니다."; }
+  $("#idOut").innerHTML = `<span class="verdict ${v[0]}">${esc(v[1])}</span><pre class="code">${esc(body)}</pre><p class="mini">${esc(note)}</p>`;
+});
+
+/* ---------------- 6b. mass assignment ---------------- */
+$("#maSend").addEventListener("click", () => {
+  const mode = $("input[name=maMode]:checked").value;
+  const before = {id:1001, nickname:"민수", role:"USER", point:1200};
+  let req;
+  try { req = JSON.parse($("#maBody").value); if (!req || typeof req !== "object" || Array.isArray(req)) throw new Error("객체가 아님"); }
+  catch (e) { $("#maOut").innerHTML = `<span class="verdict warn">400 Bad Request</span><p class="mini">JSON 형식이 올바르지 않습니다. 중괄호와 따옴표를 확인하세요.</p>`; return; }
+  const after = Object.assign({}, before);
+  const changed = [];
+  if (mode === "entity") { Object.keys(req).forEach(k => { if (k in after && k !== "id") { if (after[k] !== req[k]) changed.push(k); after[k] = req[k]; } }); }
+  else if (typeof req.nickname === "string") { if (after.nickname !== req.nickname) changed.push("nickname"); after.nickname = req.nickname; }
+  const escalated = after.role !== before.role || after.point !== before.point;
+  const v = escalated ? ["bad", "권한 상승 발생"] : ["ok", "의도한 필드만 변경"];
+  if (escalated) log({who:"minsu", from:"203.0.113.50 · Chrome", act:"프로필 수정으로 role 변경 (취약 구현)", target:"user 1001", res:"권한 상승", cls:"bad"});
+  $("#maOut").innerHTML = `<span class="verdict ${v[0]}">${esc(v[1])}</span>
+    <div class="split"><div><span class="mini">변경 전</span><pre class="code">${esc(JSON.stringify(before, null, 2))}</pre></div><div><span class="mini">변경 후 · 바뀐 필드: ${changed.length ? esc(changed.join(", ")) : "없음"}</span><pre class="code">${esc(JSON.stringify(after, null, 2))}</pre></div></div>
+    <p class="mini">${mode === "entity" ? "요청의 모든 필드가 엔티티에 들어가, 민수가 스스로 관리자가 됐습니다." : "요청 DTO에 nickname만 있으니 role과 point는 무시됩니다. 권한 변경은 관리자 전용 API가 따로 맡습니다."}</p>`;
+});
+
+/* ---------------- 7. reauth ---------------- */
+let raSid = newSid();
+let raPending = null;
+function raAgeRender(){ $("#raAgeV").textContent = hm(Number($("#raAge").value)); }
+function raNeeds(act, age){ if (act === "view") return false; if (act === "pay") return true; return age > 5; }
+const ACT = {email:"이메일 변경", pw:"비밀번호 변경", pay:"결제", view:"주문 내역 조회"};
+$("#raRun").addEventListener("click", () => {
+  const act = $("#raAct").value, age = Number($("#raAge").value);
+  $("#raPrompt").hidden = true; raPending = null;
+  if (!raNeeds(act, age)) {
+    $("#raOut").innerHTML = `<span class="verdict ok">${ACT[act]} 처리됨</span><p>${act === "view" ? "민감 작업이 아니라 재인증 없이 처리합니다." : `마지막 인증이 ${hm(age)} 전이라 5분 이내 기준을 만족합니다.`}</p><p class="mini">현재 세션 ID: <span class="mono">${esc(short(raSid))}</span></p>`;
+    return;
+  }
+  raPending = act;
+  $("#raOut").innerHTML = `<span class="verdict warn">재인증 필요</span><p>${act === "pay" ? "결제는 매번 비밀번호를 다시 받습니다 (ASVS 7.5.3)." : `마지막 인증이 ${hm(age)} 전이라 5분 기준을 넘었습니다 (ASVS 7.5.1).`}</p><p class="mini">현재 세션 ID: <span class="mono">${esc(short(raSid))}</span></p>`;
+  $("#raPrompt").hidden = false; $("#raPw").value = ""; try { $("#raPw").focus(); } catch(_){}
+});
+$("#raConfirm").addEventListener("click", () => {
+  if (!raPending) return;
+  if ($("#raPw").value !== "demo") {
+    $("#raOut").insertAdjacentHTML("beforeend", `<p class="res-bad">비밀번호가 올바르지 않습니다. 재인증 실패도 로그인 실패처럼 횟수를 셉니다.</p>`);
+    log({who:"minsu", from:"203.0.113.50 · Chrome", act:"재인증 실패 (" + ACT[raPending] + ")", target:"세션 " + raSid.slice(0,6) + "…", res:"실패", cls:"warn"});
+    return;
+  }
+  const old = raSid; raSid = newSid();
+  const act = raPending; raPending = null; $("#raPrompt").hidden = true;
+  $("#raAge").value = 0; raAgeRender();
+  let extra = "";
+  if (act === "email") extra = "<li><span class=\"ic info\">i</span><span>기존 이메일 주소로 변경 알림을 보냅니다. 본인이 아니면 되돌릴 수 있는 링크를 담습니다.</span></li>";
+  if (act === "pw") { extra = "<li><span class=\"ic info\">i</span><span>현재 세션을 뺀 다른 세션을 모두 종료했습니다 (ASVS 7.4.3). 8단계 기기 목록에 반영됩니다.</span></li>"; devRevokeOthers("비밀번호 변경"); }
+  $("#raOut").innerHTML = `<span class="verdict ok">${ACT[act]} 처리됨</span>
+    <ul class="checks"><li><span class="ic ok">✓</span><span>비밀번호 재인증 성공, auth_time 갱신</span></li>
+    <li><span class="ic ok">✓</span><span>세션 ID 교체 (ASVS 7.2.4): <span class="mono">${esc(short(old))}</span> → <span class="mono">${esc(short(raSid))}</span>. 이전 ID는 폐기됐습니다.</span></li>${extra}</ul>`;
+  log({who:"minsu", from:"203.0.113.50 · Chrome", act:"재인증 후 " + ACT[act], target:"세션 교체 " + old.slice(0,6) + "… → " + raSid.slice(0,6) + "…", res:"성공", cls:"ok"});
+});
+$("#raAge").addEventListener("input", raAgeRender);
+$("#raPw").addEventListener("keydown", e => { if (e.key === "Enter") $("#raConfirm").click(); });
+
+/* ---------------- 8. devices ---------------- */
+const DEV_INIT = () => [
+  {id:"c41f", name:"Chrome · Windows", kind:"브라우저", meta:"서울 · 지금 사용 중", current:true, gone:false},
+  {id:"9b2e", name:"iPhone 앱", kind:"앱", meta:"서울 · 2시간 전", gone:false},
+  {id:"07da", name:"Galaxy 앱", kind:"앱", meta:"부산 · 어제", gone:false},
+  {id:"e5a1", name:"Safari · Mac", kind:"브라우저", meta:"서울 · 3일 전", gone:false}
+];
+let DEV = DEV_INIT();
+function devRender(){
+  $("#devList").innerHTML = DEV.map(d => `<li class="${d.gone ? "gone" : ""}"><div class="grow"><div class="name">${esc(d.name)}${d.current ? ' <span class="tag">이 기기</span>' : ""}</div><div class="meta">${esc(d.kind)} · ${esc(d.meta)} · 세션 #${esc(d.id)}…</div></div>${d.gone ? '<span class="res-bad">종료됨</span>' : (d.current ? "" : `<button type="button" class="btn small" data-kill="${d.id}">종료</button>`)}</li>`).join("");
+  $$("[data-kill]").forEach(b => b.addEventListener("click", () => {
+    const d = DEV.find(x => x.id === b.dataset.kill); if (!d) return; d.gone = true;
+    sql(`DELETE FROM auth_session\n WHERE user_id = 1001 AND id_hash = :hash_of_${d.id};`);
+    log({who:"minsu", from:"203.0.113.50 · Chrome", act:"기기 세션 종료", target:d.name, res:"폐기", cls:"ok"});
+    devRender();
+  }));
+}
+function sql(q){ $("#devSql").textContent = q; }
+function devRevokeOthers(why){
+  DEV.forEach(d => { if (!d.current) d.gone = true; });
+  sql(`-- ${why}\nDELETE FROM auth_session\n WHERE user_id = 1001 AND id_hash <> :current_hash;  -- 브라우저, 앱 세션이 한 번에`);
+  log({who:"minsu", from:"203.0.113.50 · Chrome", act:why + ": 다른 세션 전부 종료", target:"user 1001 (3개)", res:"폐기", cls:"ok"});
+  devRender();
+}
+$("#devLogout").addEventListener("click", () => {
+  const d = DEV.find(x => x.current); if (!d || d.gone) return; d.gone = true;
+  sql(`DELETE FROM auth_session WHERE id_hash = :current_hash;\n-- 응답: Set-Cookie: __Host-SID=; Max-Age=0; Path=/; Secure; HttpOnly`);
+  log({who:"minsu", from:"203.0.113.50 · Chrome", act:"로그아웃", target:"세션 #c41f…", res:"폐기", cls:"ok"});
+  devRender();
+});
+$("#devOthers").addEventListener("click", () => devRevokeOthers("다른 기기 로그아웃"));
+$("#devPw").addEventListener("click", () => devRevokeOthers("비밀번호 변경"));
+$("#devSuspend").addEventListener("click", () => {
+  DEV.forEach(d => d.gone = true);
+  sql(`-- 운영자 조치: 계정 정지 (ASVS 7.4.2)\nUPDATE users SET status = 'SUSPENDED' WHERE id = 1001;\nDELETE FROM auth_session WHERE user_id = 1001;`);
+  log({who:"admin.kim", from:"10.0.4.21 (사무실)", act:"계정 정지와 전체 세션 종료", target:"user 1001 (민수)", res:"폐기", cls:"bad"});
+  devRender();
+});
+$("#devReset").addEventListener("click", () => { DEV = DEV_INIT(); sql("-- 실행된 쿼리가 여기 표시됩니다"); devRender(); });
+
+/* ---------------- admin evaluator ---------------- */
+function adRender(){
+  const where = $("#adWhere").value, ip = $("#adIp").checked, strong = $("#adStrong").checked;
+  const client = $("#adClient").value, bind = $("#adBind").checked, idle = Number($("#adIdle").value);
+  $("#adBindLabel").textContent = client === "browser" ? "DBSC 바인딩 등록 완료" : "DPoP 키 + 앱 무결성 증명 통과";
+  $("#adIdleV").textContent = hm(idle);
+  const L = []; let deny = null;
+  if (ip) L.push(["ok", `<b>IP 허용 목록</b>: 포함. (고시 제6조 ①, ISMS-P 2.6.3)`]);
+  else { L.push(["bad", `<b>IP 허용 목록</b>: 미포함 → 거부. 관리자 화면은 허용된 IP에만 엽니다. (고시 제6조 ①, ISMS-P 2.6.3)`]); deny = deny || "IP 제한"; }
+  if (where === "office") L.push(["ok", `<b>외부 접속 여부</b>: 사무실 내부망이라 외부 접속이 아닙니다. 안전한 인증수단 의무가 생기지 않습니다. (고시 제6조 ②)`]);
+  else if (strong) L.push(["ok", `<b>외부 접속</b>: OTP나 보안키를 썼으므로 안전한 인증수단 요건을 채웁니다. (고시 제6조 ②)`]);
+  else {
+    L.push(["bad", where === "vpn"
+      ? `<b>외부 접속 (VPN)</b>: VPN만으로는 부족 → 거부. VPN으로 대신할 수 있는 단서는 이용자가 아닌 정보주체를 처리하는 시스템에만 해당하고, 우리 회원은 이용자입니다. (고시 제6조 ②)`
+      : `<b>외부 접속</b>: 안전한 인증수단 없음 → 거부. (고시 제6조 ②)`]);
+    deny = deny || "외부 접속 인증";
+  }
+  if (bind) L.push(["ok", `<b>기기 바인딩</b>: ${client === "browser" ? "DBSC 등록 완료" : "DPoP와 무결성 증명 통과"}. (결정문 ⑮)`]);
+  else { L.push(["bad", `<b>기기 바인딩</b>: ${client === "browser" ? "DBSC 미등록 (보안 칩이 없거나 미지원 브라우저)" : "DPoP 또는 무결성 증명 실패"} → 거부. 관리자는 바인딩되지 않은 세션을 받지 않습니다. (결정문 ⑮)`]); deny = deny || "기기 바인딩"; }
+  if (idle < 15) L.push(["ok", `<b>무활동</b>: ${hm(idle)}. 15분 한도 이내. (고시 제6조 ④)`]);
+  else { L.push(["bad", `<b>무활동</b>: ${hm(idle)} → 자동 차단, 다시 로그인. 내부망에서도 적용됩니다. (고시 제6조 ④, 15분은 우리 선택)`]); deny = deny || "무활동 차단"; }
+  $("#adOut").innerHTML = `<span class="verdict ${deny ? "bad" : "ok"}">${deny ? "접속 거부 · " + esc(deny) : "접속 허용"}</span><ul class="checks">${L.map(([k,t]) => `<li><span class="ic ${k}">${k==="ok"?"✓":"✕"}</span><span>${t}</span></li>`).join("")}</ul>
+    ${!deny ? '<p class="mini">허용된 뒤에도 회원 정보를 열람할 때마다 접속기록이 남습니다.</p>' : ""}`;
+}
+["#adWhere","#adIp","#adStrong","#adClient","#adBind","#adIdle"].forEach(id => { $(id).addEventListener("change", adRender); $(id).addEventListener("input", adRender); });
+
+/* ---------------- boot ---------------- */
+renderTables(); applyFilter(); renderLog();
+checkPw(); rtRender(); sidGen(); fxRender(); cookieRender(); toRender(); csRender(); raAgeRender(); devRender(); adRender();
+$("#raOut").innerHTML = `<p class="mini">작업과 경과 시간을 고르고 실행해 보세요. 현재 세션 ID: <span class="mono">${esc(short(raSid))}</span></p>`;
+})();
+</script>
+</body>
+</html>
