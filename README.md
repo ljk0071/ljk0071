@@ -7,6 +7,7 @@
 | Spring Boot 4 + Kotlin 실무 교과서 | [열기](https://ljk0071.github.io/ljk0071/textbooks/spring-boot4-kotlin.html) |
 | 백엔드 시스템 기초 지도 | [열기](https://ljk0071.github.io/ljk0071/textbooks/backend-foundations.html) |
 | Rsbuild·React 커머스 교과서 | [열기](https://ljk0071.github.io/ljk0071/textbooks/rsbuild-react-commerce.html) |
+| RFC 실전 교과서 | [열기](https://ljk0071.github.io/ljk0071/textbooks/rfc-textbook.html) |
 
 # 🔍 장애 분석
 
